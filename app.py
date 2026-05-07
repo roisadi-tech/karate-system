@@ -7,6 +7,8 @@ from flask import (
     send_file
 )
 
+from flask_sqlalchemy import SQLAlchemy
+
 import sqlite3
 import os
 import shutil
@@ -20,6 +22,16 @@ from werkzeug.utils import secure_filename
 from reportlab.pdfgen import canvas
 
 app = Flask(__name__)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+    'DATABASE_URL',
+    'sqlite:///database.db'
+)
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
 app.secret_key = 'karate_secret'
 from functools import wraps
 
