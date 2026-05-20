@@ -316,20 +316,25 @@ def editar_aluno(id):
 # =========================
 
 @app.route('/excluir_aluno/<int:id>')
-
 @login_obrigatorio
 def excluir_aluno(id):
 
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
+    aluno = Aluno.query.get_or_404(id)
 
-    cursor.execute(
-        'DELETE FROM alunos WHERE id=?',
-        (id,)
-    )
+    # apagar foto
+    if aluno.foto:
 
-    conn.commit()
-    conn.close()
+        caminho = os.path.join(
+            'static/uploads',
+            aluno.foto
+        )
+
+        if os.path.exists(caminho):
+            os.remove(caminho)
+
+    db.session.delete(aluno)
+
+    db.session.commit()
 
     return redirect('/alunos')
 
