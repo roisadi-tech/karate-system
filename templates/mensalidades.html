@@ -37,8 +37,8 @@
 
                             {% for aluno in alunos %}
 
-                            <option value="{{ aluno[0] }}">
-                                {{ aluno[1] }}
+                            <option value="{{ aluno.id }}">
+                                {{ aluno.nome }}
                             </option>
 
                             {% endfor %}
@@ -135,19 +135,19 @@
 
                     <tr>
 
-                        <td>{{ mensalidade[0] }}</td>
+                        <td>{{ mensalidade.id }}</td>
 
-                        <td>{{ mensalidade[1] }}</td>
+                        <td>{{ mensalidade.aluno.nome }}</td>
 
                         <td>
-                            R$ {{ mensalidade[2] }}
+                            R$ {{ mensalidade.valor }}
                         </td>
 
-                        <td>{{ mensalidade[3] }}</td>
+                        <td>{{ mensalidade.vencimento }}</td>
 
                         <td>
 
-                            {% if mensalidade[4] == 'PAGO' %}
+                            {% if mensalidade.status == 'PAGO' %}
 
                                 <span class="badge bg-success">
                                     PAGO
@@ -167,7 +167,7 @@
 
                             <!-- BOTÃO PDF -->
                             <a
-                                href="/recibo/{{ mensalidade[0] }}"
+                                href="/recibo/{{ mensalidade.id }}"
                                 class="btn btn-primary btn-sm"
                             >
                                 PDF
@@ -175,7 +175,7 @@
 
                             <!-- BOTÃO WHATSAPP -->
                             <a
-                                href="https://wa.me/55{{ mensalidade[5] }}?text=Olá {{ mensalidade[1] }}, tudo bem? 😊 Estamos passando para lembrar que sua mensalidade no valor de R$ {{ mensalidade[2] }} está {{ mensalidade[4] }}. Qualquer dúvida estamos à disposição!"
+                                href="https://wa.me/55{{ mensalidade.aluno.whatsapp }}?text=Olá {{ mensalidade.aluno.nome }}, tudo bem? 😊 Estamos passando para lembrar que sua mensalidade no valor de R$ {{ mensalidade.valor }} está {{ mensalidade.status }}. Qualquer dúvida estamos à disposição!"
                                 target="_blank"
                                 class="btn btn-success btn-sm"
                             >

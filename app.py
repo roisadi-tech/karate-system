@@ -438,12 +438,8 @@ def frequencia():
     )
 
 @app.route('/mensalidades', methods=['GET', 'POST'])
-
 @login_obrigatorio
 def mensalidades():
-
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
 
     if request.method == 'POST':
 
@@ -452,43 +448,25 @@ def mensalidades():
         vencimento = request.form['vencimento']
         status = request.form['status']
 
-        cursor.execute('''
-        INSERT INTO mensalidades
-        (aluno_id, valor, vencimento, status)
-        VALUES (?, ?, ?, ?)
-        ''', (
-            aluno_id,
-            valor,
-            vencimento,
-            status
-        ))
+        nova_mensalidade = Mensalidade(
 
-        conn.commit()
+            aluno_id=aluno_id,
+            valor=valor,
+            vencimento=vencimento,
+            status=status
+        )
 
-    cursor.execute('SELECT * FROM alunos')
+        db.session.add(nova_mensalidade)
 
-    alunos = cursor.fetchall()
+        db.session.commit()
 
-    cursor.execute('''
-    SELECT
-        mensalidades.id,
-        alunos.nome,
-        mensalidades.valor,
-        mensalidades.vencimento,
-        mensalidades.status,
-        alunos.whatsapp
+    alunos = Aluno.query.order_by(
+        Aluno.nome.asc()
+    ).all()
 
-    FROM mensalidades
-
-    INNER JOIN alunos
-    ON alunos.id = mensalidades.aluno_id
-
-    ORDER BY mensalidades.vencimento DESC
-    ''')
-
-    lista = cursor.fetchall()
-
-    conn.close()
+    lista = Mensalidade.query.order_by(
+        Mensalidade.vencimento.desc()
+    ).all()
 
     return render_template(
         'mensalidades.html',

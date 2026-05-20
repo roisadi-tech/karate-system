@@ -59,11 +59,16 @@ class Mensalidade(db.Model):
     )
 
     vencimento = db.Column(
-        db.String(50)
+        db.String(20)
     )
 
     status = db.Column(
         db.String(20)
+    )
+
+    aluno = db.relationship(
+        'Aluno',
+        backref='mensalidades'
     )
 
 
