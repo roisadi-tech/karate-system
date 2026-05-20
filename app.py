@@ -377,60 +377,45 @@ def presencas():
 
 
 @app.route('/frequencia')
-
 @login_obrigatorio
 def frequencia():
 
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-
-    cursor.execute('SELECT id, nome FROM alunos')
-
-    alunos = cursor.fetchall()
+    alunos = Aluno.query.order_by(
+        Aluno.nome.asc()
+    ).all()
 
     relatorio = []
 
     for aluno in alunos:
 
-        aluno_id = aluno[0]
-        nome = aluno[1]
+        total = Presenca.query.filter_by(
+            aluno_id=aluno.id
+        ).count()
 
-        # TOTAL DE AULAS
-        cursor.execute('''
-        SELECT COUNT(*)
-        FROM presencas
-        WHERE aluno_id=?
-        ''', (aluno_id,))
+        presentes = Presenca.query.filter_by(
+            aluno_id=aluno.id,
+            status='PRESENTE'
+        ).count()
 
-        total = cursor.fetchone()[0]
-
-        # PRESENÇAS
-        cursor.execute('''
-        SELECT COUNT(*)
-        FROM presencas
-        WHERE aluno_id=?
-        AND status='PRESENTE'
-        ''', (aluno_id,))
-
-        presentes = cursor.fetchone()[0]
-
-        # CÁLCULO %
         if total > 0:
+
             percentual = round(
                 (presentes / total) * 100,
                 1
             )
+
         else:
+
             percentual = 0
 
         relatorio.append({
-            'nome': nome,
+
+            'nome': aluno.nome,
             'total': total,
             'presentes': presentes,
             'percentual': percentual
-        })
 
-    conn.close()
+        })
 
     return render_template(
         'frequencia.html',
