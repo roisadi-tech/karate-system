@@ -620,51 +620,36 @@ def backup():
 @login_obrigatorio
 def relatorios():
 
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-
-    # TOTAL ALUNOS
-    cursor.execute('''
-    SELECT COUNT(*)
-    FROM alunos
-    ''')
-
-    total_alunos = cursor.fetchone()[0]
+    # TOTAL DE ALUNOS
+    total_alunos = Aluno.query.count()
 
     # TOTAL RECEBIDO
-    cursor.execute('''
-    SELECT SUM(valor)
-    FROM mensalidades
-    WHERE status='PAGO'
-    ''')
-
-    recebido = cursor.fetchone()[0]
+    recebido = db.session.query(
+        db.func.sum(Mensalidade.valor)
+    ).filter(
+        Mensalidade.status == 'PAGO'
+    ).scalar()
 
     if recebido is None:
         recebido = 0
 
     # TOTAL PENDENTE
-    cursor.execute('''
-    SELECT SUM(valor)
-    FROM mensalidades
-    WHERE status='PENDENTE'
-    ''')
-
-    pendente = cursor.fetchone()[0]
+    pendente = db.session.query(
+        db.func.sum(Mensalidade.valor)
+    ).filter(
+        Mensalidade.status == 'PENDENTE'
+    ).scalar()
 
     if pendente is None:
         pendente = 0
 
     # ALUNOS POR FAIXA
-    cursor.execute('''
-    SELECT faixa, COUNT(*)
-    FROM alunos
-    GROUP BY faixa
-    ''')
-
-    faixas = cursor.fetchall()
-
-    conn.close()
+    faixas = db.session.query(
+        Aluno.faixa,
+        db.func.count(Aluno.id)
+    ).group_by(
+        Aluno.faixa
+    ).all()
 
     return render_template(
         'relatorios.html',
