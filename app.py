@@ -39,6 +39,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+from models import *
 
 app.secret_key = 'karate_secret'
 from functools import wraps
