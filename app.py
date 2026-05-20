@@ -341,12 +341,8 @@ def excluir_aluno(id):
 
 
 @app.route('/presencas', methods=['GET', 'POST'])
-
 @login_obrigatorio
 def presencas():
-
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
 
     if request.method == 'POST':
 
@@ -354,40 +350,24 @@ def presencas():
         data = request.form['data']
         status = request.form['status']
 
-        cursor.execute('''
-        INSERT INTO presencas
-        (aluno_id, data, status)
-        VALUES (?, ?, ?)
-        ''', (
-            aluno_id,
-            data,
-            status
-        ))
+        nova_presenca = Presenca(
 
-        conn.commit()
+            aluno_id=aluno_id,
+            data=data,
+            status=status
+        )
 
-    cursor.execute('SELECT * FROM alunos')
+        db.session.add(nova_presenca)
 
-    alunos = cursor.fetchall()
+        db.session.commit()
 
-    cursor.execute('''
-    SELECT
-        presencas.id,
-        alunos.nome,
-        presencas.data,
-        presencas.status
+    alunos = Aluno.query.order_by(
+        Aluno.nome.asc()
+    ).all()
 
-    FROM presencas
-
-    INNER JOIN alunos
-    ON alunos.id = presencas.aluno_id
-
-    ORDER BY presencas.data DESC
-    ''')
-
-    lista_presencas = cursor.fetchall()
-
-    conn.close()
+    lista_presencas = Presenca.query.order_by(
+        Presenca.data.desc()
+    ).all()
 
     return render_template(
         'presencas.html',
