@@ -460,12 +460,8 @@ def mensalidades():
     )
 
 @app.route('/exames', methods=['GET', 'POST'])
-
 @login_obrigatorio
 def exames():
-
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
 
     if request.method == 'POST':
 
@@ -475,62 +471,35 @@ def exames():
         data_exame = request.form['data_exame']
         resultado = request.form['resultado']
 
-        cursor.execute('''
-        INSERT INTO exames
-        (
-            aluno_id,
-            faixa_atual,
-            nova_faixa,
-            data_exame,
-            resultado
-        )
-        VALUES (?, ?, ?, ?, ?)
-        ''', (
-            aluno_id,
-            faixa_atual,
-            nova_faixa,
-            data_exame,
-            resultado
-        ))
+        novo_exame = Exame(
 
-        # SE APROVADO -> ALTERA FAIXA DO ALUNO
+            aluno_id=aluno_id,
+            faixa_atual=faixa_atual,
+            nova_faixa=nova_faixa,
+            data_exame=data_exame,
+            resultado=resultado
+        )
+
+        db.session.add(novo_exame)
+
+        # SE APROVADO -> ALTERA FAIXA
         if resultado == 'APROVADO':
 
-            cursor.execute('''
-            UPDATE alunos
-            SET faixa=?
-            WHERE id=?
-            ''', (
-                nova_faixa,
-                aluno_id
-            ))
+            aluno = Aluno.query.get(aluno_id)
 
-        conn.commit()
+            if aluno:
 
-    cursor.execute('SELECT * FROM alunos')
+                aluno.faixa = nova_faixa
 
-    alunos = cursor.fetchall()
+        db.session.commit()
 
-    cursor.execute('''
-    SELECT
-        exames.id,
-        alunos.nome,
-        exames.faixa_atual,
-        exames.nova_faixa,
-        exames.data_exame,
-        exames.resultado
+    alunos = Aluno.query.order_by(
+        Aluno.nome.asc()
+    ).all()
 
-    FROM exames
-
-    INNER JOIN alunos
-    ON alunos.id = exames.aluno_id
-
-    ORDER BY exames.data_exame DESC
-    ''')
-
-    lista = cursor.fetchall()
-
-    conn.close()
+    lista = Exame.query.order_by(
+        Exame.data_exame.desc()
+    ).all()
 
     return render_template(
         'exames.html',

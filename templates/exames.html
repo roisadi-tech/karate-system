@@ -37,8 +37,8 @@
 
                             {% for aluno in alunos %}
 
-                            <option value="{{ aluno[0] }}">
-                                {{ aluno[1] }}
+                            <option value="{{ aluno.id }}">
+                                {{ aluno.nome }}
                             </option>
 
                             {% endfor %}
@@ -143,15 +143,15 @@
 
                     <tr>
 
-                        <td>{{ exame[0] }}</td>
-                        <td>{{ exame[1] }}</td>
-                        <td>{{ exame[2] }}</td>
-                        <td>{{ exame[3] }}</td>
-                        <td>{{ exame[4] }}</td>
+                        <td>{{ exame.id }}</td>
+                        <td>{{ exame.aluno.nome }}</td>
+                        <td>{{ exame.faixa_atual }}</td>
+                        <td>{{ exame.nova_faixa }}</td>
+                        <td>{{ exame.data_exame }}</td>
 
                         <td>
 
-                            {% if exame[5] == 'APROVADO' %}
+                            {% if exame.resultado == 'APROVADO' %}
 
                                 <span class="badge bg-success">
                                     APROVADO

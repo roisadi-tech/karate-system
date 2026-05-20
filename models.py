@@ -98,3 +98,39 @@ class Presenca(db.Model):
         'Aluno',
         backref='presencas'
     )
+
+
+class Exame(db.Model):
+
+    __tablename__ = 'exames'
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    aluno_id = db.Column(
+        db.Integer,
+        db.ForeignKey('alunos.id')
+    )
+
+    faixa_atual = db.Column(
+        db.String(50)
+    )
+
+    nova_faixa = db.Column(
+        db.String(50)
+    )
+
+    data_exame = db.Column(
+        db.String(20)
+    )
+
+    resultado = db.Column(
+        db.String(20)
+    )
+
+    aluno = db.relationship(
+        'Aluno',
+        backref='exames'
+    )
