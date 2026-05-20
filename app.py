@@ -535,28 +535,7 @@ def logout():
 @login_obrigatorio
 def recibo(id):
 
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-
-    cursor.execute('''
-    SELECT
-        mensalidades.id,
-        alunos.nome,
-        mensalidades.valor,
-        mensalidades.vencimento,
-        mensalidades.status
-
-    FROM mensalidades
-
-    INNER JOIN alunos
-    ON alunos.id = mensalidades.aluno_id
-
-    WHERE mensalidades.id=?
-    ''', (id,))
-
-    mensalidade = cursor.fetchone()
-
-    conn.close()
+    mensalidade = Mensalidade.query.get_or_404(id)
 
     nome_arquivo = f'recibo_{id}.pdf'
 
@@ -570,25 +549,25 @@ def recibo(id):
     c.drawString(
         100,
         730,
-        f'Aluno: {mensalidade[1]}'
+        f'Aluno: {mensalidade.aluno.nome}'
     )
 
     c.drawString(
         100,
         700,
-        f'Valor: R$ {mensalidade[2]}'
+        f'Valor: R$ {mensalidade.valor}'
     )
 
     c.drawString(
         100,
         670,
-        f'Vencimento: {mensalidade[3]}'
+        f'Vencimento: {mensalidade.vencimento}'
     )
 
     c.drawString(
         100,
         640,
-        f'Status: {mensalidade[4]}'
+        f'Status: {mensalidade.status}'
     )
 
     c.drawString(
@@ -696,31 +675,14 @@ def relatorios():
     )
 
 @app.route('/cobrar')
-
 @login_obrigatorio
 def cobrar():
 
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-
-    cursor.execute('''
-    SELECT
-        alunos.nome,
-        alunos.whatsapp,
-        mensalidades.valor,
-        mensalidades.vencimento
-
-    FROM mensalidades
-
-    INNER JOIN alunos
-    ON alunos.id = mensalidades.aluno_id
-
-    WHERE mensalidades.status='PENDENTE'
-    ''')
-
-    dados = cursor.fetchall()
-
-    conn.close()
+    dados = Mensalidade.query.filter_by(
+        status='PENDENTE'
+    ).order_by(
+        Mensalidade.vencimento.asc()
+    ).all()
 
     return render_template(
         'cobrar.html',

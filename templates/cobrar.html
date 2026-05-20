@@ -44,15 +44,15 @@
 
             <tr>
 
-                <td>{{ item[0] }}</td>
-                <td>R$ {{ item[2] }}</td>
-                <td>{{ item[3] }}</td>
+                <td>{{ item.aluno.nome }}</td>
+                <td>R$ {{ item.valor }}</td>
+                <td>{{ item.vencimento }}</td>
 
                 <td>
 
                     <!-- BOTÃO INDIVIDUAL COM CLASSE -->
                     <a
-                        href="https://wa.me/55{{ item[1] }}?text=Olá {{ item[0] }}, sua mensalidade de R$ {{ item[2] }} está pendente. Vencimento: {{ item[3] }}"
+                        href="https://wa.me/55{{ item.aluno.whatsapp }}?text=Olá%20{{ item.aluno.nome }}%2C%20sua%20mensalidade%20de%20R%24%20{{ item.valor }}%20está%20pendente.%20Vencimento%3A%20{{ item.vencimento }}"
                         target="_blank"
                         class="btn btn-success btn-sm link-whatsapp"
                     >
