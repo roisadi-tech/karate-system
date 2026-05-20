@@ -272,45 +272,38 @@ def cadastrar_aluno():
 # =========================
 
 @app.route('/editar_aluno/<int:id>', methods=['GET', 'POST'])
-
 @login_obrigatorio
 def editar_aluno(id):
 
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
+    aluno = Aluno.query.get_or_404(id)
 
     if request.method == 'POST':
 
-        nome = request.form['nome']
-        faixa = request.form['faixa']
-        whatsapp = request.form['whatsapp']
-        mensalidade = request.form['mensalidade']
+        aluno.nome = request.form['nome']
+        aluno.faixa = request.form['faixa']
+        aluno.whatsapp = request.form['whatsapp']
+        aluno.mensalidade = request.form['mensalidade']
 
-        cursor.execute('''
-        UPDATE alunos
-        SET nome=?, faixa=?, whatsapp=?, mensalidade=?
-        WHERE id=?
-        ''', (
-            nome,
-            faixa,
-            whatsapp,
-            mensalidade,
-            id
-        ))
+        foto = request.files['foto']
 
-        conn.commit()
-        conn.close()
+        if foto and foto.filename != '':
+
+            nome_arquivo = secure_filename(
+                foto.filename
+            )
+
+            caminho = os.path.join(
+                'static/uploads',
+                nome_arquivo
+            )
+
+            foto.save(caminho)
+
+            aluno.foto = nome_arquivo
+
+        db.session.commit()
 
         return redirect('/alunos')
-
-    cursor.execute(
-        'SELECT * FROM alunos WHERE id=?',
-        (id,)
-    )
-
-    aluno = cursor.fetchone()
-
-    conn.close()
 
     return render_template(
         'editar_aluno.html',

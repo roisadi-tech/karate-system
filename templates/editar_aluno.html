@@ -22,43 +22,71 @@
                 Editar Aluno
             </h1>
 
-            <form method="POST">
+            <form
+                method="POST"
+                enctype="multipart/form-data"
+            >
+
+                <div class="text-center mb-4">
+
+                    {% if aluno.foto %}
+
+                        <img
+                            src="/static/uploads/{{ aluno.foto }}"
+                            width="120"
+                            height="120"
+                            style="
+                                object-fit: cover;
+                                border-radius: 50%;
+                            "
+                        >
+
+                    {% endif %}
+
+                </div>
 
                 <div class="mb-3">
+
                     <label>Nome</label>
 
                     <input
                         type="text"
                         name="nome"
                         class="form-control"
-                        value="{{ aluno[1] }}"
+                        value="{{ aluno.nome }}"
                         required
                     >
+
                 </div>
 
                 <div class="mb-3">
+
                     <label>Faixa</label>
 
                     <input
                         type="text"
                         name="faixa"
                         class="form-control"
-                        value="{{ aluno[5] }}"
+                        value="{{ aluno.faixa }}"
                     >
+
                 </div>
 
                 <div class="mb-3">
+
                     <label>WhatsApp</label>
 
                     <input
                         type="text"
                         name="whatsapp"
                         class="form-control"
-                        value="{{ aluno[4] }}"
+                        value="{{ aluno.whatsapp }}"
                     >
+
                 </div>
 
                 <div class="mb-3">
+
                     <label>Mensalidade</label>
 
                     <input
@@ -66,13 +94,33 @@
                         step="0.01"
                         name="mensalidade"
                         class="form-control"
-                        value="{{ aluno[6] }}"
+                        value="{{ aluno.mensalidade }}"
                     >
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label>Nova Foto</label>
+
+                    <input
+                        type="file"
+                        name="foto"
+                        class="form-control"
+                    >
+
                 </div>
 
                 <button class="btn btn-success">
                     Atualizar
                 </button>
+
+                <a
+                    href="/alunos"
+                    class="btn btn-secondary"
+                >
+                    Voltar
+                </a>
 
             </form>
 
