@@ -146,12 +146,8 @@ def index():
 
 
 @app.route('/alunos', methods=['GET', 'POST'])
-
 @login_obrigatorio
 def alunos():
-
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
 
     # CADASTRAR ALUNO
     if request.method == 'POST':
@@ -167,7 +163,7 @@ def alunos():
 
         nome_arquivo = ''
 
-        if foto:
+        if foto and foto.filename != '':
 
             nome_arquivo = secure_filename(
                 foto.filename
@@ -180,42 +176,37 @@ def alunos():
 
             foto.save(caminho)
 
-        cursor.execute('''
-        INSERT INTO alunos
-        (
-            nome,
-            nascimento,
-            responsavel,
-            whatsapp,
-            faixa,
-            mensalidade,
-            foto
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            nome,
-            nascimento,
-            responsavel,
-            whatsapp,
-            faixa,
-            mensalidade,
-            nome_arquivo
-        ))
+        novo_aluno = Aluno(
 
-        conn.commit()
+            nome=nome,
+            idade=nascimento,
+            sexo=responsavel,
+            whatsapp=whatsapp,
+            faixa=faixa,
+            mensalidade=mensalidade,
+            foto=nome_arquivo
+        )
+
+        db.session.add(novo_aluno)
+
+        db.session.commit()
 
         return redirect('/alunos')
 
-    # LISTAR ALUNOS
-    cursor.execute('''
-    SELECT *
-    FROM alunos
-    ORDER BY id DESC
-    ''')
+    # BUSCA
+    busca = request.args.get('busca')
 
-    lista_alunos = cursor.fetchall()
+    if busca:
 
-    conn.close()
+        lista_alunos = Aluno.query.filter(
+            Aluno.nome.ilike(f'%{busca}%')
+        ).order_by(Aluno.id.desc()).all()
+
+    else:
+
+        lista_alunos = Aluno.query.order_by(
+            Aluno.id.desc()
+        ).all()
 
     return render_template(
         'alunos.html',

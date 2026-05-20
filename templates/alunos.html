@@ -77,14 +77,14 @@
 
             <tr>
 
-                <td>{{ aluno[0] }}</td>
+                <td>{{ aluno.id }}</td>
 
                 <td>
 
-                    {% if aluno[8] %}
+                    {% if aluno.foto %}
 
                         <img
-                            src="/static/uploads/{{ aluno[8] }}"
+                            src="/static/uploads/{{ aluno.foto }}"
                             width="60"
                             height="60"
                             style="
@@ -97,27 +97,27 @@
 
                 </td>
 
-                <td>{{ aluno[1] }}</td>
+                <td>{{ aluno.nome }}</td>
 
-                <td>{{ aluno[5] }}</td>
+                <td>{{ aluno.faixa }}</td>
 
-                <td>{{ aluno[4] }}</td>
+                <td>{{ aluno.whatsapp }}</td>
 
                 <td>
-                    R$ {{ aluno[6] }}
+                    R$ {{ aluno.mensalidade }}
                 </td>
 
                 <td>
 
                     <a
-                        href="/editar_aluno/{{ aluno[0] }}"
+                        href="/editar_aluno/{{ aluno.id }}"
                         class="btn btn-warning btn-sm"
                     >
                         Editar
                     </a>
 
                     <a
-                        href="/excluir_aluno/{{ aluno[0] }}"
+                        href="/excluir_aluno/{{ aluno.id }}"
                         class="btn btn-danger btn-sm"
                     >
                         Excluir
