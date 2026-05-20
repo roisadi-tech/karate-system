@@ -7,7 +7,7 @@ from flask import (
     send_file
 )
 
-from flask_sqlalchemy import SQLAlchemy
+from database import db
 
 import sqlite3
 import os
@@ -38,8 +38,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
+db.init_app(app)
 from models import *
+
 
 app.secret_key = 'karate_secret'
 from functools import wraps
@@ -215,12 +216,8 @@ def alunos():
 
 
 @app.route('/cadastrar_aluno', methods=['GET', 'POST'])
-
 @login_obrigatorio
 def cadastrar_aluno():
-
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
 
     if request.method == 'POST':
 
@@ -248,34 +245,22 @@ def cadastrar_aluno():
 
             foto.save(caminho)
 
-        cursor.execute('''
-        INSERT INTO alunos
-        (
-            nome,
-            nascimento,
-            responsavel,
-            whatsapp,
-            faixa,
-            mensalidade,
-            foto
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            nome,
-            nascimento,
-            responsavel,
-            whatsapp,
-            faixa,
-            mensalidade,
-            nome_arquivo
-        ))
+        novo_aluno = Aluno(
 
-        conn.commit()
-        conn.close()
+            nome=nome,
+            idade=nascimento,
+            sexo=responsavel,
+            whatsapp=whatsapp,
+            faixa=faixa,
+            mensalidade=mensalidade,
+            foto=nome_arquivo
+        )
+
+        db.session.add(novo_aluno)
+
+        db.session.commit()
 
         return redirect('/alunos')
-
-    conn.close()
 
     return render_template(
         'cadastrar_aluno.html'
