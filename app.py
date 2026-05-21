@@ -9,7 +9,6 @@ from flask import (
 
 from database import db
 
-import sqlite3
 import os
 import shutil
 
@@ -43,7 +42,6 @@ from models import *
 
 
 app.secret_key = 'karate_secret'
-from functools import wraps
 
 def login_obrigatorio(f):
 
@@ -64,67 +62,39 @@ def login_obrigatorio(f):
 @login_obrigatorio
 def index():
 
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-
     # TOTAL DE ALUNOS
-    cursor.execute('''
-    SELECT COUNT(*)
-    FROM alunos
-    ''')
-
-    total_alunos = cursor.fetchone()[0]
+    total_alunos = Aluno.query.count()
 
     # FATURAMENTO PAGO
-    cursor.execute('''
-    SELECT SUM(valor)
-    FROM mensalidades
-    WHERE status='PAGO'
-    ''')
+    faturamento = db.session.query(
+        db.func.sum(Mensalidade.valor)
+    ).filter(
+        Mensalidade.status == 'PAGO'
+    ).scalar()
 
-    resultado = cursor.fetchone()[0]
-
-    if resultado:
-        faturamento = resultado
-    else:
+    if faturamento is None:
         faturamento = 0
 
     # INADIMPLENTES
-    cursor.execute('''
-    SELECT COUNT(*)
-    FROM mensalidades
-    WHERE status='PENDENTE'
-    ''')
+    inadimplentes = Mensalidade.query.filter_by(
+        status='PENDENTE'
+    ).count()
 
-    inadimplentes = cursor.fetchone()[0]
-
-    # APTOS EXAME
-    cursor.execute('SELECT id FROM alunos')
-
-    alunos = cursor.fetchall()
+    # APTOS PARA EXAME
+    alunos = Aluno.query.all()
 
     aptos = 0
 
     for aluno in alunos:
 
-        aluno_id = aluno[0]
+        total = Presenca.query.filter_by(
+            aluno_id=aluno.id
+        ).count()
 
-        cursor.execute('''
-        SELECT COUNT(*)
-        FROM presencas
-        WHERE aluno_id=?
-        ''', (aluno_id,))
-
-        total = cursor.fetchone()[0]
-
-        cursor.execute('''
-        SELECT COUNT(*)
-        FROM presencas
-        WHERE aluno_id=?
-        AND status='PRESENTE'
-        ''', (aluno_id,))
-
-        presentes = cursor.fetchone()[0]
+        presentes = Presenca.query.filter_by(
+            aluno_id=aluno.id,
+            status='PRESENTE'
+        ).count()
 
         if total > 0:
 
@@ -134,8 +104,6 @@ def index():
 
             if percentual >= 75:
                 aptos += 1
-
-    conn.close()
 
     return render_template(
         'index.html',
@@ -580,38 +548,6 @@ def recibo(id):
 
     return send_file(
         nome_arquivo,
-        as_attachment=True
-    )
-
-@app.route('/backup')
-@login_obrigatorio
-def backup():
-
-    data = datetime.now().strftime(
-        '%Y-%m-%d_%H-%M-%S'
-    )
-
-    nome_backup = f'backup_{data}.db'
-
-    origem = 'database.db'
-
-    destino = os.path.join(
-        'backups',
-        nome_backup
-    )
-
-    # CRIA PASTA BACKUPS
-    if not os.path.exists('backups'):
-
-        os.makedirs('backups')
-
-    shutil.copy(
-        origem,
-        destino
-    )
-
-    return send_file(
-        destino,
         as_attachment=True
     )
 
