@@ -1,38 +1,31 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
+{% extends 'base.html' %}
 
-    <title>Presenças</title>
+{% block conteudo %}
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
-</head>
-<body class="bg-light">
+<div class="row">
 
-<div class="container mt-5">
+    <div class="col-md-4">
 
-    <div class="card shadow-sm mb-4">
+        <div class="card shadow-sm">
 
-        <div class="card-body">
+            <div class="card-body">
 
-            <h1 class="mb-4">
-                Controle de Presença
-            </h1>
+                <h3 class="mb-4">
+                    Registrar Presença
+                </h3>
 
-            <form method="POST">
+                <form method="POST">
 
-                <div class="row">
+                    <div class="mb-3">
 
-                    <div class="col-md-4">
-
-                        <label>Aluno</label>
+                        <label class="form-label">
+                            Aluno
+                        </label>
 
                         <select
                             name="aluno_id"
-                            class="form-control"
+                            class="form-select"
+                            required
                         >
 
                             {% for aluno in alunos %}
@@ -47,9 +40,11 @@
 
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="mb-3">
 
-                        <label>Data</label>
+                        <label class="form-label">
+                            Data
+                        </label>
 
                         <input
                             type="date"
@@ -60,75 +55,108 @@
 
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="mb-3">
 
-                        <label>Status</label>
+                        <label class="form-label">
+                            Status
+                        </label>
 
                         <select
                             name="status"
-                            class="form-control"
+                            class="form-select"
                         >
 
-                            <option>PRESENTE</option>
-                            <option>FALTOU</option>
+                            <option value="PRESENTE">
+                                PRESENTE
+                            </option>
+
+                            <option value="FALTA">
+                                FALTA
+                            </option>
 
                         </select>
 
                     </div>
 
-                    <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-success w-100">
 
-                        <button class="btn btn-primary w-100">
-                            Salvar
-                        </button>
+                        Salvar
 
-                    </div>
+                    </button>
 
-                </div>
+                </form>
 
-            </form>
+            </div>
 
         </div>
 
     </div>
 
-    <div class="card shadow-sm">
+    <div class="col-md-8">
 
-        <div class="card-body">
+        <div class="card shadow-sm">
 
-            <h3 class="mb-4">
-                Histórico
-            </h3>
+            <div class="card-body">
 
-            <table class="table table-striped">
+                <h3 class="mb-4">
+                    Lista de Presenças
+                </h3>
 
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Aluno</th>
-                        <th>Data</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
+                <table class="table table-hover">
 
-                <tbody>
+                    <thead>
 
-                    {% for presenca in presencas %}
+                        <tr>
 
-                    <tr>
+                            <th>Aluno</th>
+                            <th>Data</th>
+                            <th>Status</th>
 
-                        <td>{{ presenca.id }}</td>
-                        <td>{{ presenca.aluno.nome }}</td>
-                        <td>{{ presenca.data }}</td>
-                        <td>{{ presenca.status }}</td>
+                        </tr>
 
-                    </tr>
+                    </thead>
 
-                    {% endfor %}
+                    <tbody>
 
-                </tbody>
+                        {% for presenca in presencas %}
 
-            </table>
+                        <tr>
+
+                            <td>
+                                {{ presenca.aluno.nome }}
+                            </td>
+
+                            <td>
+                                {{ presenca.data }}
+                            </td>
+
+                            <td>
+
+                                {% if presenca.status == 'PRESENTE' %}
+
+                                <span class="badge bg-success">
+                                    PRESENTE
+                                </span>
+
+                                {% else %}
+
+                                <span class="badge bg-danger">
+                                    FALTA
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
 
         </div>
 
@@ -136,5 +164,4 @@
 
 </div>
 
-</body>
-</html>
+{% endblock %}
