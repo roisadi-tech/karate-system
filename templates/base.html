@@ -54,6 +54,8 @@
 
             padding: 12px;
 
+            transition: 0.2s;
+
         }
 
         .sidebar .nav-link:hover {
@@ -61,6 +63,8 @@
             background: #1e293b;
 
             color: white;
+
+            transform: translateX(4px);
 
         }
 
@@ -90,6 +94,32 @@
 
         }
 
+        .usuario-box {
+
+            background: #1e293b;
+
+            border-radius: 12px;
+
+            padding: 12px;
+
+            color: white;
+
+            margin-bottom: 20px;
+
+        }
+
+        .badge-admin {
+
+            background: #dc3545;
+
+        }
+
+        .badge-user {
+
+            background: #198754;
+
+        }
+
     </style>
 
 </head>
@@ -108,79 +138,85 @@
 
         </div>
 
+        <!-- USUÁRIO -->
+
+        <div class="usuario-box">
+
+            <div>
+                <strong>
+                    {{ session.usuario }}
+                </strong>
+            </div>
+
+            <span class="badge
+                {% if session.tipo == 'admin' %}
+                    badge-admin
+                {% else %}
+                    badge-user
+                {% endif %}
+            ">
+                {{ session.tipo }}
+            </span>
+
+        </div>
+
         <nav class="nav flex-column">
 
-            <a
-                href="/"
-                class="nav-link"
-            >
+            <a href="/" class="nav-link">
                 <i class="bi bi-speedometer2"></i>
                 Dashboard
             </a>
 
-            <a
-                href="/alunos"
-                class="nav-link"
-            >
+            <a href="/alunos" class="nav-link">
                 <i class="bi bi-people"></i>
                 Alunos
             </a>
 
-            <a
-                href="/presencas"
-                class="nav-link"
-            >
+            <a href="/presencas" class="nav-link">
                 <i class="bi bi-check2-square"></i>
                 Presenças
             </a>
 
-            <a
-                href="/frequencia"
-                class="nav-link"
-            >
+            <a href="/frequencia" class="nav-link">
                 <i class="bi bi-graph-up"></i>
                 Frequência
             </a>
 
-            <a
-                href="/mensalidades"
-                class="nav-link"
-            >
+            <a href="/mensalidades" class="nav-link">
                 <i class="bi bi-cash-stack"></i>
                 Mensalidades
             </a>
 
-            <a
-                href="/cobrar"
-                class="nav-link"
-            >
+            <a href="/cobrar" class="nav-link">
                 <i class="bi bi-whatsapp"></i>
                 Cobranças
             </a>
 
-            <a
-                href="/exames"
-                class="nav-link"
-            >
+            <a href="/exames" class="nav-link">
                 <i class="bi bi-award"></i>
                 Exames
             </a>
 
-            <a
-                href="/relatorios"
-                class="nav-link"
-            >
+            <a href="/relatorios" class="nav-link">
                 <i class="bi bi-bar-chart"></i>
                 Relatórios
             </a>
 
-            <a
-                href="/backup"
-                class="nav-link"
-            >
+            <!-- APENAS ADMIN -->
+
+            {% if session.tipo == 'admin' %}
+
+            <a href="/backup" class="nav-link">
                 <i class="bi bi-download"></i>
                 Backup
             </a>
+
+            <a href="/usuarios" class="nav-link">
+                <i class="bi bi-person-gear"></i>
+                Usuários
+            </a>
+
+            {% endif %}
 
             <hr class="text-secondary">
 
@@ -201,7 +237,6 @@
     <div class="content">
 
         {% block conteudo %}
-
         {% endblock %}
 
     </div>

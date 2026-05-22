@@ -4,10 +4,19 @@ from flask import (
     request,
     redirect,
     session,
-    send_file
+    send_file,
+    flash
 )
 
 from database import db
+
+from models import (
+    Aluno,
+    Mensalidade,
+    Presenca,
+    Exame,
+    Usuario
+)
 
 import os
 import shutil
@@ -18,13 +27,30 @@ from functools import wraps
 
 from werkzeug.utils import secure_filename
 
+from werkzeug.security import (
+    check_password_hash
+)
+
 from reportlab.pdfgen import canvas
 
+
+# =====================================
+# APP
+# =====================================
+
 app = Flask(__name__)
+
+app.secret_key = 'karate_secret'
+
+
+# =====================================
+# DATABASE
+# =====================================
 
 database_url = os.getenv('DATABASE_URL')
 
 if database_url:
+
     database_url = database_url.replace(
         "postgres://",
         "postgresql://",
@@ -38,10 +64,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
-from models import *
 
 
-app.secret_key = 'karate_secret'
+# =====================================
+# LOGIN OBRIGATÓRIO
+# =====================================
 
 def login_obrigatorio(f):
 
@@ -57,15 +84,36 @@ def login_obrigatorio(f):
     return decorated_function
 
 
-@app.route('/')
+# =====================================
+# ADMIN OBRIGATÓRIO
+# =====================================
 
+def admin_obrigatorio(f):
+
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+
+        if session.get('tipo') != 'admin':
+
+            flash('Acesso permitido apenas para administradores.')
+
+            return redirect('/')
+
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
+# =====================================
+# DASHBOARD
+# =====================================
+
+@app.route('/')
 @login_obrigatorio
 def index():
 
-    # TOTAL DE ALUNOS
     total_alunos = Aluno.query.count()
 
-    # FATURAMENTO PAGO
     faturamento = db.session.query(
         db.func.sum(Mensalidade.valor)
     ).filter(
@@ -75,12 +123,10 @@ def index():
     if faturamento is None:
         faturamento = 0
 
-    # INADIMPLENTES
     inadimplentes = Mensalidade.query.filter_by(
         status='PENDENTE'
     ).count()
 
-    # APTOS PARA EXAME
     alunos = Aluno.query.all()
 
     aptos = 0
@@ -103,6 +149,7 @@ def index():
             ) * 100
 
             if percentual >= 75:
+
                 aptos += 1
 
     return render_template(
@@ -114,62 +161,66 @@ def index():
     )
 
 
-@app.route('/alunos', methods=['GET', 'POST'])
+# =====================================
+# LOGIN
+# =====================================
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+
+    if request.method == 'POST':
+
+        usuario_form = request.form['usuario']
+        senha_form = request.form['senha']
+
+        usuario = Usuario.query.filter_by(
+            usuario=usuario_form
+        ).first()
+
+        if usuario and check_password_hash(
+            usuario.senha,
+            senha_form
+        ):
+
+            session['usuario'] = usuario.usuario
+            session['tipo'] = usuario.tipo
+
+            return redirect('/')
+
+        flash('Usuário ou senha inválidos.')
+
+    return render_template('login.html')
+
+
+# =====================================
+# LOGOUT
+# =====================================
+
+@app.route('/logout')
+def logout():
+
+    session.clear()
+
+    return redirect('/login')
+
+
+# =====================================
+# ALUNOS
+# =====================================
+
+@app.route('/alunos')
 @login_obrigatorio
 def alunos():
 
-    # CADASTRAR ALUNO
-    if request.method == 'POST':
-
-        nome = request.form['nome']
-        nascimento = request.form['nascimento']
-        responsavel = request.form['responsavel']
-        whatsapp = request.form['whatsapp']
-        faixa = request.form['faixa']
-        mensalidade = request.form['mensalidade']
-
-        foto = request.files['foto']
-
-        nome_arquivo = ''
-
-        if foto and foto.filename != '':
-
-            nome_arquivo = secure_filename(
-                foto.filename
-            )
-
-            caminho = os.path.join(
-                'static/uploads',
-                nome_arquivo
-            )
-
-            foto.save(caminho)
-
-        novo_aluno = Aluno(
-
-            nome=nome,
-            idade=nascimento,
-            sexo=responsavel,
-            whatsapp=whatsapp,
-            faixa=faixa,
-            mensalidade=mensalidade,
-            foto=nome_arquivo
-        )
-
-        db.session.add(novo_aluno)
-
-        db.session.commit()
-
-        return redirect('/alunos')
-
-    # BUSCA
     busca = request.args.get('busca')
 
     if busca:
 
         lista_alunos = Aluno.query.filter(
             Aluno.nome.ilike(f'%{busca}%')
-        ).order_by(Aluno.id.desc()).all()
+        ).order_by(
+            Aluno.id.desc()
+        ).all()
 
     else:
 
@@ -182,6 +233,10 @@ def alunos():
         alunos=lista_alunos
     )
 
+
+# =====================================
+# CADASTRAR ALUNO
+# =====================================
 
 @app.route('/cadastrar_aluno', methods=['GET', 'POST'])
 @login_obrigatorio
@@ -206,6 +261,10 @@ def cadastrar_aluno():
                 foto.filename
             )
 
+            if not os.path.exists('static/uploads'):
+
+                os.makedirs('static/uploads')
+
             caminho = os.path.join(
                 'static/uploads',
                 nome_arquivo
@@ -228,6 +287,8 @@ def cadastrar_aluno():
 
         db.session.commit()
 
+        flash('Aluno cadastrado com sucesso.')
+
         return redirect('/alunos')
 
     return render_template(
@@ -235,9 +296,9 @@ def cadastrar_aluno():
     )
 
 
-# =========================
+# =====================================
 # EDITAR ALUNO
-# =========================
+# =====================================
 
 @app.route('/editar_aluno/<int:id>', methods=['GET', 'POST'])
 @login_obrigatorio
@@ -271,6 +332,8 @@ def editar_aluno(id):
 
         db.session.commit()
 
+        flash('Aluno atualizado.')
+
         return redirect('/alunos')
 
     return render_template(
@@ -279,17 +342,17 @@ def editar_aluno(id):
     )
 
 
-# =========================
+# =====================================
 # EXCLUIR ALUNO
-# =========================
+# =====================================
 
 @app.route('/excluir_aluno/<int:id>')
 @login_obrigatorio
+@admin_obrigatorio
 def excluir_aluno(id):
 
     aluno = Aluno.query.get_or_404(id)
 
-    # apagar foto
     if aluno.foto:
 
         caminho = os.path.join(
@@ -298,15 +361,21 @@ def excluir_aluno(id):
         )
 
         if os.path.exists(caminho):
+
             os.remove(caminho)
 
     db.session.delete(aluno)
 
     db.session.commit()
 
+    flash('Aluno excluído.')
+
     return redirect('/alunos')
 
 
+# =====================================
+# PRESENÇAS
+# =====================================
 
 @app.route('/presencas', methods=['GET', 'POST'])
 @login_obrigatorio
@@ -314,20 +383,20 @@ def presencas():
 
     if request.method == 'POST':
 
-        aluno_id = request.form['aluno_id']
-        data = request.form['data']
-        status = request.form['status']
-
         nova_presenca = Presenca(
 
-            aluno_id=aluno_id,
-            data=data,
-            status=status
+            aluno_id=request.form['aluno_id'],
+            data=request.form['data'],
+            status=request.form['status']
         )
 
         db.session.add(nova_presenca)
 
         db.session.commit()
+
+        flash('Presença registrada.')
+
+        return redirect('/presencas')
 
     alunos = Aluno.query.order_by(
         Aluno.nome.asc()
@@ -343,6 +412,10 @@ def presencas():
         presencas=lista_presencas
     )
 
+
+# =====================================
+# FREQUÊNCIA
+# =====================================
 
 @app.route('/frequencia')
 @login_obrigatorio
@@ -365,6 +438,8 @@ def frequencia():
             status='PRESENTE'
         ).count()
 
+        percentual = 0
+
         if total > 0:
 
             percentual = round(
@@ -372,17 +447,12 @@ def frequencia():
                 1
             )
 
-        else:
-
-            percentual = 0
-
         relatorio.append({
 
             'nome': aluno.nome,
             'total': total,
             'presentes': presentes,
             'percentual': percentual
-
         })
 
     return render_template(
@@ -390,28 +460,32 @@ def frequencia():
         relatorio=relatorio
     )
 
+
+# =====================================
+# MENSALIDADES
+# =====================================
+
 @app.route('/mensalidades', methods=['GET', 'POST'])
 @login_obrigatorio
 def mensalidades():
 
     if request.method == 'POST':
 
-        aluno_id = request.form['aluno_id']
-        valor = request.form['valor']
-        vencimento = request.form['vencimento']
-        status = request.form['status']
-
         nova_mensalidade = Mensalidade(
 
-            aluno_id=aluno_id,
-            valor=valor,
-            vencimento=vencimento,
-            status=status
+            aluno_id=request.form['aluno_id'],
+            valor=request.form['valor'],
+            vencimento=request.form['vencimento'],
+            status=request.form['status']
         )
 
         db.session.add(nova_mensalidade)
 
         db.session.commit()
+
+        flash('Mensalidade cadastrada.')
+
+        return redirect('/mensalidades')
 
     alunos = Aluno.query.order_by(
         Aluno.nome.asc()
@@ -427,6 +501,11 @@ def mensalidades():
         mensalidades=lista
     )
 
+
+# =====================================
+# EXAMES
+# =====================================
+
 @app.route('/exames', methods=['GET', 'POST'])
 @login_obrigatorio
 def exames():
@@ -434,32 +513,31 @@ def exames():
     if request.method == 'POST':
 
         aluno_id = request.form['aluno_id']
-        faixa_atual = request.form['faixa_atual']
-        nova_faixa = request.form['nova_faixa']
-        data_exame = request.form['data_exame']
-        resultado = request.form['resultado']
 
         novo_exame = Exame(
 
             aluno_id=aluno_id,
-            faixa_atual=faixa_atual,
-            nova_faixa=nova_faixa,
-            data_exame=data_exame,
-            resultado=resultado
+            faixa_atual=request.form['faixa_atual'],
+            nova_faixa=request.form['nova_faixa'],
+            data_exame=request.form['data_exame'],
+            resultado=request.form['resultado']
         )
 
         db.session.add(novo_exame)
 
-        # SE APROVADO -> ALTERA FAIXA
-        if resultado == 'APROVADO':
+        if request.form['resultado'] == 'APROVADO':
 
             aluno = Aluno.query.get(aluno_id)
 
             if aluno:
 
-                aluno.faixa = nova_faixa
+                aluno.faixa = request.form['nova_faixa']
 
         db.session.commit()
+
+        flash('Exame registrado.')
+
+        return redirect('/exames')
 
     alunos = Aluno.query.order_by(
         Aluno.nome.asc()
@@ -475,32 +553,30 @@ def exames():
         exames=lista
     )
 
-from werkzeug.security import check_password_hash
 
-SENHA_HASH = "32768:8:1$A4OP1L4guv9zkdQH$127d3045db344300464cf0e541aded0b68d1597e85f65fd721f46eea8f96c8e6d068ad362e375dfc7ae849891775d20db6e5b116519f5d7fab22dcaababd5403"
+# =====================================
+# COBRANÇAS
+# =====================================
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
+@app.route('/cobrar')
+@login_obrigatorio
+def cobrar():
 
-    if request.method == 'POST':
+    dados = Mensalidade.query.filter_by(
+        status='PENDENTE'
+    ).order_by(
+        Mensalidade.vencimento.asc()
+    ).all()
 
-        usuario = request.form['usuario']
-        senha = request.form['senha']
+    return render_template(
+        'cobrar.html',
+        dados=dados
+    )
 
-        if usuario == 'admin' and check_password_hash(SENHA_HASH, senha):
 
-            session['usuario'] = usuario
-
-            return redirect('/')
-
-    return render_template('login.html')
-
-@app.route('/logout')
-def logout():
-
-    session.pop('usuario', None)
-
-    return redirect('/login')
+# =====================================
+# RECIBO PDF
+# =====================================
 
 @app.route('/recibo/<int:id>')
 @login_obrigatorio
@@ -508,12 +584,17 @@ def recibo(id):
 
     mensalidade = Mensalidade.query.get_or_404(id)
 
-    nome_arquivo = f'recibo_{id}.pdf'
+    if not os.path.exists('recibos'):
+
+        os.makedirs('recibos')
+
+    nome_arquivo = f'recibos/recibo_{id}.pdf'
 
     c = canvas.Canvas(nome_arquivo)
 
-    c.setFont("Helvetica-Bold", 20)
-    c.drawString(180, 800, "RECIBO")
+    c.setFont("Helvetica-Bold", 22)
+
+    c.drawString(200, 800, "RECIBO")
 
     c.setFont("Helvetica", 12)
 
@@ -554,15 +635,54 @@ def recibo(id):
         as_attachment=True
     )
 
-@app.route('/relatorios')
 
+# =====================================
+# BACKUP
+# =====================================
+
+@app.route('/backup')
+@login_obrigatorio
+@admin_obrigatorio
+def backup():
+
+    data = datetime.now().strftime(
+        '%Y-%m-%d_%H-%M-%S'
+    )
+
+    nome_backup = f'backup_{data}.db'
+
+    origem = 'database.db'
+
+    if not os.path.exists('backups'):
+
+        os.makedirs('backups')
+
+    destino = os.path.join(
+        'backups',
+        nome_backup
+    )
+
+    shutil.copy(
+        origem,
+        destino
+    )
+
+    return send_file(
+        destino,
+        as_attachment=True
+    )
+
+
+# =====================================
+# RELATÓRIOS
+# =====================================
+
+@app.route('/relatorios')
 @login_obrigatorio
 def relatorios():
 
-    # TOTAL DE ALUNOS
     total_alunos = Aluno.query.count()
 
-    # TOTAL RECEBIDO
     recebido = db.session.query(
         db.func.sum(Mensalidade.valor)
     ).filter(
@@ -572,7 +692,6 @@ def relatorios():
     if recebido is None:
         recebido = 0
 
-    # TOTAL PENDENTE
     pendente = db.session.query(
         db.func.sum(Mensalidade.valor)
     ).filter(
@@ -582,7 +701,6 @@ def relatorios():
     if pendente is None:
         pendente = 0
 
-    # ALUNOS POR FAIXA
     faixas = db.session.query(
         Aluno.faixa,
         db.func.count(Aluno.id)
@@ -598,23 +716,20 @@ def relatorios():
         faixas=faixas
     )
 
-@app.route('/cobrar')
-@login_obrigatorio
-def cobrar():
 
-    dados = Mensalidade.query.filter_by(
-        status='PENDENTE'
-    ).order_by(
-        Mensalidade.vencimento.asc()
-    ).all()
-
-    return render_template(
-        'cobrar.html',
-        dados=dados
-    )
+# =====================================
+# INICIAR APP
+# =====================================
 
 with app.app_context():
+
     db.create_all()
 
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+
+    app.run(
+        host='0.0.0.0',
+        port=5000,
+        debug=True
+    )

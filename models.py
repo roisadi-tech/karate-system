@@ -134,3 +134,29 @@ class Exame(db.Model):
         'Aluno',
         backref='exames'
     )
+
+
+class Usuario(db.Model):
+
+    __tablename__ = 'usuarios'
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    usuario = db.Column(
+        db.String(100),
+        unique=True,
+        nullable=False
+    )
+
+    senha = db.Column(
+        db.String(300),
+        nullable=False
+    )
+
+    tipo = db.Column(
+        db.String(50),
+        default='admin'
+    )
