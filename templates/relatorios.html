@@ -2,25 +2,53 @@
 
 {% block conteudo %}
 
-<h1 class="mb-4">
-    Relatórios
-</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
 
-<div class="row mb-4">
+    <div>
+
+        <h2 class="fw-bold">
+            📈 Relatórios Gerais
+        </h2>
+
+        <p class="text-muted mb-0">
+            Visão geral da academia
+        </p>
+
+    </div>
+
+</div>
+
+<!-- CARDS -->
+
+<div class="row g-4 mb-4">
+
+    <!-- TOTAL ALUNOS -->
 
     <div class="col-md-4">
 
-        <div class="card bg-primary text-white shadow-sm">
+        <div class="card p-4 h-100">
 
-            <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
 
-                <h5>
-                    Total de Alunos
-                </h5>
+                <div>
 
-                <h2>
-                    {{ total_alunos }}
-                </h2>
+                    <small class="text-muted">
+                        Total de Alunos
+                    </small>
+
+                    <h2 class="fw-bold mt-2">
+
+                        {{ total_alunos }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-primary text-white p-3 rounded-4">
+
+                    <i class="bi bi-people-fill fs-3"></i>
+
+                </div>
 
             </div>
 
@@ -28,19 +56,33 @@
 
     </div>
 
+    <!-- RECEBIDO -->
+
     <div class="col-md-4">
 
-        <div class="card bg-success text-white shadow-sm">
+        <div class="card p-4 h-100">
 
-            <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
 
-                <h5>
-                    Total Recebido
-                </h5>
+                <div>
 
-                <h2>
-                    R$ {{ recebido }}
-                </h2>
+                    <small class="text-muted">
+                        Total Recebido
+                    </small>
+
+                    <h2 class="fw-bold mt-2 text-success">
+
+                        R$ {{ recebido }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-success text-white p-3 rounded-4">
+
+                    <i class="bi bi-cash-stack fs-3"></i>
+
+                </div>
 
             </div>
 
@@ -48,19 +90,33 @@
 
     </div>
 
+    <!-- PENDENTE -->
+
     <div class="col-md-4">
 
-        <div class="card bg-danger text-white shadow-sm">
+        <div class="card p-4 h-100">
 
-            <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
 
-                <h5>
-                    Total Pendente
-                </h5>
+                <div>
 
-                <h2>
-                    R$ {{ pendente }}
-                </h2>
+                    <small class="text-muted">
+                        Total Pendente
+                    </small>
+
+                    <h2 class="fw-bold mt-2 text-danger">
+
+                        R$ {{ pendente }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-danger text-white p-3 rounded-4">
+
+                    <i class="bi bi-exclamation-circle-fill fs-3"></i>
+
+                </div>
 
             </div>
 
@@ -70,80 +126,106 @@
 
 </div>
 
-<div class="card shadow-sm">
+<!-- FAIXAS -->
 
-    <div class="card-body">
+<div class="card p-4">
 
-        <h4 class="mb-4">
-            Alunos por Faixa
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h4 class="fw-bold">
+
+            Distribuição por Faixa
+
         </h4>
 
-        <canvas id="graficoFaixas"></canvas>
+        <span class="badge bg-dark p-2">
+
+            {{ faixas|length }} categorias
+
+        </span>
 
     </div>
 
-</div>
+    <div class="table-responsive">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <table class="table align-middle">
 
-<script>
+            <thead>
 
-const ctx = document.getElementById('graficoFaixas');
+                <tr>
 
-new Chart(ctx, {
+                    <th>Faixa</th>
 
-    type: 'bar',
+                    <th>Quantidade de Alunos</th>
 
-    data: {
+                    <th>Indicador</th>
 
-        labels: [
+                </tr>
 
-            {% for faixa in faixas %}
+            </thead>
 
-                '{{ faixa[0] }}',
+            <tbody>
 
-            {% endfor %}
+                {% for faixa, total in faixas %}
 
-        ],
+                <tr>
 
-        datasets: [{
+                    <!-- FAIXA -->
 
-            label: 'Quantidade de Alunos',
+                    <td>
 
-            data: [
+                        <span class="badge bg-dark p-2">
 
-                {% for faixa in faixas %}
+                            {{ faixa }}
 
-                    {{ faixa[1] }},
+                        </span>
+
+                    </td>
+
+                    <!-- TOTAL -->
+
+                    <td>
+
+                        <strong>
+
+                            {{ total }} alunos
+
+                        </strong>
+
+                    </td>
+
+                    <!-- BARRA -->
+
+                    <td width="350">
+
+                        <div
+                            class="progress"
+                            style="height: 22px;"
+                        >
+
+                            <div
+                                class="progress-bar"
+                                style="width: {{ total * 10 }}%;"
+                            >
+
+                                {{ total }}
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                </tr>
 
                 {% endfor %}
 
-            ],
+            </tbody>
 
-            borderWidth: 2
+        </table>
 
-        }]
+    </div>
 
-    },
-
-    options: {
-
-        responsive: true,
-
-        scales: {
-
-            y: {
-
-                beginAtZero: true
-
-            }
-
-        }
-
-    }
-
-});
-
-</script>
+</div>
 
 {% endblock %}

@@ -4,35 +4,133 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
 
-    <h1>
-        Cobranças Pendentes
-    </h1>
+    <div>
 
-    <button
-        onclick="cobrarTodos()"
-        class="btn btn-danger"
-    >
-        <i class="bi bi-whatsapp"></i>
-        Cobrar Todos
-    </button>
+        <h2 class="fw-bold">
+            📲 Central de Cobranças
+        </h2>
+
+        <p class="text-muted mb-0">
+            Controle de mensalidades pendentes
+        </p>
+
+    </div>
 
 </div>
 
-<div class="card shadow-sm">
+<!-- RESUMO -->
 
-    <div class="card-body">
+<div class="row g-4 mb-4">
 
-        <table class="table table-hover align-middle">
+    <!-- TOTAL PENDENTE -->
+
+    <div class="col-md-6">
+
+        <div class="card p-4 h-100">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <small class="text-muted">
+                        Mensalidades Pendentes
+                    </small>
+
+                    <h2 class="fw-bold mt-2 text-danger">
+
+                        {{ dados|length }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-danger text-white p-3 rounded-4">
+
+                    <i class="bi bi-exclamation-triangle-fill fs-2"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- WHATSAPP -->
+
+    <div class="col-md-6">
+
+        <div class="card p-4 h-100">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <small class="text-muted">
+                        Cobranças via WhatsApp
+                    </small>
+
+                    <h2 class="fw-bold mt-2 text-success">
+
+                        Ativo
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-success text-white p-3 rounded-4">
+
+                    <i class="bi bi-whatsapp fs-2"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- TABELA -->
+
+<div class="card p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h4 class="fw-bold">
+
+            Lista de Cobranças
+
+        </h4>
+
+        <span class="badge bg-dark p-2">
+
+            {{ dados|length }} pendências
+
+        </span>
+
+    </div>
+
+    <div class="table-responsive">
+
+        <table class="table align-middle">
 
             <thead>
 
                 <tr>
 
                     <th>Aluno</th>
+
                     <th>WhatsApp</th>
+
                     <th>Valor</th>
+
                     <th>Vencimento</th>
-                    <th>Ação</th>
+
+                    <th>Status</th>
+
+                    <th>Ações</th>
 
                 </tr>
 
@@ -44,31 +142,70 @@
 
                 <tr>
 
-                    <td>
-                        {{ item.aluno.nome }}
-                    </td>
+                    <!-- ALUNO -->
 
                     <td>
+
+                        <strong>
+
+                            {{ item.aluno.nome }}
+
+                        </strong>
+
+                    </td>
+
+                    <!-- WHATS -->
+
+                    <td>
+
                         {{ item.aluno.whatsapp }}
+
                     </td>
 
-                    <td>
-                        R$ {{ item.valor }}
-                    </td>
+                    <!-- VALOR -->
 
                     <td>
+
+                        <strong class="text-danger">
+
+                            R$ {{ item.valor }}
+
+                        </strong>
+
+                    </td>
+
+                    <!-- VENCIMENTO -->
+
+                    <td>
+
                         {{ item.vencimento }}
+
                     </td>
+
+                    <!-- STATUS -->
+
+                    <td>
+
+                        <span class="badge bg-danger p-2">
+
+                            PENDENTE
+
+                        </span>
+
+                    </td>
+
+                    <!-- AÇÕES -->
 
                     <td>
 
                         <a
-                            href="https://wa.me/55{{ item.aluno.whatsapp }}?text=Olá {{ item.aluno.nome }}, sua mensalidade de R$ {{ item.valor }} está pendente. Vencimento: {{ item.vencimento }}"
                             target="_blank"
-                            class="btn btn-success btn-sm link-whatsapp"
+                            href="https://wa.me/55{{ item.aluno.whatsapp }}?text=Olá%20{{ item.aluno.nome }},%20sua%20mensalidade%20da%20academia%20de%20karatê%20está%20pendente."
+                            class="btn btn-success btn-sm"
                         >
 
                             <i class="bi bi-whatsapp"></i>
+
                             Cobrar
 
                         </a>
@@ -86,28 +223,5 @@
     </div>
 
 </div>
-
-<script>
-
-function cobrarTodos() {
-
-    const links = document.querySelectorAll('.link-whatsapp');
-
-    links.forEach((link, index) => {
-
-        setTimeout(() => {
-
-            window.open(
-                link.href,
-                '_blank'
-            );
-
-        }, index * 1000);
-
-    });
-
-}
-
-</script>
 
 {% endblock %}

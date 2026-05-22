@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h2 class="fw-bold">
+            👤 Novo Usuário
+        </h2>
+
+        <p class="text-muted mb-0">
+            Cadastre administradores e professores
+        </p>
+
+    </div>
+
+</div>
+
+<!-- FORM -->
+
+<div class="card p-4">
+
+    <form method="POST">
+
+        <div class="row g-4">
+
+            <!-- USUÁRIO -->
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+
+                    Usuário
+
+                </label>
+
+                <input
+                    type="text"
+                    name="usuario"
+                    class="form-control form-control-lg"
+                    required
+                >
+
+            </div>
+
+            <!-- TIPO -->
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+
+                    Tipo de Usuário
+
+                </label>
+
+                <select
+                    name="tipo"
+                    class="form-select form-select-lg"
+                    required
+                >
+
+                    <option value="professor">
+
+                        PROFESSOR
+
+                    </option>
+
+                    <option value="admin">
+
+                        ADMIN
+
+                    </option>
+
+                </select>
+
+            </div>
+
+            <!-- SENHA -->
+
+            <div class="col-md-12">
+
+                <label class="form-label">
+
+                    Senha
+
+                </label>
+
+                <input
+                    type="password"
+                    name="senha"
+                    class="form-control form-control-lg"
+                    required
+                >
+
+            </div>
+
+        </div>
+
+        <!-- BOTÕES -->
+
+        <div class="mt-5 d-flex gap-3">
+
+            <button
+                class="btn btn-danger btn-lg"
+            >
+
+                <i class="bi bi-person-plus-fill"></i>
+
+                Cadastrar Usuário
+
+            </button>
+
+            <a
+                href="/usuarios"
+                class="btn btn-secondary btn-lg"
+            >
+
+                Voltar
+
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

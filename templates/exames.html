@@ -2,199 +2,298 @@
 
 {% block conteudo %}
 
-<div class="row">
+<div class="d-flex justify-content-between align-items-center mb-4">
 
-    <div class="col-md-4">
+    <div>
 
-        <div class="card shadow-sm">
+        <h2 class="fw-bold">
+            🥋 Exames de Faixa
+        </h2>
 
-            <div class="card-body">
-
-                <h3 class="mb-4">
-                    Novo Exame
-                </h3>
-
-                <form method="POST">
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Aluno
-                        </label>
-
-                        <select
-                            name="aluno_id"
-                            class="form-select"
-                        >
-
-                            {% for aluno in alunos %}
-
-                            <option value="{{ aluno.id }}">
-                                {{ aluno.nome }}
-                            </option>
-
-                            {% endfor %}
-
-                        </select>
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Faixa Atual
-                        </label>
-
-                        <input
-                            type="text"
-                            name="faixa_atual"
-                            class="form-control"
-                        >
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Nova Faixa
-                        </label>
-
-                        <input
-                            type="text"
-                            name="nova_faixa"
-                            class="form-control"
-                        >
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Data Exame
-                        </label>
-
-                        <input
-                            type="date"
-                            name="data_exame"
-                            class="form-control"
-                        >
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Resultado
-                        </label>
-
-                        <select
-                            name="resultado"
-                            class="form-select"
-                        >
-
-                            <option value="APROVADO">
-                                APROVADO
-                            </option>
-
-                            <option value="REPROVADO">
-                                REPROVADO
-                            </option>
-
-                        </select>
-
-                    </div>
-
-                    <button class="btn btn-success w-100">
-
-                        Salvar
-
-                    </button>
-
-                </form>
-
-            </div>
-
-        </div>
+        <p class="text-muted mb-0">
+            Gerencie os exames e graduações dos alunos
+        </p>
 
     </div>
 
-    <div class="col-md-8">
+</div>
 
-        <div class="card shadow-sm">
+<!-- FORMULÁRIO -->
 
-            <div class="card-body">
+<div class="card p-4 mb-4">
 
-                <h3 class="mb-4">
-                    Histórico de Exames
-                </h3>
+    <h4 class="fw-bold mb-4">
 
-                <table class="table table-hover">
+        Novo Exame
 
-                    <thead>
+    </h4>
 
-                        <tr>
+    <form method="POST">
 
-                            <th>Aluno</th>
-                            <th>Faixa Atual</th>
-                            <th>Nova Faixa</th>
-                            <th>Data</th>
-                            <th>Resultado</th>
+        <div class="row g-3">
 
-                        </tr>
+            <!-- ALUNO -->
 
-                    </thead>
+            <div class="col-md-3">
 
-                    <tbody>
+                <label class="form-label">
 
-                        {% for exame in exames %}
+                    Aluno
 
-                        <tr>
+                </label>
 
-                            <td>
-                                {{ exame.aluno.nome }}
-                            </td>
+                <select
+                    name="aluno_id"
+                    class="form-select form-select-lg"
+                    required
+                >
 
-                            <td>
-                                {{ exame.faixa_atual }}
-                            </td>
+                    <option value="">
+                        Selecione
+                    </option>
 
-                            <td>
-                                {{ exame.nova_faixa }}
-                            </td>
+                    {% for aluno in alunos %}
 
-                            <td>
-                                {{ exame.data_exame }}
-                            </td>
+                    <option value="{{ aluno.id }}">
 
-                            <td>
+                        {{ aluno.nome }}
 
-                                {% if exame.resultado == 'APROVADO' %}
+                    </option>
 
-                                <span class="badge bg-success">
-                                    APROVADO
-                                </span>
+                    {% endfor %}
 
-                                {% else %}
+                </select>
 
-                                <span class="badge bg-danger">
-                                    REPROVADO
-                                </span>
+            </div>
 
-                                {% endif %}
+            <!-- FAIXA ATUAL -->
 
-                            </td>
+            <div class="col-md-2">
 
-                        </tr>
+                <label class="form-label">
 
-                        {% endfor %}
+                    Faixa Atual
 
-                    </tbody>
+                </label>
 
-                </table>
+                <input
+                    type="text"
+                    name="faixa_atual"
+                    class="form-control form-control-lg"
+                    required
+                >
+
+            </div>
+
+            <!-- NOVA FAIXA -->
+
+            <div class="col-md-2">
+
+                <label class="form-label">
+
+                    Nova Faixa
+
+                </label>
+
+                <input
+                    type="text"
+                    name="nova_faixa"
+                    class="form-control form-control-lg"
+                    required
+                >
+
+            </div>
+
+            <!-- DATA -->
+
+            <div class="col-md-2">
+
+                <label class="form-label">
+
+                    Data
+
+                </label>
+
+                <input
+                    type="date"
+                    name="data_exame"
+                    class="form-control form-control-lg"
+                    required
+                >
+
+            </div>
+
+            <!-- RESULTADO -->
+
+            <div class="col-md-3">
+
+                <label class="form-label">
+
+                    Resultado
+
+                </label>
+
+                <select
+                    name="resultado"
+                    class="form-select form-select-lg"
+                    required
+                >
+
+                    <option value="APROVADO">
+                        APROVADO
+                    </option>
+
+                    <option value="REPROVADO">
+                        REPROVADO
+                    </option>
+
+                </select>
 
             </div>
 
         </div>
+
+        <div class="mt-4">
+
+            <button
+                class="btn btn-warning btn-lg text-white"
+            >
+
+                <i class="bi bi-award-fill"></i>
+
+                Registrar Exame
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+<!-- TABELA -->
+
+<div class="card p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h4 class="fw-bold">
+
+            Histórico de Exames
+
+        </h4>
+
+        <span class="badge bg-dark p-2">
+
+            {{ exames|length }} registros
+
+        </span>
+
+    </div>
+
+    <div class="table-responsive">
+
+        <table class="table align-middle">
+
+            <thead>
+
+                <tr>
+
+                    <th>Aluno</th>
+
+                    <th>Faixa Atual</th>
+
+                    <th>Nova Faixa</th>
+
+                    <th>Data</th>
+
+                    <th>Resultado</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for exame in exames %}
+
+                <tr>
+
+                    <!-- ALUNO -->
+
+                    <td>
+
+                        <strong>
+
+                            {{ exame.aluno.nome }}
+
+                        </strong>
+
+                    </td>
+
+                    <!-- FAIXA ATUAL -->
+
+                    <td>
+
+                        <span class="badge bg-secondary p-2">
+
+                            {{ exame.faixa_atual }}
+
+                        </span>
+
+                    </td>
+
+                    <!-- NOVA FAIXA -->
+
+                    <td>
+
+                        <span class="badge bg-dark p-2">
+
+                            {{ exame.nova_faixa }}
+
+                        </span>
+
+                    </td>
+
+                    <!-- DATA -->
+
+                    <td>
+
+                        {{ exame.data_exame }}
+
+                    </td>
+
+                    <!-- RESULTADO -->
+
+                    <td>
+
+                        {% if exame.resultado == 'APROVADO' %}
+
+                            <span class="badge bg-success p-2">
+
+                                APROVADO
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-danger p-2">
+
+                                REPROVADO
+
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
 
     </div>
 

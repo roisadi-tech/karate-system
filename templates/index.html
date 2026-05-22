@@ -2,25 +2,53 @@
 
 {% block conteudo %}
 
-<h1 class="mb-4">
-    Dashboard
-</h1>
+<!-- TÍTULO -->
 
-<div class="row">
+<div class="mb-4">
+
+    <h2 class="fw-bold">
+        🥋 Dashboard
+    </h2>
+
+    <p class="text-muted mb-0">
+
+        Bem-vindo ao sistema da academia
+
+    </p>
+
+</div>
+
+<!-- CARDS -->
+
+<div class="row g-4 mb-4">
+
+    <!-- ALUNOS -->
 
     <div class="col-md-3">
 
-        <div class="card bg-primary text-white shadow-sm">
+        <div class="card p-4 h-100">
 
-            <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
 
-                <h5>
-                    Total de Alunos
-                </h5>
+                <div>
 
-                <h2>
-                    {{ total_alunos }}
-                </h2>
+                    <small class="text-muted">
+                        Total de Alunos
+                    </small>
+
+                    <h2 class="fw-bold mt-2">
+
+                        {{ total_alunos }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-primary text-white p-3 rounded-4">
+
+                    <i class="bi bi-people-fill fs-2"></i>
+
+                </div>
 
             </div>
 
@@ -28,19 +56,33 @@
 
     </div>
 
+    <!-- FATURAMENTO -->
+
     <div class="col-md-3">
 
-        <div class="card bg-success text-white shadow-sm">
+        <div class="card p-4 h-100">
 
-            <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
 
-                <h5>
-                    Faturamento
-                </h5>
+                <div>
 
-                <h2>
-                    R$ {{ faturamento }}
-                </h2>
+                    <small class="text-muted">
+                        Faturamento
+                    </small>
+
+                    <h2 class="fw-bold mt-2 text-success">
+
+                        R$ {{ faturamento }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-success text-white p-3 rounded-4">
+
+                    <i class="bi bi-cash-stack fs-2"></i>
+
+                </div>
 
             </div>
 
@@ -48,19 +90,33 @@
 
     </div>
 
+    <!-- INADIMPLENTES -->
+
     <div class="col-md-3">
 
-        <div class="card bg-danger text-white shadow-sm">
+        <div class="card p-4 h-100">
 
-            <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
 
-                <h5>
-                    Inadimplentes
-                </h5>
+                <div>
 
-                <h2>
-                    {{ inadimplentes }}
-                </h2>
+                    <small class="text-muted">
+                        Inadimplentes
+                    </small>
+
+                    <h2 class="fw-bold mt-2 text-danger">
+
+                        {{ inadimplentes }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-danger text-white p-3 rounded-4">
+
+                    <i class="bi bi-exclamation-circle-fill fs-2"></i>
+
+                </div>
 
             </div>
 
@@ -68,23 +124,183 @@
 
     </div>
 
+    <!-- APTOS -->
+
     <div class="col-md-3">
 
-        <div class="card bg-warning text-dark shadow-sm">
+        <div class="card p-4 h-100">
 
-            <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
 
-                <h5>
-                    Aptos Exame
-                </h5>
+                <div>
 
-                <h2>
-                    {{ aptos }}
-                </h2>
+                    <small class="text-muted">
+                        Aptos para Exame
+                    </small>
+
+                    <h2 class="fw-bold mt-2 text-warning">
+
+                        {{ aptos }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-warning text-white p-3 rounded-4">
+
+                    <i class="bi bi-award-fill fs-2"></i>
+
+                </div>
 
             </div>
 
         </div>
+
+    </div>
+
+</div>
+
+<!-- ATALHOS -->
+
+<div class="row g-4">
+
+    <!-- ALUNOS -->
+
+    <div class="col-md-3">
+
+        <a
+            href="/alunos"
+            class="text-decoration-none"
+        >
+
+            <div class="card p-4 text-center h-100">
+
+                <div class="mb-3">
+
+                    <i class="bi bi-people-fill fs-1 text-primary"></i>
+
+                </div>
+
+                <h5 class="fw-bold">
+
+                    Alunos
+
+                </h5>
+
+                <p class="text-muted mb-0">
+
+                    Gerenciar alunos cadastrados
+
+                </p>
+
+            </div>
+
+        </a>
+
+    </div>
+
+    <!-- PRESENÇAS -->
+
+    <div class="col-md-3">
+
+        <a
+            href="/presencas"
+            class="text-decoration-none"
+        >
+
+            <div class="card p-4 text-center h-100">
+
+                <div class="mb-3">
+
+                    <i class="bi bi-check2-square fs-1 text-success"></i>
+
+                </div>
+
+                <h5 class="fw-bold">
+
+                    Presenças
+
+                </h5>
+
+                <p class="text-muted mb-0">
+
+                    Controle de frequência
+
+                </p>
+
+            </div>
+
+        </a>
+
+    </div>
+
+    <!-- MENSALIDADES -->
+
+    <div class="col-md-3">
+
+        <a
+            href="/mensalidades"
+            class="text-decoration-none"
+        >
+
+            <div class="card p-4 text-center h-100">
+
+                <div class="mb-3">
+
+                    <i class="bi bi-cash-coin fs-1 text-danger"></i>
+
+                </div>
+
+                <h5 class="fw-bold">
+
+                    Mensalidades
+
+                </h5>
+
+                <p class="text-muted mb-0">
+
+                    Gestão financeira
+
+                </p>
+
+            </div>
+
+        </a>
+
+    </div>
+
+    <!-- RELATÓRIOS -->
+
+    <div class="col-md-3">
+
+        <a
+            href="/relatorios"
+            class="text-decoration-none"
+        >
+
+            <div class="card p-4 text-center h-100">
+
+                <div class="mb-3">
+
+                    <i class="bi bi-graph-up-arrow fs-1 text-warning"></i>
+
+                </div>
+
+                <h5 class="fw-bold">
+
+                    Relatórios
+
+                </h5>
+
+                <p class="text-muted mb-0">
+
+                    Indicadores da academia
+
+                </p>
+
+            </div>
+
+        </a>
 
     </div>
 

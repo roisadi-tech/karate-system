@@ -2,139 +2,255 @@
 
 {% block conteudo %}
 
-<div class="card shadow-sm">
+<div class="d-flex justify-content-between align-items-center mb-4">
 
-    <div class="card-body">
+    <div>
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">
+            ✏️ Editar Aluno
+        </h2>
 
-            <h1>
-                Editar Aluno
-            </h1>
+        <p class="text-muted mb-0">
+            Atualize os dados do aluno
+        </p>
+
+    </div>
+
+</div>
+
+<!-- FORM -->
+
+<div class="card p-4">
+
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+    >
+
+        <div class="row g-4">
+
+            <!-- FOTO -->
+
+            <div class="col-md-4">
+
+                <div class="text-center">
+
+                    {% if aluno.foto %}
+
+                        <img
+                            src="{{ url_for('static', filename='uploads/' + aluno.foto) }}"
+                            class="img-fluid rounded-4 shadow-sm mb-3"
+                            style="height: 300px; object-fit: cover; width: 100%;"
+                        >
+
+                    {% else %}
+
+                        <div
+                            class="bg-light rounded-4 d-flex align-items-center justify-content-center mb-3"
+                            style="height: 300px;"
+                        >
+
+                            <i
+                                class="bi bi-person-circle text-secondary"
+                                style="font-size: 120px;"
+                            ></i>
+
+                        </div>
+
+                    {% endif %}
+
+                    <input
+                        type="file"
+                        name="foto"
+                        class="form-control"
+                    >
+
+                </div>
+
+            </div>
+
+            <!-- DADOS -->
+
+            <div class="col-md-8">
+
+                <div class="row g-3">
+
+                    <!-- NOME -->
+
+                    <div class="col-md-12">
+
+                        <label class="form-label">
+
+                            Nome Completo
+
+                        </label>
+
+                        <input
+                            type="text"
+                            name="nome"
+                            value="{{ aluno.nome }}"
+                            class="form-control form-control-lg"
+                            required
+                        >
+
+                    </div>
+
+                    <!-- WHATSAPP -->
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+
+                            WhatsApp
+
+                        </label>
+
+                        <input
+                            type="text"
+                            name="whatsapp"
+                            value="{{ aluno.whatsapp }}"
+                            class="form-control form-control-lg"
+                            required
+                        >
+
+                    </div>
+
+                    <!-- FAIXA -->
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">
+
+                            Faixa
+
+                        </label>
+
+                        <select
+                            name="faixa"
+                            class="form-select form-select-lg"
+                            required
+                        >
+
+                            <option
+                                value="Branca"
+                                {% if aluno.faixa == 'Branca' %}selected{% endif %}
+                            >
+                                Branca
+                            </option>
+
+                            <option
+                                value="Cinza"
+                                {% if aluno.faixa == 'Cinza' %}selected{% endif %}
+                            >
+                                Cinza
+                            </option>
+
+                            <option
+                                value="Azul"
+                                {% if aluno.faixa == 'Azul' %}selected{% endif %}
+                            >
+                                Azul
+                            </option>
+
+                            <option
+                                value="Amarela"
+                                {% if aluno.faixa == 'Amarela' %}selected{% endif %}
+                            >
+                                Amarela
+                            </option>
+
+                            <option
+                                value="Laranja"
+                                {% if aluno.faixa == 'Laranja' %}selected{% endif %}
+                            >
+                                Laranja
+                            </option>
+
+                            <option
+                                value="Verde"
+                                {% if aluno.faixa == 'Verde' %}selected{% endif %}
+                            >
+                                Verde
+                            </option>
+
+                            <option
+                                value="Roxa"
+                                {% if aluno.faixa == 'Roxa' %}selected{% endif %}
+                            >
+                                Roxa
+                            </option>
+
+                            <option
+                                value="Marrom"
+                                {% if aluno.faixa == 'Marrom' %}selected{% endif %}
+                            >
+                                Marrom
+                            </option>
+
+                            <option
+                                value="Preta"
+                                {% if aluno.faixa == 'Preta' %}selected{% endif %}
+                            >
+                                Preta
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <!-- MENSALIDADE -->
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">
+
+                            Mensalidade
+
+                        </label>
+
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="mensalidade"
+                            value="{{ aluno.mensalidade }}"
+                            class="form-control form-control-lg"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- BOTÕES -->
+
+        <div class="mt-5 d-flex gap-3">
+
+            <button
+                class="btn btn-warning btn-lg text-white"
+            >
+
+                <i class="bi bi-save-fill"></i>
+
+                Salvar Alterações
+
+            </button>
 
             <a
                 href="/alunos"
-                class="btn btn-secondary"
+                class="btn btn-secondary btn-lg"
             >
+
                 Voltar
+
             </a>
 
         </div>
 
-        <form
-            method="POST"
-            enctype="multipart/form-data"
-        >
-
-            <div class="row">
-
-                <div class="col-md-6 mb-3">
-
-                    <label class="form-label">
-                        Nome
-                    </label>
-
-                    <input
-                        type="text"
-                        name="nome"
-                        class="form-control"
-                        value="{{ aluno.nome }}"
-                        required
-                    >
-
-                </div>
-
-                <div class="col-md-6 mb-3">
-
-                    <label class="form-label">
-                        WhatsApp
-                    </label>
-
-                    <input
-                        type="text"
-                        name="whatsapp"
-                        class="form-control"
-                        value="{{ aluno.whatsapp }}"
-                    >
-
-                </div>
-
-            </div>
-
-            <div class="row">
-
-                <div class="col-md-6 mb-3">
-
-                    <label class="form-label">
-                        Faixa
-                    </label>
-
-                    <input
-                        type="text"
-                        name="faixa"
-                        class="form-control"
-                        value="{{ aluno.faixa }}"
-                    >
-
-                </div>
-
-                <div class="col-md-6 mb-3">
-
-                    <label class="form-label">
-                        Mensalidade
-                    </label>
-
-                    <input
-                        type="number"
-                        step="0.01"
-                        name="mensalidade"
-                        class="form-control"
-                        value="{{ aluno.mensalidade }}"
-                    >
-
-                </div>
-
-            </div>
-
-            <div class="mb-3">
-
-                <label class="form-label">
-                    Nova Foto
-                </label>
-
-                <input
-                    type="file"
-                    name="foto"
-                    class="form-control"
-                >
-
-            </div>
-
-            {% if aluno.foto %}
-
-            <div class="mb-4">
-
-                <img
-                    src="/static/uploads/{{ aluno.foto }}"
-                    width="120"
-                    class="rounded-circle"
-                    style="object-fit: cover;"
-                >
-
-            </div>
-
-            {% endif %}
-
-            <button class="btn btn-success">
-
-                <i class="bi bi-check-circle"></i>
-                Atualizar
-
-            </button>
-
-        </form>
-
-    </div>
+    </form>
 
 </div>
 

@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h2 class="fw-bold">
+            👥 Usuários do Sistema
+        </h2>
+
+        <p class="text-muted mb-0">
+            Gerencie administradores e professores
+        </p>
+
+    </div>
+
+    <a
+        href="/cadastrar_usuario"
+        class="btn btn-danger btn-lg"
+    >
+
+        <i class="bi bi-person-plus-fill"></i>
+
+        Novo Usuário
+
+    </a>
+
+</div>
+
+<!-- TABELA -->
+
+<div class="card p-4">
+
+    <div class="table-responsive">
+
+        <table class="table align-middle">
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+
+                    <th>Usuário</th>
+
+                    <th>Tipo</th>
+
+                    <th>Status</th>
+
+                    <th width="180">
+                        Ações
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for usuario in usuarios %}
+
+                <tr>
+
+                    <!-- ID -->
+
+                    <td>
+
+                        #{{ usuario.id }}
+
+                    </td>
+
+                    <!-- USUARIO -->
+
+                    <td>
+
+                        <strong>
+
+                            {{ usuario.usuario }}
+
+                        </strong>
+
+                    </td>
+
+                    <!-- TIPO -->
+
+                    <td>
+
+                        {% if usuario.tipo == 'admin' %}
+
+                            <span class="badge bg-danger p-2">
+
+                                ADMIN
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-primary p-2">
+
+                                PROFESSOR
+
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <!-- STATUS -->
+
+                    <td>
+
+                        <span class="badge bg-success p-2">
+
+                            ATIVO
+
+                        </span>
+
+                    </td>
+
+                    <!-- AÇÕES -->
+
+                    <td>
+
+                        <div class="d-flex gap-2">
+
+                            <a
+                                href="/editar_usuario/{{ usuario.id }}"
+                                class="btn btn-warning btn-sm text-white"
+                            >
+
+                                <i class="bi bi-pencil-fill"></i>
+
+                            </a>
+
+                            <a
+                                href="/excluir_usuario/{{ usuario.id }}"
+                                class="btn btn-danger btn-sm"
+                                onclick="return confirm('Deseja excluir este usuário?')"
+                            >
+
+                                <i class="bi bi-trash-fill"></i>
+
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

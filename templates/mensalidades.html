@@ -2,193 +2,286 @@
 
 {% block conteudo %}
 
-<div class="row">
+<div class="d-flex justify-content-between align-items-center mb-4">
 
-    <div class="col-md-4">
+    <div>
 
-        <div class="card shadow-sm">
+        <h2 class="fw-bold">
+            💰 Mensalidades
+        </h2>
 
-            <div class="card-body">
-
-                <h3 class="mb-4">
-                    Nova Mensalidade
-                </h3>
-
-                <form method="POST">
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Aluno
-                        </label>
-
-                        <select
-                            name="aluno_id"
-                            class="form-select"
-                        >
-
-                            {% for aluno in alunos %}
-
-                            <option value="{{ aluno.id }}">
-                                {{ aluno.nome }}
-                            </option>
-
-                            {% endfor %}
-
-                        </select>
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Valor
-                        </label>
-
-                        <input
-                            type="number"
-                            step="0.01"
-                            name="valor"
-                            class="form-control"
-                        >
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Vencimento
-                        </label>
-
-                        <input
-                            type="date"
-                            name="vencimento"
-                            class="form-control"
-                        >
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Status
-                        </label>
-
-                        <select
-                            name="status"
-                            class="form-select"
-                        >
-
-                            <option value="PENDENTE">
-                                PENDENTE
-                            </option>
-
-                            <option value="PAGO">
-                                PAGO
-                            </option>
-
-                        </select>
-
-                    </div>
-
-                    <button class="btn btn-success w-100">
-
-                        Salvar
-
-                    </button>
-
-                </form>
-
-            </div>
-
-        </div>
+        <p class="text-muted mb-0">
+            Controle financeiro da academia
+        </p>
 
     </div>
 
-    <div class="col-md-8">
+</div>
 
-        <div class="card shadow-sm">
+<!-- FORMULÁRIO -->
 
-            <div class="card-body">
+<div class="card p-4 mb-4">
 
-                <h3 class="mb-4">
-                    Mensalidades
-                </h3>
+    <h4 class="fw-bold mb-4">
 
-                <table class="table table-hover">
+        Nova Mensalidade
 
-                    <thead>
+    </h4>
 
-                        <tr>
+    <form method="POST">
 
-                            <th>Aluno</th>
-                            <th>Valor</th>
-                            <th>Vencimento</th>
-                            <th>Status</th>
-                            <th>Recibo</th>
+        <div class="row g-3">
 
-                        </tr>
+            <!-- ALUNO -->
 
-                    </thead>
+            <div class="col-md-3">
 
-                    <tbody>
+                <label class="form-label">
 
-                        {% for item in mensalidades %}
+                    Aluno
 
-                        <tr>
+                </label>
 
-                            <td>
-                                {{ item.aluno.nome }}
-                            </td>
+                <select
+                    name="aluno_id"
+                    class="form-select form-select-lg"
+                    required
+                >
 
-                            <td>
-                                R$ {{ item.valor }}
-                            </td>
+                    <option value="">
+                        Selecione
+                    </option>
 
-                            <td>
-                                {{ item.vencimento }}
-                            </td>
+                    {% for aluno in alunos %}
 
-                            <td>
+                    <option value="{{ aluno.id }}">
 
-                                {% if item.status == 'PAGO' %}
+                        {{ aluno.nome }}
 
-                                <span class="badge bg-success">
-                                    PAGO
-                                </span>
+                    </option>
 
-                                {% else %}
+                    {% endfor %}
 
-                                <span class="badge bg-danger">
-                                    PENDENTE
-                                </span>
+                </select>
 
-                                {% endif %}
+            </div>
 
-                            </td>
+            <!-- VALOR -->
 
-                            <td>
+            <div class="col-md-3">
 
-                                <a
-                                    href="/recibo/{{ item.id }}"
-                                    class="btn btn-primary btn-sm"
-                                >
-                                    PDF
-                                </a>
+                <label class="form-label">
 
-                            </td>
+                    Valor
 
-                        </tr>
+                </label>
 
-                        {% endfor %}
+                <input
+                    type="number"
+                    step="0.01"
+                    name="valor"
+                    class="form-control form-control-lg"
+                    placeholder="0.00"
+                    required
+                >
 
-                    </tbody>
+            </div>
 
-                </table>
+            <!-- VENCIMENTO -->
+
+            <div class="col-md-3">
+
+                <label class="form-label">
+
+                    Vencimento
+
+                </label>
+
+                <input
+                    type="date"
+                    name="vencimento"
+                    class="form-control form-control-lg"
+                    required
+                >
+
+            </div>
+
+            <!-- STATUS -->
+
+            <div class="col-md-3">
+
+                <label class="form-label">
+
+                    Status
+
+                </label>
+
+                <select
+                    name="status"
+                    class="form-select form-select-lg"
+                    required
+                >
+
+                    <option value="PENDENTE">
+                        PENDENTE
+                    </option>
+
+                    <option value="PAGO">
+                        PAGO
+                    </option>
+
+                </select>
 
             </div>
 
         </div>
+
+        <div class="mt-4">
+
+            <button
+                class="btn btn-success btn-lg"
+            >
+
+                <i class="bi bi-cash-stack"></i>
+
+                Salvar Mensalidade
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+<!-- TABELA -->
+
+<div class="card p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h4 class="fw-bold">
+
+            Histórico Financeiro
+
+        </h4>
+
+        <span class="badge bg-dark p-2">
+
+            {{ mensalidades|length }} registros
+
+        </span>
+
+    </div>
+
+    <div class="table-responsive">
+
+        <table class="table align-middle">
+
+            <thead>
+
+                <tr>
+
+                    <th>Aluno</th>
+
+                    <th>Valor</th>
+
+                    <th>Vencimento</th>
+
+                    <th>Status</th>
+
+                    <th>Ações</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for mensalidade in mensalidades %}
+
+                <tr>
+
+                    <!-- ALUNO -->
+
+                    <td>
+
+                        <strong>
+
+                            {{ mensalidade.aluno.nome }}
+
+                        </strong>
+
+                    </td>
+
+                    <!-- VALOR -->
+
+                    <td>
+
+                        <strong class="text-success">
+
+                            R$ {{ mensalidade.valor }}
+
+                        </strong>
+
+                    </td>
+
+                    <!-- VENCIMENTO -->
+
+                    <td>
+
+                        {{ mensalidade.vencimento }}
+
+                    </td>
+
+                    <!-- STATUS -->
+
+                    <td>
+
+                        {% if mensalidade.status == 'PAGO' %}
+
+                            <span class="badge bg-success p-2">
+
+                                PAGO
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-danger p-2">
+
+                                PENDENTE
+
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <!-- AÇÕES -->
+
+                    <td>
+
+                        <a
+                            href="/recibo/{{ mensalidade.id }}"
+                            class="btn btn-dark btn-sm"
+                        >
+
+                            <i class="bi bi-file-earmark-pdf-fill"></i>
+
+                            Recibo
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
 
     </div>
 

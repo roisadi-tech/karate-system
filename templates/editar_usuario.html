@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h2 class="fw-bold">
+            ✏️ Editar Usuário
+        </h2>
+
+        <p class="text-muted mb-0">
+            Atualize os dados do usuário
+        </p>
+
+    </div>
+
+</div>
+
+<!-- FORM -->
+
+<div class="card p-4">
+
+    <form method="POST">
+
+        <div class="row g-4">
+
+            <!-- USUÁRIO -->
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+
+                    Usuário
+
+                </label>
+
+                <input
+                    type="text"
+                    name="usuario"
+                    value="{{ usuario.usuario }}"
+                    class="form-control form-control-lg"
+                    required
+                >
+
+            </div>
+
+            <!-- TIPO -->
+
+            <div class="col-md-6">
+
+                <label class="form-label">
+
+                    Tipo de Usuário
+
+                </label>
+
+                <select
+                    name="tipo"
+                    class="form-select form-select-lg"
+                    required
+                >
+
+                    <option
+                        value="professor"
+                        {% if usuario.tipo == 'professor' %}selected{% endif %}
+                    >
+                        PROFESSOR
+                    </option>
+
+                    <option
+                        value="admin"
+                        {% if usuario.tipo == 'admin' %}selected{% endif %}
+                    >
+                        ADMIN
+                    </option>
+
+                </select>
+
+            </div>
+
+            <!-- NOVA SENHA -->
+
+            <div class="col-md-12">
+
+                <label class="form-label">
+
+                    Nova Senha
+
+                </label>
+
+                <input
+                    type="password"
+                    name="senha"
+                    class="form-control form-control-lg"
+                    placeholder="Deixe vazio para não alterar"
+                >
+
+            </div>
+
+        </div>
+
+        <!-- BOTÕES -->
+
+        <div class="mt-5 d-flex gap-3">
+
+            <button
+                class="btn btn-warning btn-lg text-white"
+            >
+
+                <i class="bi bi-save-fill"></i>
+
+                Salvar Alterações
+
+            </button>
+
+            <a
+                href="/usuarios"
+                class="btn btn-secondary btn-lg"
+            >
+
+                Voltar
+
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

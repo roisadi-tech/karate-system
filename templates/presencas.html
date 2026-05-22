@@ -2,163 +2,232 @@
 
 {% block conteudo %}
 
-<div class="row">
+<div class="d-flex justify-content-between align-items-center mb-4">
 
-    <div class="col-md-4">
+    <div>
 
-        <div class="card shadow-sm">
+        <h2 class="fw-bold">
+            ✅ Controle de Presenças
+        </h2>
 
-            <div class="card-body">
-
-                <h3 class="mb-4">
-                    Registrar Presença
-                </h3>
-
-                <form method="POST">
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Aluno
-                        </label>
-
-                        <select
-                            name="aluno_id"
-                            class="form-select"
-                            required
-                        >
-
-                            {% for aluno in alunos %}
-
-                            <option value="{{ aluno.id }}">
-                                {{ aluno.nome }}
-                            </option>
-
-                            {% endfor %}
-
-                        </select>
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Data
-                        </label>
-
-                        <input
-                            type="date"
-                            name="data"
-                            class="form-control"
-                            required
-                        >
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Status
-                        </label>
-
-                        <select
-                            name="status"
-                            class="form-select"
-                        >
-
-                            <option value="PRESENTE">
-                                PRESENTE
-                            </option>
-
-                            <option value="FALTA">
-                                FALTA
-                            </option>
-
-                        </select>
-
-                    </div>
-
-                    <button class="btn btn-success w-100">
-
-                        Salvar
-
-                    </button>
-
-                </form>
-
-            </div>
-
-        </div>
+        <p class="text-muted mb-0">
+            Registre e acompanhe a frequência dos alunos
+        </p>
 
     </div>
 
-    <div class="col-md-8">
+</div>
 
-        <div class="card shadow-sm">
+<!-- FORMULÁRIO -->
 
-            <div class="card-body">
+<div class="card p-4 mb-4">
 
-                <h3 class="mb-4">
-                    Lista de Presenças
-                </h3>
+    <h4 class="fw-bold mb-4">
 
-                <table class="table table-hover">
+        Nova Presença
 
-                    <thead>
+    </h4>
 
-                        <tr>
+    <form method="POST">
 
-                            <th>Aluno</th>
-                            <th>Data</th>
-                            <th>Status</th>
+        <div class="row g-3">
 
-                        </tr>
+            <!-- ALUNO -->
 
-                    </thead>
+            <div class="col-md-4">
 
-                    <tbody>
+                <label class="form-label">
 
-                        {% for presenca in presencas %}
+                    Aluno
 
-                        <tr>
+                </label>
 
-                            <td>
-                                {{ presenca.aluno.nome }}
-                            </td>
+                <select
+                    name="aluno_id"
+                    class="form-select form-select-lg"
+                    required
+                >
 
-                            <td>
-                                {{ presenca.data }}
-                            </td>
+                    <option value="">
+                        Selecione
+                    </option>
 
-                            <td>
+                    {% for aluno in alunos %}
 
-                                {% if presenca.status == 'PRESENTE' %}
+                    <option value="{{ aluno.id }}">
 
-                                <span class="badge bg-success">
-                                    PRESENTE
-                                </span>
+                        {{ aluno.nome }}
 
-                                {% else %}
+                    </option>
 
-                                <span class="badge bg-danger">
-                                    FALTA
-                                </span>
+                    {% endfor %}
 
-                                {% endif %}
+                </select>
 
-                            </td>
+            </div>
 
-                        </tr>
+            <!-- DATA -->
 
-                        {% endfor %}
+            <div class="col-md-4">
 
-                    </tbody>
+                <label class="form-label">
 
-                </table>
+                    Data
+
+                </label>
+
+                <input
+                    type="date"
+                    name="data"
+                    class="form-control form-control-lg"
+                    required
+                >
+
+            </div>
+
+            <!-- STATUS -->
+
+            <div class="col-md-4">
+
+                <label class="form-label">
+
+                    Status
+
+                </label>
+
+                <select
+                    name="status"
+                    class="form-select form-select-lg"
+                    required
+                >
+
+                    <option value="PRESENTE">
+                        PRESENTE
+                    </option>
+
+                    <option value="FALTA">
+                        FALTA
+                    </option>
+
+                </select>
 
             </div>
 
         </div>
+
+        <div class="mt-4">
+
+            <button
+                class="btn btn-success btn-lg"
+            >
+
+                <i class="bi bi-check-circle-fill"></i>
+
+                Registrar Presença
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+<!-- TABELA -->
+
+<div class="card p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h4 class="fw-bold">
+
+            Histórico de Presenças
+
+        </h4>
+
+        <span class="badge bg-dark p-2">
+
+            {{ presencas|length }} registros
+
+        </span>
+
+    </div>
+
+    <div class="table-responsive">
+
+        <table class="table align-middle">
+
+            <thead>
+
+                <tr>
+
+                    <th>Aluno</th>
+
+                    <th>Data</th>
+
+                    <th>Status</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for presenca in presencas %}
+
+                <tr>
+
+                    <!-- NOME -->
+
+                    <td>
+
+                        <strong>
+
+                            {{ presenca.aluno.nome }}
+
+                        </strong>
+
+                    </td>
+
+                    <!-- DATA -->
+
+                    <td>
+
+                        {{ presenca.data }}
+
+                    </td>
+
+                    <!-- STATUS -->
+
+                    <td>
+
+                        {% if presenca.status == 'PRESENTE' %}
+
+                            <span class="badge bg-success p-2">
+
+                                PRESENTE
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-danger p-2">
+
+                                FALTA
+
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
 
     </div>
 

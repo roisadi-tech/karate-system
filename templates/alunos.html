@@ -4,74 +4,96 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
 
-    <h1>
-        Alunos
-    </h1>
+    <div>
+
+        <h2 class="fw-bold">
+            👨‍🎓 Alunos
+        </h2>
+
+        <p class="text-muted mb-0">
+            Gerencie todos os alunos da academia
+        </p>
+
+    </div>
 
     <a
         href="/cadastrar_aluno"
-        class="btn btn-success"
+        class="btn btn-danger btn-lg"
     >
-        <i class="bi bi-plus-circle"></i>
+
+        <i class="bi bi-person-plus-fill"></i>
+
         Novo Aluno
+
     </a>
 
 </div>
 
 <!-- BUSCA -->
 
-<div class="card shadow-sm mb-4">
+<div class="card p-4 mb-4">
 
-    <div class="card-body">
+    <form method="GET">
 
-        <form
-            method="GET"
-            action="/alunos"
-        >
+        <div class="row g-3">
 
-            <div class="input-group">
+            <div class="col-md-10">
 
                 <input
                     type="text"
                     name="busca"
-                    class="form-control"
-                    placeholder="Buscar aluno..."
+                    class="form-control form-control-lg"
+                    placeholder="Buscar aluno pelo nome..."
+                    value="{{ request.args.get('busca', '') }}"
                 >
 
-                <button class="btn btn-primary">
+            </div>
+
+            <div class="col-md-2 d-grid">
+
+                <button
+                    class="btn btn-dark btn-lg"
+                >
 
                     <i class="bi bi-search"></i>
+
                     Buscar
 
                 </button>
 
             </div>
 
-        </form>
+        </div>
 
-    </div>
+    </form>
 
 </div>
 
 <!-- TABELA -->
 
-<div class="card shadow-sm">
+<div class="card p-4">
 
-    <div class="card-body">
+    <div class="table-responsive">
 
-        <table class="table table-hover align-middle">
+        <table class="table align-middle">
 
             <thead>
 
                 <tr>
 
-                    <th>ID</th>
                     <th>Foto</th>
+
                     <th>Nome</th>
-                    <th>Faixa</th>
+
                     <th>WhatsApp</th>
+
+                    <th>Faixa</th>
+
                     <th>Mensalidade</th>
-                    <th>Ações</th>
+
+                    <th width="220">
+                        Ações
+                    </th>
 
                 </tr>
 
@@ -83,59 +105,113 @@
 
                 <tr>
 
-                    <td>
-                        {{ aluno.id }}
-                    </td>
+                    <!-- FOTO -->
 
                     <td>
 
                         {% if aluno.foto %}
 
-                        <img
-                            src="/static/uploads/{{ aluno.foto }}"
-                            width="60"
-                            height="60"
-                            style="
-                                object-fit: cover;
-                                border-radius: 50%;
-                            "
-                        >
+                            <img
+                                src="{{ url_for('static', filename='uploads/' + aluno.foto) }}"
+                                width="60"
+                                height="60"
+                                style="
+                                    object-fit: cover;
+                                    border-radius: 50%;
+                                "
+                            >
+
+                        {% else %}
+
+                            <div
+                                class="bg-secondary text-white d-flex align-items-center justify-content-center"
+                                style="
+                                    width:60px;
+                                    height:60px;
+                                    border-radius:50%;
+                                "
+                            >
+
+                                <i class="bi bi-person-fill"></i>
+
+                            </div>
 
                         {% endif %}
 
                     </td>
 
-                    <td>
-                        {{ aluno.nome }}
-                    </td>
+                    <!-- NOME -->
 
                     <td>
-                        {{ aluno.faixa }}
+
+                        <strong>
+                            {{ aluno.nome }}
+                        </strong>
+
                     </td>
 
+                    <!-- WHATSAPP -->
+
                     <td>
+
                         {{ aluno.whatsapp }}
+
                     </td>
 
+                    <!-- FAIXA -->
+
                     <td>
-                        R$ {{ aluno.mensalidade }}
+
+                        <span class="badge bg-dark p-2">
+
+                            {{ aluno.faixa }}
+
+                        </span>
+
                     </td>
 
+                    <!-- MENSALIDADE -->
+
                     <td>
 
-                        <a
-                            href="/editar_aluno/{{ aluno.id }}"
-                            class="btn btn-warning btn-sm"
-                        >
-                            <i class="bi bi-pencil"></i>
-                        </a>
+                        <strong class="text-success">
 
-                        <a
-                            href="/excluir_aluno/{{ aluno.id }}"
-                            class="btn btn-danger btn-sm"
-                        >
-                            <i class="bi bi-trash"></i>
-                        </a>
+                            R$ {{ aluno.mensalidade }}
+
+                        </strong>
+
+                    </td>
+
+                    <!-- AÇÕES -->
+
+                    <td>
+
+                        <div class="d-flex gap-2">
+
+                            <a
+                                href="/editar_aluno/{{ aluno.id }}"
+                                class="btn btn-primary btn-sm"
+                            >
+
+                                <i class="bi bi-pencil-fill"></i>
+
+                            </a>
+
+                            {% if session.tipo == 'admin' %}
+
+                            <a
+                                href="/excluir_aluno/{{ aluno.id }}"
+                                class="btn btn-danger btn-sm"
+                                onclick="return confirm('Deseja excluir este aluno?')"
+                            >
+
+                                <i class="bi bi-trash-fill"></i>
+
+                            </a>
+
+                            {% endif %}
+
+                        </div>
 
                     </td>
 

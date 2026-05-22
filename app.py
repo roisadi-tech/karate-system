@@ -28,7 +28,8 @@ from functools import wraps
 from werkzeug.utils import secure_filename
 
 from werkzeug.security import (
-    check_password_hash
+    check_password_hash,
+    generate_password_hash
 )
 
 from reportlab.pdfgen import canvas
@@ -36,8 +37,18 @@ from reportlab.pdfgen import canvas
 from flask_migrate import Migrate
 
 
+# =====================================
+# APP
+# =====================================
+
 app = Flask(__name__)
 
+app.secret_key = 'karate_secret'
+
+
+# =====================================
+# DATABASE
+# =====================================
 
 database_url = os.getenv('DATABASE_URL')
 
@@ -90,7 +101,10 @@ def admin_obrigatorio(f):
 
         if session.get('tipo') != 'admin':
 
-            flash('Acesso permitido apenas para administradores.')
+            flash(
+                'Acesso permitido apenas para administradores.',
+                'danger'
+            )
 
             return redirect('/')
 
@@ -180,9 +194,17 @@ def login():
             session['usuario'] = usuario.usuario
             session['tipo'] = usuario.tipo
 
+            flash(
+                'Login realizado com sucesso.',
+                'success'
+            )
+
             return redirect('/')
 
-        flash('Usuário ou senha inválidos.')
+        flash(
+            'Usuário ou senha inválidos.',
+            'danger'
+        )
 
     return render_template('login.html')
 
@@ -195,6 +217,11 @@ def login():
 def logout():
 
     session.clear()
+
+    flash(
+        'Logout realizado com sucesso.',
+        'info'
+    )
 
     return redirect('/login')
 
@@ -246,11 +273,31 @@ def cadastrar_aluno():
         faixa = request.form['faixa']
         mensalidade = request.form['mensalidade']
 
-        foto = request.files['foto']
+        foto = request.files.get('foto')
 
         nome_arquivo = ''
 
         if foto and foto.filename != '':
+
+            extensoes_permitidas = [
+                '.png',
+                '.jpg',
+                '.jpeg',
+                '.webp'
+            ]
+
+            extensao = os.path.splitext(
+                foto.filename
+            )[1].lower()
+
+            if extensao not in extensoes_permitidas:
+
+                flash(
+                    'Formato de imagem inválido.',
+                    'danger'
+                )
+
+                return redirect(request.url)
 
             nome_arquivo = secure_filename(
                 foto.filename
@@ -282,7 +329,10 @@ def cadastrar_aluno():
 
         db.session.commit()
 
-        flash('Aluno cadastrado com sucesso.')
+        flash(
+            'Aluno cadastrado com sucesso.',
+            'success'
+        )
 
         return redirect('/alunos')
 
@@ -308,9 +358,29 @@ def editar_aluno(id):
         aluno.whatsapp = request.form['whatsapp']
         aluno.mensalidade = request.form['mensalidade']
 
-        foto = request.files['foto']
+        foto = request.files.get('foto')
 
         if foto and foto.filename != '':
+
+            extensoes_permitidas = [
+                '.png',
+                '.jpg',
+                '.jpeg',
+                '.webp'
+            ]
+
+            extensao = os.path.splitext(
+                foto.filename
+            )[1].lower()
+
+            if extensao not in extensoes_permitidas:
+
+                flash(
+                    'Formato de imagem inválido.',
+                    'danger'
+                )
+
+                return redirect(request.url)
 
             nome_arquivo = secure_filename(
                 foto.filename
@@ -327,7 +397,10 @@ def editar_aluno(id):
 
         db.session.commit()
 
-        flash('Aluno atualizado.')
+        flash(
+            'Aluno atualizado com sucesso.',
+            'success'
+        )
 
         return redirect('/alunos')
 
@@ -363,7 +436,10 @@ def excluir_aluno(id):
 
     db.session.commit()
 
-    flash('Aluno excluído.')
+    flash(
+        'Aluno excluído com sucesso.',
+        'success'
+    )
 
     return redirect('/alunos')
 
@@ -389,7 +465,10 @@ def presencas():
 
         db.session.commit()
 
-        flash('Presença registrada.')
+        flash(
+            'Presença registrada com sucesso.',
+            'success'
+        )
 
         return redirect('/presencas')
 
@@ -478,7 +557,10 @@ def mensalidades():
 
         db.session.commit()
 
-        flash('Mensalidade cadastrada.')
+        flash(
+            'Mensalidade cadastrada com sucesso.',
+            'success'
+        )
 
         return redirect('/mensalidades')
 
@@ -530,7 +612,10 @@ def exames():
 
         db.session.commit()
 
-        flash('Exame registrado.')
+        flash(
+            'Exame registrado com sucesso.',
+            'success'
+        )
 
         return redirect('/exames')
 
@@ -623,6 +708,12 @@ def recibo(id):
         'Academia de Karatê'
     )
 
+    c.drawString(
+        100,
+        540,
+        f'Gerado em: {datetime.now().strftime("%d/%m/%Y %H:%M")}'
+    )
+
     c.save()
 
     return send_file(
@@ -660,6 +751,11 @@ def backup():
     shutil.copy(
         origem,
         destino
+    )
+
+    flash(
+        'Backup realizado com sucesso.',
+        'success'
     )
 
     return send_file(
@@ -713,13 +809,186 @@ def relatorios():
 
 
 # =====================================
-# INICIAR APP
+# USUÁRIOS
+# =====================================
+
+@app.route('/usuarios')
+@login_obrigatorio
+@admin_obrigatorio
+def usuarios():
+
+    lista_usuarios = Usuario.query.order_by(
+        Usuario.id.desc()
+    ).all()
+
+    return render_template(
+        'usuarios.html',
+        usuarios=lista_usuarios
+    )
+
+
+# =====================================
+# CADASTRAR USUÁRIO
+# =====================================
+
+@app.route('/cadastrar_usuario', methods=['GET', 'POST'])
+@login_obrigatorio
+@admin_obrigatorio
+def cadastrar_usuario():
+
+    if request.method == 'POST':
+
+        usuario_form = request.form['usuario']
+        senha_form = request.form['senha']
+        tipo_form = request.form['tipo']
+
+        # VERIFICA DUPLICADO
+
+        existe = Usuario.query.filter_by(
+            usuario=usuario_form
+        ).first()
+
+        if existe:
+
+            flash('Este usuário já existe.')
+
+            return redirect('/cadastrar_usuario')
+
+        # CRIPTOGRAFA SENHA
+
+        senha_hash = generate_password_hash(
+            senha_form
+        )
+
+        novo_usuario = Usuario(
+
+            usuario=usuario_form,
+            senha=senha_hash,
+            tipo=tipo_form
+        )
+
+        db.session.add(novo_usuario)
+
+        db.session.commit()
+
+        flash('Usuário cadastrado com sucesso.')
+
+        return redirect('/usuarios')
+
+    return render_template(
+        'cadastrar_usuario.html'
+    )
+
+
+# =====================================
+# EDITAR USUÁRIO
+# =====================================
+
+@app.route('/editar_usuario/<int:id>', methods=['GET', 'POST'])
+@login_obrigatorio
+@admin_obrigatorio
+def editar_usuario(id):
+
+    usuario = Usuario.query.get_or_404(id)
+
+    if request.method == 'POST':
+
+        usuario_form = request.form['usuario']
+        tipo_form = request.form['tipo']
+        senha_form = request.form['senha']
+
+        # VERIFICA SE JÁ EXISTE OUTRO USUÁRIO
+
+        existe = Usuario.query.filter(
+            Usuario.usuario == usuario_form,
+            Usuario.id != id
+        ).first()
+
+        if existe:
+
+            flash('Já existe outro usuário com este nome.')
+
+            return redirect(f'/editar_usuario/{id}')
+
+        # ATUALIZA DADOS
+
+        usuario.usuario = usuario_form
+        usuario.tipo = tipo_form
+
+        # ALTERA SENHA SOMENTE SE PREENCHER
+
+        if senha_form != '':
+
+            usuario.senha = generate_password_hash(
+                senha_form
+            )
+
+        db.session.commit()
+
+        flash('Usuário atualizado com sucesso.')
+
+        return redirect('/usuarios')
+
+    return render_template(
+        'editar_usuario.html',
+        usuario=usuario
+    )
+
+
+# =====================================
+# EXCLUIR USUÁRIO
+# =====================================
+
+@app.route('/excluir_usuario/<int:id>')
+@login_obrigatorio
+@admin_obrigatorio
+def excluir_usuario(id):
+
+    usuario = Usuario.query.get_or_404(id)
+
+    # NÃO PODE EXCLUIR A SI MESMO
+
+    if usuario.usuario == session['usuario']:
+
+        flash('Você não pode excluir sua própria conta.')
+
+        return redirect('/usuarios')
+
+    # VERIFICA QUANTOS ADMINS EXISTEM
+
+    if usuario.tipo == 'admin':
+
+        total_admins = Usuario.query.filter_by(
+            tipo='admin'
+        ).count()
+
+        if total_admins <= 1:
+
+            flash('O sistema precisa ter pelo menos um administrador.')
+
+            return redirect('/usuarios')
+
+    db.session.delete(usuario)
+
+    db.session.commit()
+
+    flash('Usuário excluído com sucesso.')
+
+    return redirect('/usuarios')
+
+
+# =====================================
+# CRIAR TABELAS
 # =====================================
 
 with app.app_context():
 
     db.create_all()
 
+
+# =====================================
+# INICIAR SERVIDOR
+# =====================================
 
 if __name__ == '__main__':
 
