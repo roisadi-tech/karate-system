@@ -475,6 +475,10 @@ def exames():
         exames=lista
     )
 
+from werkzeug.security import check_password_hash
+
+SENHA_HASH = "32768:8:1$A4OP1L4guv9zkdQH$127d3045db344300464cf0e541aded0b68d1597e85f65fd721f46eea8f96c8e6d068ad362e375dfc7ae849891775d20db6e5b116519f5d7fab22dcaababd5403"
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
@@ -483,8 +487,7 @@ def login():
         usuario = request.form['usuario']
         senha = request.form['senha']
 
-        # LOGIN SIMPLES
-        if usuario == 'admin' and senha == '1234':
+        if usuario == 'admin' and check_password_hash(SENHA_HASH, senha):
 
             session['usuario'] = usuario
 
