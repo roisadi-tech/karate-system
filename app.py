@@ -33,19 +33,11 @@ from werkzeug.security import (
 
 from reportlab.pdfgen import canvas
 
+from flask_migrate import Migrate
 
-# =====================================
-# APP
-# =====================================
 
 app = Flask(__name__)
 
-app.secret_key = 'karate_secret'
-
-
-# =====================================
-# DATABASE
-# =====================================
 
 database_url = os.getenv('DATABASE_URL')
 
@@ -63,7 +55,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+
 db.init_app(app)
+
+migrate = Migrate(app, db)
 
 
 # =====================================

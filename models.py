@@ -20,7 +20,7 @@ class Aluno(db.Model):
     )
 
     sexo = db.Column(
-        db.String(20)
+        db.String(50)
     )
 
     whatsapp = db.Column(
@@ -37,6 +37,34 @@ class Aluno(db.Model):
 
     foto = db.Column(
         db.String(300)
+    )
+
+
+class Presenca(db.Model):
+
+    __tablename__ = 'presencas'
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    aluno_id = db.Column(
+        db.Integer,
+        db.ForeignKey('alunos.id')
+    )
+
+    data = db.Column(
+        db.String(30)
+    )
+
+    status = db.Column(
+        db.String(30)
+    )
+
+    aluno = db.relationship(
+        'Aluno',
+        backref='presencas'
     )
 
 
@@ -59,44 +87,16 @@ class Mensalidade(db.Model):
     )
 
     vencimento = db.Column(
-        db.String(20)
+        db.String(30)
     )
 
     status = db.Column(
-        db.String(20)
+        db.String(30)
     )
 
     aluno = db.relationship(
         'Aluno',
         backref='mensalidades'
-    )
-
-
-class Presenca(db.Model):
-
-    __tablename__ = 'presencas'
-
-    id = db.Column(
-        db.Integer,
-        primary_key=True
-    )
-
-    aluno_id = db.Column(
-        db.Integer,
-        db.ForeignKey('alunos.id')
-    )
-
-    data = db.Column(
-        db.String(20)
-    )
-
-    status = db.Column(
-        db.String(20)
-    )
-
-    aluno = db.relationship(
-        'Aluno',
-        backref='presencas'
     )
 
 
@@ -123,11 +123,11 @@ class Exame(db.Model):
     )
 
     data_exame = db.Column(
-        db.String(20)
+        db.String(30)
     )
 
     resultado = db.Column(
-        db.String(20)
+        db.String(30)
     )
 
     aluno = db.relationship(
@@ -157,6 +157,6 @@ class Usuario(db.Model):
     )
 
     tipo = db.Column(
-        db.String(50),
-        default='admin'
+        db.String(30),
+        default='professor'
     )

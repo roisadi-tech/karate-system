@@ -26,85 +26,186 @@
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
     >
 
+    <!-- Google Fonts -->
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
     <style>
+
+        * {
+
+            font-family: 'Poppins', sans-serif;
+
+        }
 
         body {
 
             background: #f1f5f9;
 
+            overflow-x: hidden;
+
         }
 
         .sidebar {
 
-            width: 260px;
+            width: 270px;
 
             min-height: 100vh;
 
-            background: #0f172a;
+            background: linear-gradient(
+                180deg,
+                #0f172a 0%,
+                #111827 100%
+            );
 
-        }
+            position: fixed;
 
-        .sidebar .nav-link {
+            left: 0;
 
-            color: #cbd5e1;
+            top: 0;
 
-            margin-bottom: 8px;
+            padding: 25px;
 
-            border-radius: 10px;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.08);
 
-            padding: 12px;
-
-            transition: 0.2s;
-
-        }
-
-        .sidebar .nav-link:hover {
-
-            background: #1e293b;
-
-            color: white;
-
-            transform: translateX(4px);
-
-        }
-
-        .sidebar .nav-link.active {
-
-            background: #dc3545;
-
-            color: white;
-
-        }
-
-        .content {
-
-            flex: 1;
-
-            padding: 30px;
+            z-index: 1000;
 
         }
 
         .logo {
 
+            color: white;
+
             font-size: 28px;
 
-            font-weight: bold;
+            font-weight: 700;
 
-            color: white;
+            margin-bottom: 35px;
 
         }
 
         .usuario-box {
 
-            background: #1e293b;
+            background: rgba(255,255,255,0.08);
 
-            border-radius: 12px;
+            border-radius: 18px;
 
-            padding: 12px;
+            padding: 15px;
+
+            margin-bottom: 30px;
 
             color: white;
 
-            margin-bottom: 20px;
+        }
+
+        .usuario-box small {
+
+            color: #cbd5e1;
+
+        }
+
+        .usuario-box .nome {
+
+            font-size: 18px;
+
+            font-weight: 600;
+
+        }
+
+        .nav-link {
+
+            color: #cbd5e1;
+
+            margin-bottom: 10px;
+
+            border-radius: 14px;
+
+            padding: 14px 16px;
+
+            transition: 0.3s;
+
+            font-weight: 500;
+
+        }
+
+        .nav-link:hover {
+
+            background: #1e293b;
+
+            color: white;
+
+            transform: translateX(5px);
+
+        }
+
+        .nav-link.active {
+
+            background: #dc3545;
+
+            color: white;
+
+            box-shadow: 0 8px 18px rgba(220,53,69,0.3);
+
+        }
+
+        .nav-link i {
+
+            margin-right: 10px;
+
+            font-size: 18px;
+
+        }
+
+        .content {
+
+            margin-left: 270px;
+
+            padding: 35px;
+
+            width: calc(100% - 270px);
+
+        }
+
+        .topbar {
+
+            background: white;
+
+            border-radius: 20px;
+
+            padding: 18px 25px;
+
+            margin-bottom: 30px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+
+        }
+
+        .topbar-title {
+
+            font-size: 24px;
+
+            font-weight: 700;
+
+            color: #0f172a;
 
         }
 
@@ -112,11 +213,95 @@
 
             background: #dc3545;
 
+            padding: 8px 14px;
+
+            border-radius: 12px;
+
+            color: white;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
         }
 
-        .badge-user {
+        .badge-professor {
 
-            background: #198754;
+            background: #0d6efd;
+
+            padding: 8px 14px;
+
+            border-radius: 12px;
+
+            color: white;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+        }
+
+        .card {
+
+            border: none;
+
+            border-radius: 22px;
+
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+
+        }
+
+        .btn {
+
+            border-radius: 12px;
+
+            font-weight: 500;
+
+        }
+
+        .table {
+
+            background: white;
+
+            border-radius: 20px;
+
+            overflow: hidden;
+
+        }
+
+        .table thead {
+
+            background: #0f172a;
+
+            color: white;
+
+        }
+
+        .alert {
+
+            border-radius: 15px;
+
+        }
+
+        @media (max-width: 991px) {
+
+            .sidebar {
+
+                width: 100%;
+
+                min-height: auto;
+
+                position: relative;
+
+            }
+
+            .content {
+
+                margin-left: 0;
+
+                width: 100%;
+
+            }
 
         }
 
@@ -126,122 +311,208 @@
 
 <body>
 
-<div class="d-flex">
+<div class="sidebar">
 
-    <!-- SIDEBAR -->
+    <!-- LOGO -->
 
-    <div class="sidebar p-3">
+    <div class="logo">
 
-        <div class="logo mb-4">
+        🥋 Karate System
 
-            🥋 Karate System
+    </div>
 
-        </div>
+    <!-- USUÁRIO -->
 
-        <!-- USUÁRIO -->
+    <div class="usuario-box">
 
-        <div class="usuario-box">
+        <small>
+            Logado como
+        </small>
 
-            <div>
-                <strong>
-                    {{ session.usuario }}
-                </strong>
-            </div>
+        <div class="nome">
 
-            <span class="badge
-                {% if session.tipo == 'admin' %}
-                    badge-admin
-                {% else %}
-                    badge-user
-                {% endif %}
-            ">
-                {{ session.tipo }}
-            </span>
+            {{ session.usuario }}
 
         </div>
 
-        <nav class="nav flex-column">
-
-            <a href="/" class="nav-link">
-                <i class="bi bi-speedometer2"></i>
-                Dashboard
-            </a>
-
-            <a href="/alunos" class="nav-link">
-                <i class="bi bi-people"></i>
-                Alunos
-            </a>
-
-            <a href="/presencas" class="nav-link">
-                <i class="bi bi-check2-square"></i>
-                Presenças
-            </a>
-
-            <a href="/frequencia" class="nav-link">
-                <i class="bi bi-graph-up"></i>
-                Frequência
-            </a>
-
-            <a href="/mensalidades" class="nav-link">
-                <i class="bi bi-cash-stack"></i>
-                Mensalidades
-            </a>
-
-            <a href="/cobrar" class="nav-link">
-                <i class="bi bi-whatsapp"></i>
-                Cobranças
-            </a>
-
-            <a href="/exames" class="nav-link">
-                <i class="bi bi-award"></i>
-                Exames
-            </a>
-
-            <a href="/relatorios" class="nav-link">
-                <i class="bi bi-bar-chart"></i>
-                Relatórios
-            </a>
-
-            <!-- APENAS ADMIN -->
+        <div class="mt-2">
 
             {% if session.tipo == 'admin' %}
 
-            <a href="/backup" class="nav-link">
-                <i class="bi bi-download"></i>
-                Backup
-            </a>
+                <span class="badge-admin">
+                    ADMIN
+                </span>
 
-            <a href="/usuarios" class="nav-link">
-                <i class="bi bi-person-gear"></i>
-                Usuários
-            </a>
+            {% else %}
+
+                <span class="badge-professor">
+                    PROFESSOR
+                </span>
 
             {% endif %}
 
-            <hr class="text-secondary">
-
-            <a
-                href="/logout"
-                class="nav-link text-danger"
-            >
-                <i class="bi bi-box-arrow-right"></i>
-                Sair
-            </a>
-
-        </nav>
+        </div>
 
     </div>
 
-    <!-- CONTEÚDO -->
+    <!-- MENU -->
 
-    <div class="content">
+    <nav class="nav flex-column">
 
-        {% block conteudo %}
-        {% endblock %}
+        <a
+            href="/"
+            class="nav-link"
+        >
+            <i class="bi bi-speedometer2"></i>
+            Dashboard
+        </a>
 
-    </div>
+        <a
+            href="/alunos"
+            class="nav-link"
+        >
+            <i class="bi bi-people"></i>
+            Alunos
+        </a>
+
+        <a
+            href="/presencas"
+            class="nav-link"
+        >
+            <i class="bi bi-check2-square"></i>
+            Presenças
+        </a>
+
+        <a
+            href="/frequencia"
+            class="nav-link"
+        >
+            <i class="bi bi-bar-chart-line"></i>
+            Frequência
+        </a>
+
+        <a
+            href="/mensalidades"
+            class="nav-link"
+        >
+            <i class="bi bi-cash-stack"></i>
+            Mensalidades
+        </a>
+
+        <a
+            href="/cobrar"
+            class="nav-link"
+        >
+            <i class="bi bi-whatsapp"></i>
+            Cobranças
+        </a>
+
+        <a
+            href="/exames"
+            class="nav-link"
+        >
+            <i class="bi bi-award"></i>
+            Exames
+        </a>
+
+        <a
+            href="/relatorios"
+            class="nav-link"
+        >
+            <i class="bi bi-graph-up-arrow"></i>
+            Relatórios
+        </a>
+
+        {% if session.tipo == 'admin' %}
+
+        <a
+            href="/usuarios"
+            class="nav-link"
+        >
+            <i class="bi bi-person-gear"></i>
+            Usuários
+        </a>
+
+        {% endif %}
+
+        <hr class="text-secondary">
+
+        <a
+            href="/logout"
+            class="nav-link text-danger"
+        >
+            <i class="bi bi-box-arrow-right"></i>
+            Sair
+        </a>
+
+    </nav>
 
 </div>
+
+<!-- CONTEÚDO -->
+
+<div class="content">
+
+    <!-- TOPBAR -->
+
+    <div class="topbar">
+
+        <div class="topbar-title">
+
+            Sistema de Gestão da Academia
+
+        </div>
+
+        <div>
+
+            <i class="bi bi-calendar-check"></i>
+
+            {{ moment().format('DD/MM/YYYY') if moment else '' }}
+
+        </div>
+
+    </div>
+
+    <!-- FLASH MESSAGES -->
+
+    {% with mensagens = get_flashed_messages() %}
+
+        {% if mensagens %}
+
+            {% for msg in mensagens %}
+
+                <div
+                    class="alert alert-success alert-dismissible fade show"
+                    role="alert"
+                >
+
+                    {{ msg }}
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                    ></button>
+
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+    {% endwith %}
+
+    <!-- CONTEÚDO DAS PÁGINAS -->
+
+    {% block conteudo %}
+
+    {% endblock %}
+
+</div>
+
+<!-- Bootstrap JS -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 
