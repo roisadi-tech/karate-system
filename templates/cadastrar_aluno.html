@@ -20,7 +20,7 @@
 
 <!-- FORM -->
 
-<div class="card p-4">
+<div class="card border-0 shadow-sm p-4 rounded-4">
 
     <form
         method="POST"
@@ -31,27 +31,33 @@
 
             <!-- FOTO -->
 
-            <div class="col-md-4">
+            <div class="col-lg-4">
 
                 <div class="text-center">
 
-                    <div
-                        class="bg-light rounded-4 d-flex align-items-center justify-content-center mb-3"
-                        style="height: 300px;"
+                    <img
+                        id="preview"
+                        src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                        class="img-fluid rounded-circle shadow-sm mb-3"
+                        style="
+                            width: 250px;
+                            height: 250px;
+                            object-fit: cover;
+                            border: 5px solid #f1f5f9;
+                        "
                     >
-
-                        <i
-                            class="bi bi-person-circle text-secondary"
-                            style="font-size: 120px;"
-                        ></i>
-
-                    </div>
 
                     <input
                         type="file"
                         name="foto"
                         class="form-control"
+                        accept=".png,.jpg,.jpeg,.webp"
+                        onchange="previewImagem(event)"
                     >
+
+                    <small class="text-muted d-block mt-2">
+                        PNG, JPG, JPEG ou WEBP
+                    </small>
 
                 </div>
 
@@ -59,7 +65,7 @@
 
             <!-- DADOS -->
 
-            <div class="col-md-8">
+            <div class="col-lg-8">
 
                 <div class="row g-3">
 
@@ -67,10 +73,8 @@
 
                     <div class="col-md-12">
 
-                        <label class="form-label">
-
+                        <label class="form-label fw-semibold">
                             Nome Completo
-
                         </label>
 
                         <input
@@ -86,10 +90,8 @@
 
                     <div class="col-md-6">
 
-                        <label class="form-label">
-
+                        <label class="form-label fw-semibold">
                             Data de Nascimento
-
                         </label>
 
                         <input
@@ -101,14 +103,42 @@
 
                     </div>
 
-                    <!-- RESPONSÁVEL -->
+                    <!-- SEXO -->
 
                     <div class="col-md-6">
 
-                        <label class="form-label">
+                        <label class="form-label fw-semibold">
+                            Sexo
+                        </label>
 
+                        <select
+                            name="sexo"
+                            class="form-select form-select-lg"
+                            required
+                        >
+
+                            <option value="">
+                                Selecione
+                            </option>
+
+                            <option value="Masculino">
+                                Masculino
+                            </option>
+
+                            <option value="Feminino">
+                                Feminino
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <!-- RESPONSÁVEL -->
+
+                    <div class="col-md-12">
+
+                        <label class="form-label fw-semibold">
                             Responsável
-
                         </label>
 
                         <input
@@ -124,10 +154,8 @@
 
                     <div class="col-md-6">
 
-                        <label class="form-label">
-
+                        <label class="form-label fw-semibold">
                             WhatsApp
-
                         </label>
 
                         <input
@@ -144,10 +172,8 @@
 
                     <div class="col-md-3">
 
-                        <label class="form-label">
-
+                        <label class="form-label fw-semibold">
                             Faixa
-
                         </label>
 
                         <select
@@ -156,41 +182,15 @@
                             required
                         >
 
-                            <option value="Branca">
-                                Branca
-                            </option>
-
-                            <option value="Cinza">
-                                Cinza
-                            </option>
-
-                            <option value="Azul">
-                                Azul
-                            </option>
-
-                            <option value="Amarela">
-                                Amarela
-                            </option>
-
-                            <option value="Laranja">
-                                Laranja
-                            </option>
-
-                            <option value="Verde">
-                                Verde
-                            </option>
-
-                            <option value="Roxa">
-                                Roxa
-                            </option>
-
-                            <option value="Marrom">
-                                Marrom
-                            </option>
-
-                            <option value="Preta">
-                                Preta
-                            </option>
+                            <option value="Branca">Branca</option>
+                            <option value="Cinza">Cinza</option>
+                            <option value="Azul">Azul</option>
+                            <option value="Amarela">Amarela</option>
+                            <option value="Laranja">Laranja</option>
+                            <option value="Verde">Verde</option>
+                            <option value="Roxa">Roxa</option>
+                            <option value="Marrom">Marrom</option>
+                            <option value="Preta">Preta</option>
 
                         </select>
 
@@ -200,10 +200,8 @@
 
                     <div class="col-md-3">
 
-                        <label class="form-label">
-
+                        <label class="form-label fw-semibold">
                             Mensalidade
-
                         </label>
 
                         <input
@@ -211,6 +209,7 @@
                             step="0.01"
                             name="mensalidade"
                             class="form-control form-control-lg"
+                            placeholder="120.00"
                             required
                         >
 
@@ -227,7 +226,7 @@
         <div class="mt-5 d-flex gap-3">
 
             <button
-                class="btn btn-danger btn-lg"
+                class="btn btn-danger btn-lg px-4"
             >
 
                 <i class="bi bi-person-plus-fill"></i>
@@ -238,7 +237,7 @@
 
             <a
                 href="/alunos"
-                class="btn btn-secondary btn-lg"
+                class="btn btn-secondary btn-lg px-4"
             >
 
                 Voltar
@@ -250,5 +249,27 @@
     </form>
 
 </div>
+
+<!-- PREVIEW FOTO -->
+
+<script>
+
+function previewImagem(event) {
+
+    const reader = new FileReader()
+
+    reader.onload = function() {
+
+        const output = document.getElementById('preview')
+
+        output.src = reader.result
+
+    }
+
+    reader.readAsDataURL(event.target.files[0])
+
+}
+
+</script>
 
 {% endblock %}

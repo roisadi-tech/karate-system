@@ -431,7 +431,7 @@ def editar_aluno(id):
 # PERFIL DO ALUNO
 # =====================================
 
-@app.route('/aluno/<int:id>')
+@app.route('/perfil_aluno/<int:id>')
 @login_obrigatorio
 def perfil_aluno(id):
 

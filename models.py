@@ -15,12 +15,16 @@ class Aluno(db.Model):
         nullable=False
     )
 
-    idade = db.Column(
-        db.String(50)
+    nascimento = db.Column(
+        db.String(30)
     )
 
     sexo = db.Column(
-        db.String(50)
+        db.String(30)
+    )
+
+    responsavel = db.Column(
+        db.String(200)
     )
 
     whatsapp = db.Column(
