@@ -708,6 +708,7 @@ def frequencia():
 
         relatorio.append({
 
+            'id': aluno.id,
             'nome': aluno.nome,
             'total': total,
             'presentes': presentes,
