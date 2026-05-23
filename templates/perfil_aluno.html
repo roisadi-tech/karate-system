@@ -163,6 +163,7 @@
                         Não informado
 
                     {% endif %}
+
                 </p>
 
                 <p>
@@ -177,7 +178,7 @@
 
                 <p>
                     <strong>Mensalidade:</strong>
-                    {{ formatar_moeda(mensalidade.valor) }}
+                    {{ formatar_moeda(aluno.mensalidade) }}
                 </p>
 
                 <p>
@@ -421,7 +422,7 @@
                         <tr>
 
                             <td>
-                                {{ presenca.data }}
+                                {{ formatar_data(presenca.data) }}
                             </td>
 
                             <td>
@@ -622,7 +623,7 @@
                         <tr>
 
                             <td>
-                                {{ exame.data_exame }}
+                                {{ formatar_data(exame.data_exame) }}
                             </td>
 
                             <td>
