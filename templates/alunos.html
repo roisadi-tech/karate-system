@@ -341,50 +341,54 @@
 
                     <!-- AÇÕES -->
 
-                    <td>
+<td>
 
-                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+    <div class="d-flex justify-content-center gap-2 flex-wrap">
 
-                            <!-- PERFIL -->
+        <!-- PERFIL -->
 
-                            <a
-                                href="/perfil_aluno/{{ aluno.id }}"
-                                class="btn btn-dark btn-sm rounded-3"
-                                title="Ver Perfil"
-                            >
+        <a
+            href="/aluno/{{ aluno.id }}"
+            class="btn btn-dark btn-sm rounded-3"
+            title="Ver Perfil"
+        >
 
-                                <i class="bi bi-person-vcard-fill"></i>
+            <i class="bi bi-person-vcard-fill"></i>
 
-                            </a>
+        </a>
 
-                            <!-- EDITAR -->
+        <!-- EDITAR -->
 
-                            <a
-                                href="/editar_aluno/{{ aluno.id }}"
-                                class="btn btn-primary btn-sm rounded-3"
-                                title="Editar"
-                            >
+        <a
+            href="/editar_aluno/{{ aluno.id }}"
+            class="btn btn-primary btn-sm rounded-3"
+            title="Editar"
+        >
 
-                                <i class="bi bi-pencil-fill"></i>
+            <i class="bi bi-pencil-fill"></i>
 
-                            </a>
+        </a>
 
-                            <!-- EXCLUIR -->
+        <!-- EXCLUIR -->
 
-                            {% if session.tipo == 'admin' %}
+        {% if session.tipo == 'admin' %}
 
-                            <a
-                                href="/excluir_aluno/{{ aluno.id }}"
-                                class="btn btn-danger btn-sm rounded-3"
-                                title="Excluir"
-                                onclick="return confirm('Deseja excluir este aluno?')"
-                            >
+        <a
+            href="/excluir_aluno/{{ aluno.id }}"
+            class="btn btn-danger btn-sm rounded-3"
+            title="Excluir"
+            onclick="return confirm('Deseja excluir este aluno?')"
+        >
 
-                                <i class="bi bi-trash-fill"></i>
+            <i class="bi bi-trash-fill"></i>
 
-                            </a>
+        </a>
 
-                            {% endif %}
+        {% endif %}
+
+    </div>
+
+</td>
 
                         </div>
 
