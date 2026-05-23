@@ -227,6 +227,37 @@ def logout():
 
 
 # =====================================
+# CRIAR ADMIN
+# =====================================
+
+@app.route('/criar_admin')
+def criar_admin():
+
+    existe = Usuario.query.filter_by(
+        usuario='admin'
+    ).first()
+
+    if existe:
+
+        return 'Admin já existe.'
+
+    admin = Usuario(
+
+        usuario='admin',
+
+        senha=generate_password_hash('1234'),
+
+        tipo='admin'
+    )
+
+    db.session.add(admin)
+
+    db.session.commit()
+
+    return 'Admin criado com sucesso.'
+
+
+# =====================================
 # ALUNOS
 # =====================================
 

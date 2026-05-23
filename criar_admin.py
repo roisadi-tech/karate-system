@@ -1,18 +1,24 @@
 from app import app
 from database import db
+
 from models import Usuario
 
 from werkzeug.security import generate_password_hash
 
+
 with app.app_context():
 
-    usuario_existe = Usuario.query.filter_by(
+    existe = Usuario.query.filter_by(
         usuario='admin'
     ).first()
 
-    if not usuario_existe:
+    if existe:
 
-        novo_usuario = Usuario(
+        print('Usuário admin já existe.')
+
+    else:
+
+        novo = Usuario(
 
             usuario='admin',
 
@@ -21,12 +27,8 @@ with app.app_context():
             tipo='admin'
         )
 
-        db.session.add(novo_usuario)
+        db.session.add(novo)
 
         db.session.commit()
 
-        print('Admin criado com sucesso!')
-
-    else:
-
-        print('Admin já existe.')
+        print('Admin criado com sucesso.')
