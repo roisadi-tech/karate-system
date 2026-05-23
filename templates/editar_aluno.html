@@ -20,7 +20,7 @@
 
 <!-- FORM -->
 
-<div class="card p-4">
+<div class="card border-0 shadow-sm p-4 rounded-4">
 
     <form
         method="POST"
@@ -31,31 +31,37 @@
 
             <!-- FOTO -->
 
-            <div class="col-md-4">
+            <div class="col-lg-4">
 
                 <div class="text-center">
 
                     {% if aluno.foto %}
 
                         <img
+                            id="preview"
                             src="{{ url_for('static', filename='uploads/' + aluno.foto) }}"
-                            class="img-fluid rounded-4 shadow-sm mb-3"
-                            style="height: 300px; object-fit: cover; width: 100%;"
+                            class="img-fluid rounded-circle shadow-sm mb-3"
+                            style="
+                                width: 250px;
+                                height: 250px;
+                                object-fit: cover;
+                                border: 5px solid #f1f5f9;
+                            "
                         >
 
                     {% else %}
 
-                        <div
-                            class="bg-light rounded-4 d-flex align-items-center justify-content-center mb-3"
-                            style="height: 300px;"
+                        <img
+                            id="preview"
+                            src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                            class="img-fluid rounded-circle shadow-sm mb-3"
+                            style="
+                                width: 250px;
+                                height: 250px;
+                                object-fit: cover;
+                                border: 5px solid #f1f5f9;
+                            "
                         >
-
-                            <i
-                                class="bi bi-person-circle text-secondary"
-                                style="font-size: 120px;"
-                            ></i>
-
-                        </div>
 
                     {% endif %}
 
@@ -63,7 +69,13 @@
                         type="file"
                         name="foto"
                         class="form-control"
+                        accept=".png,.jpg,.jpeg,.webp"
+                        onchange="previewImagem(event)"
                     >
+
+                    <small class="text-muted d-block mt-2">
+                        PNG, JPG, JPEG ou WEBP
+                    </small>
 
                 </div>
 
@@ -71,7 +83,7 @@
 
             <!-- DADOS -->
 
-            <div class="col-md-8">
+            <div class="col-lg-8">
 
                 <div class="row g-3">
 
@@ -79,7 +91,7 @@
 
                     <div class="col-md-12">
 
-                        <label class="form-label">
+                        <label class="form-label fw-semibold">
 
                             Nome Completo
 
@@ -95,11 +107,89 @@
 
                     </div>
 
+                    <!-- DATA NASCIMENTO -->
+
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-semibold">
+
+                            Data de Nascimento
+
+                        </label>
+
+                        <input
+                            type="date"
+                            name="nascimento"
+                            value="{{ aluno.nascimento }}"
+                            class="form-control form-control-lg"
+                            required
+                        >
+
+                    </div>
+
+                    <!-- SEXO -->
+
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-semibold">
+
+                            Sexo
+
+                        </label>
+
+                        <select
+                            name="sexo"
+                            class="form-select form-select-lg"
+                            required
+                        >
+
+                            <option
+                                value="Masculino"
+                                {% if aluno.sexo == 'Masculino' %}
+                                    selected
+                                {% endif %}
+                            >
+                                Masculino
+                            </option>
+
+                            <option
+                                value="Feminino"
+                                {% if aluno.sexo == 'Feminino' %}
+                                    selected
+                                {% endif %}
+                            >
+                                Feminino
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <!-- RESPONSÁVEL -->
+
+                    <div class="col-md-12">
+
+                        <label class="form-label fw-semibold">
+
+                            Responsável
+
+                        </label>
+
+                        <input
+                            type="text"
+                            name="responsavel"
+                            value="{{ aluno.responsavel }}"
+                            class="form-control form-control-lg"
+                            required
+                        >
+
+                    </div>
+
                     <!-- WHATSAPP -->
 
                     <div class="col-md-6">
 
-                        <label class="form-label">
+                        <label class="form-label fw-semibold">
 
                             WhatsApp
 
@@ -119,7 +209,7 @@
 
                     <div class="col-md-3">
 
-                        <label class="form-label">
+                        <label class="form-label fw-semibold">
 
                             Faixa
 
@@ -131,66 +221,39 @@
                             required
                         >
 
-                            <option
-                                value="Branca"
-                                {% if aluno.faixa == 'Branca' %}selected{% endif %}
-                            >
+                            <option value="Branca" {% if aluno.faixa == 'Branca' %}selected{% endif %}>
                                 Branca
                             </option>
 
-                            <option
-                                value="Cinza"
-                                {% if aluno.faixa == 'Cinza' %}selected{% endif %}
-                            >
+                            <option value="Cinza" {% if aluno.faixa == 'Cinza' %}selected{% endif %}>
                                 Cinza
                             </option>
 
-                            <option
-                                value="Azul"
-                                {% if aluno.faixa == 'Azul' %}selected{% endif %}
-                            >
+                            <option value="Azul" {% if aluno.faixa == 'Azul' %}selected{% endif %}>
                                 Azul
                             </option>
 
-                            <option
-                                value="Amarela"
-                                {% if aluno.faixa == 'Amarela' %}selected{% endif %}
-                            >
+                            <option value="Amarela" {% if aluno.faixa == 'Amarela' %}selected{% endif %}>
                                 Amarela
                             </option>
 
-                            <option
-                                value="Laranja"
-                                {% if aluno.faixa == 'Laranja' %}selected{% endif %}
-                            >
+                            <option value="Laranja" {% if aluno.faixa == 'Laranja' %}selected{% endif %}>
                                 Laranja
                             </option>
 
-                            <option
-                                value="Verde"
-                                {% if aluno.faixa == 'Verde' %}selected{% endif %}
-                            >
+                            <option value="Verde" {% if aluno.faixa == 'Verde' %}selected{% endif %}>
                                 Verde
                             </option>
 
-                            <option
-                                value="Roxa"
-                                {% if aluno.faixa == 'Roxa' %}selected{% endif %}
-                            >
+                            <option value="Roxa" {% if aluno.faixa == 'Roxa' %}selected{% endif %}>
                                 Roxa
                             </option>
 
-                            <option
-                                value="Marrom"
-                                {% if aluno.faixa == 'Marrom' %}selected{% endif %}
-                            >
+                            <option value="Marrom" {% if aluno.faixa == 'Marrom' %}selected{% endif %}>
                                 Marrom
                             </option>
 
-                            <option
-                                value="Preta"
-                                {% if aluno.faixa == 'Preta' %}selected{% endif %}
-                            >
+                            <option value="Preta" {% if aluno.faixa == 'Preta' %}selected{% endif %}>
                                 Preta
                             </option>
 
@@ -202,7 +265,7 @@
 
                     <div class="col-md-3">
 
-                        <label class="form-label">
+                        <label class="form-label fw-semibold">
 
                             Mensalidade
 
@@ -230,7 +293,7 @@
         <div class="mt-5 d-flex gap-3">
 
             <button
-                class="btn btn-warning btn-lg text-white"
+                class="btn btn-warning btn-lg text-white px-4"
             >
 
                 <i class="bi bi-save-fill"></i>
@@ -241,7 +304,7 @@
 
             <a
                 href="/alunos"
-                class="btn btn-secondary btn-lg"
+                class="btn btn-secondary btn-lg px-4"
             >
 
                 Voltar
@@ -253,5 +316,27 @@
     </form>
 
 </div>
+
+<!-- PREVIEW FOTO -->
+
+<script>
+
+function previewImagem(event) {
+
+    const reader = new FileReader()
+
+    reader.onload = function() {
+
+        const output = document.getElementById('preview')
+
+        output.src = reader.result
+
+    }
+
+    reader.readAsDataURL(event.target.files[0])
+
+}
+
+</script>
 
 {% endblock %}
