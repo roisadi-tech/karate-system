@@ -53,6 +53,47 @@ def formatar_whatsapp(numero):
 
 
 # =====================================
+# FORMATAR MOEDA
+# =====================================
+
+def formatar_moeda(valor):
+
+    try:
+
+        valor = float(valor)
+
+        return f'R$ {valor:.2f}'.replace('.', ',')
+
+    except Exception:
+
+        return 'R$ 0,00'
+
+
+# =====================================
+# FORMATAR DATA
+# =====================================
+
+def formatar_data(data):
+
+    if not data:
+
+        return 'Não informado'
+
+    try:
+
+        data_convertida = datetime.strptime(
+            str(data),
+            '%Y-%m-%d'
+        )
+
+        return data_convertida.strftime('%d/%m/%Y')
+
+    except Exception:
+
+        return data
+
+
+# =====================================
 # APP
 # =====================================
 
@@ -70,7 +111,9 @@ def inject_data():
     return {
 
         'current_date': datetime.now().strftime('%d/%m/%Y'),
-        'formatar_whatsapp': formatar_whatsapp
+        'formatar_whatsapp': formatar_whatsapp,
+        'formatar_moeda': formatar_moeda,
+        'formatar_data': formatar_data
 
     }
 

@@ -235,7 +235,7 @@
 
                         <strong class="text-danger">
 
-                            R$ {{ "%.2f"|format(item.valor or 0) }}
+                            {{ formatar_moeda(item.valor) }}
 
                         </strong>
 
@@ -245,7 +245,7 @@
 
                     <td>
 
-                        {{ item.vencimento }}
+                        {{ formatar_data(item.vencimento) }}
 
                     </td>
 
@@ -301,8 +301,8 @@
                                 "Olá " ~ item.aluno.nome ~
                                 ", tudo bem?\n\n" ~
                                 "Estamos entrando em contato para lembrar que sua mensalidade da academia de karatê está pendente.\n\n" ~
-                                "Valor: R$ " ~ item.valor ~ "\n" ~
-                                "Vencimento: " ~ item.vencimento ~ "\n\n" ~
+                                "Valor: " ~ formatar_moeda(item.valor) ~ "\n" ~
+                                "Vencimento: " ~ formatar_data(item.vencimento) ~ "\n\n" ~
                                 "Qualquer dúvida estamos à disposição. 🥋"
                             %}
 

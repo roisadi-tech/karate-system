@@ -148,7 +148,7 @@
 
                 <p>
                     <strong>Nascimento:</strong>
-                    {{ aluno.nascimento or 'Não informado' }}
+                    {{ formatar_data(aluno.nascimento) }}
                 </p>
 
                 <p>
@@ -177,7 +177,7 @@
 
                 <p>
                     <strong>Mensalidade:</strong>
-                    R$ {{ "%.2f"|format(aluno.mensalidade or 0) }}
+                    {{ formatar_moeda(mensalidade.valor) }}
                 </p>
 
                 <p>
@@ -519,12 +519,12 @@
 
                             <td>
                                 <strong class="text-success">
-                                    R$ {{ "%.2f"|format(mensalidade.valor or 0) }}
+                                    {{ formatar_moeda(mensalidade.valor) }}
                                 </strong>
                             </td>
 
                             <td>
-                                {{ mensalidade.vencimento }}
+                                {{ formatar_data(mensalidade.vencimento) }}
                             </td>
 
                             <td>

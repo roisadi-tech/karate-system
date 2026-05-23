@@ -498,7 +498,7 @@
 
                         <strong class="text-success">
 
-                            R$ {{ mensalidade.valor }}
+                            {{ formatar_moeda(mensalidade.valor) }}
 
                         </strong>
 
@@ -508,7 +508,7 @@
 
                     <td>
 
-                        {{ mensalidade.vencimento }}
+                        {{ formatar_data(mensalidade.vencimento) }}
 
                     </td>
 
@@ -589,8 +589,8 @@
         {% set mensagem =
             "Olá " ~ mensalidade.aluno.nome ~
             ", sua mensalidade da academia está pendente.\n\n" ~
-            "Valor: R$ " ~ mensalidade.valor ~ "\n" ~
-            "Vencimento: " ~ mensalidade.vencimento ~ "\n\n" ~
+            "Valor: " ~ formatar_moeda(mensalidade.valor) ~ "\n" ~
+            "Vencimento: " ~ formatar_data(mensalidade.vencimento) ~ "\n\n" ~
             "Qualquer dúvida estamos à disposição. 🥋"
         %}
 
