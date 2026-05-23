@@ -899,6 +899,8 @@ def cobrar():
 @login_obrigatorio
 def recibo(id):
 
+    import textwrap
+
     mensalidade = Mensalidade.query.get_or_404(id)
 
     if not os.path.exists('recibos'):
@@ -907,123 +909,154 @@ def recibo(id):
 
     nome_arquivo = f'recibos/recibo_{id}.pdf'
 
+    valor_formatado = f'{mensalidade.valor:.2f}'.replace('.', ',')
+
     c = canvas.Canvas(nome_arquivo)
 
     largura, altura = 595, 842
 
-    # FUNDO / BORDA
+    # BORDA PRINCIPAL
 
     c.setLineWidth(2)
-    c.rect(40, 40, largura - 80, altura - 80)
+
+    c.rect(
+        40,
+        40,
+        largura - 80,
+        altura - 80
+    )
 
     # CABEÇALHO
 
-    c.setFont("Helvetica-Bold", 22)
+    c.setFont("Helvetica-Bold", 20)
+
     c.drawCentredString(
         largura / 2,
-        790,
+        775,
         "RECIBO DE PAGAMENTO"
     )
 
     c.setFont("Helvetica-Bold", 15)
+
     c.drawCentredString(
         largura / 2,
-        760,
+        742,
         "Academia de Karatê"
     )
 
     c.setFont("Helvetica", 10)
+
     c.drawCentredString(
         largura / 2,
-        742,
+        724,
         "Sistema de Gestão da Academia"
     )
 
     # LINHA
 
-    c.line(70, 720, largura - 70, 720)
+    c.line(
+        70,
+        705,
+        largura - 70,
+        705
+    )
 
     # DADOS DO RECIBO
 
-    c.setFont("Helvetica-Bold", 12)
+    c.setFont("Helvetica-Bold", 11)
+
     c.drawString(
         70,
-        690,
+        675,
         f"Recibo Nº: {mensalidade.id}"
     )
 
     c.drawString(
         360,
-        690,
+        675,
         f"Data: {datetime.now().strftime('%d/%m/%Y')}"
     )
 
-    # TEXTO PRINCIPAL
-
-    c.setFont("Helvetica", 12)
+    # TEXTO PRINCIPAL COM QUEBRA AUTOMÁTICA
 
     texto = (
         f"Recebemos de {mensalidade.aluno.nome}, "
-        f"a importância de R$ {mensalidade.valor:.2f}, "
-        "referente ao pagamento de mensalidade da academia."
+        f"a importância de R$ {valor_formatado}, "
+        f"referente ao pagamento de mensalidade da academia."
     )
 
-    text_object = c.beginText()
-    text_object.setTextOrigin(70, 640)
-    text_object.setLeading(18)
+    linhas = textwrap.wrap(
+        texto,
+        width=82
+    )
 
-    linhas = [
-        texto[:80],
-        texto[80:160],
-        texto[160:]
-    ]
+    y = 625
+
+    c.setFont("Helvetica", 11)
 
     for linha in linhas:
 
-        if linha.strip():
+        c.drawString(
+            70,
+            y,
+            linha
+        )
 
-            text_object.textLine(linha)
+        y -= 18
 
-    c.drawText(text_object)
+    # CAIXA DOS DADOS
 
-    # DADOS DO PAGAMENTO
+    c.setLineWidth(1)
 
-    c.setFont("Helvetica-Bold", 13)
-    c.drawString(
+    c.roundRect(
         70,
-        560,
-        "Dados do Pagamento"
+        390,
+        largura - 140,
+        155,
+        10
     )
 
-    c.setFont("Helvetica", 12)
+    c.setFont("Helvetica-Bold", 13)
 
     c.drawString(
         90,
-        530,
+        515,
+        "Dados do Pagamento"
+    )
+
+    c.setFont("Helvetica", 11)
+
+    c.drawString(
+        95,
+        485,
         f"Aluno: {mensalidade.aluno.nome}"
     )
 
     c.drawString(
-        90,
-        505,
-        f"Valor: R$ {mensalidade.valor:.2f}"
+        95,
+        460,
+        f"Valor: R$ {valor_formatado}"
     )
 
     c.drawString(
-        90,
-        480,
+        95,
+        435,
         f"Vencimento: {mensalidade.vencimento}"
     )
 
     c.drawString(
-        90,
-        455,
+        95,
+        410,
         f"Status: {mensalidade.status}"
     )
 
+    # EMISSÃO
+
+    c.setFont("Helvetica", 10)
+
     c.drawString(
-        90,
-        430,
+        70,
+        350,
         f"Emitido em: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
     )
 
@@ -1033,19 +1066,24 @@ def recibo(id):
 
     c.drawString(
         70,
-        370,
+        320,
         "Este recibo foi gerado automaticamente pelo sistema Karate System."
     )
 
     # ASSINATURA
 
-    c.line(170, 250, 425, 250)
+    c.line(
+        170,
+        230,
+        425,
+        230
+    )
 
     c.setFont("Helvetica", 11)
 
     c.drawCentredString(
         largura / 2,
-        230,
+        210,
         "Assinatura do responsável"
     )
 
