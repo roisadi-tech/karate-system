@@ -476,7 +476,7 @@ def perfil_aluno(id):
 
     idade = None
 
-    data_nascimento = aluno.nascimento or aluno.idade
+    data_nascimento = aluno.nascimento
 
     if data_nascimento:
 
