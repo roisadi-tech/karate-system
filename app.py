@@ -723,6 +723,59 @@ def mensalidades():
 
 
 # =====================================
+# GERAR MENSALIDADES AUTOMÁTICAS
+# =====================================
+
+@app.route('/gerar_mensalidades', methods=['POST'])
+@login_obrigatorio
+@admin_obrigatorio
+def gerar_mensalidades():
+
+    vencimento = request.form['vencimento']
+
+    alunos = Aluno.query.order_by(
+        Aluno.nome.asc()
+    ).all()
+
+    criadas = 0
+    ignoradas = 0
+
+    for aluno in alunos:
+
+        mensalidade_existente = Mensalidade.query.filter_by(
+            aluno_id=aluno.id,
+            vencimento=vencimento
+        ).first()
+
+        if mensalidade_existente:
+
+            ignoradas += 1
+
+            continue
+
+        nova_mensalidade = Mensalidade(
+
+            aluno_id=aluno.id,
+            valor=float(aluno.mensalidade or 0),
+            vencimento=vencimento,
+            status='PENDENTE'
+        )
+
+        db.session.add(nova_mensalidade)
+
+        criadas += 1
+
+    db.session.commit()
+
+    flash(
+        f'{criadas} mensalidades geradas. {ignoradas} já existiam para este vencimento.',
+        'success'
+    )
+
+    return redirect('/mensalidades')
+
+
+# =====================================
 # EDITAR MENSALIDADE
 # =====================================
 

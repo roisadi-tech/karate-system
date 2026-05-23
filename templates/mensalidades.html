@@ -134,6 +134,85 @@
 
 </div>
 
+<!-- GERAR MENSALIDADES AUTOMÁTICAS -->
+
+{% if session.tipo == 'admin' %}
+
+<div class="card border-0 shadow-sm p-4 mb-4 rounded-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h4 class="fw-bold mb-1">
+
+                Gerar Mensalidades Automáticas
+
+            </h4>
+
+            <small class="text-muted">
+
+                Crie mensalidades pendentes para todos os alunos cadastrados
+
+            </small>
+
+        </div>
+
+        <span class="badge bg-danger p-2">
+
+            ADMIN
+
+        </span>
+
+    </div>
+
+    <form
+        method="POST"
+        action="/gerar_mensalidades"
+    >
+
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-8">
+
+                <label class="form-label">
+
+                    Vencimento das mensalidades
+
+                </label>
+
+                <input
+                    type="date"
+                    name="vencimento"
+                    class="form-control form-control-lg"
+                    required
+                >
+
+            </div>
+
+            <div class="col-md-4 d-grid">
+
+                <button
+                    class="btn btn-danger btn-lg"
+                    onclick="return confirm('Deseja gerar mensalidades para todos os alunos?')"
+                >
+
+                    <i class="bi bi-calendar-plus-fill"></i>
+
+                    Gerar para Todos
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endif %}
+
 <!-- FORMULÁRIO -->
 
 <div class="card p-4 mb-4">
