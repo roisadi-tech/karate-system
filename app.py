@@ -873,9 +873,21 @@ def cobrar():
         Mensalidade.vencimento.asc()
     ).all()
 
+    total_pendente = db.session.query(
+        db.func.sum(Mensalidade.valor)
+    ).filter(
+        Mensalidade.status == 'PENDENTE'
+    ).scalar()
+
+    if total_pendente is None:
+
+        total_pendente = 0
+
     return render_template(
         'cobrar.html',
-        dados=dados
+        dados=dados,
+        hoje=date.today(),
+        total_pendente=total_pendente
     )
 
 
