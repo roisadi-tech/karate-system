@@ -285,6 +285,7 @@ def cadastrar_aluno():
 
         nome = request.form['nome']
         nascimento = request.form['nascimento']
+        sexo = request.form['sexo']
         responsavel = request.form['responsavel']
         whatsapp = request.form['whatsapp']
         faixa = request.form['faixa']
@@ -334,8 +335,9 @@ def cadastrar_aluno():
         novo_aluno = Aluno(
 
             nome=nome,
-            idade=nascimento,
-            sexo=responsavel,
+            nascimento=nascimento,
+            sexo=sexo,
+            responsavel=responsavel,
             whatsapp=whatsapp,
             faixa=faixa,
             mensalidade=mensalidade,
@@ -371,8 +373,11 @@ def editar_aluno(id):
     if request.method == 'POST':
 
         aluno.nome = request.form['nome']
-        aluno.faixa = request.form['faixa']
+        aluno.nascimento = request.form['nascimento']
+        aluno.sexo = request.form['sexo']
+        aluno.responsavel = request.form['responsavel']
         aluno.whatsapp = request.form['whatsapp']
+        aluno.faixa = request.form['faixa']
         aluno.mensalidade = request.form['mensalidade']
 
         foto = request.files.get('foto')
@@ -402,6 +407,10 @@ def editar_aluno(id):
             nome_arquivo = secure_filename(
                 foto.filename
             )
+
+            if not os.path.exists('static/uploads'):
+
+                os.makedirs('static/uploads')
 
             caminho = os.path.join(
                 'static/uploads',
