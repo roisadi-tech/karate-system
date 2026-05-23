@@ -34,8 +34,6 @@ from werkzeug.security import (
 
 from reportlab.pdfgen import canvas
 
-from flask_migrate import Migrate
-
 from flask_moment import Moment
 
 
@@ -71,7 +69,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
-migrate = Migrate(app, db)
 moment = Moment(app)
 
 # =====================================
