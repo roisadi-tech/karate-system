@@ -2,44 +2,112 @@
 
 {% block conteudo %}
 
+<!-- TOPO -->
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h2 class="fw-bold">
+            👨‍🎓 Perfil do Aluno
+        </h2>
+
+        <p class="text-muted mb-0">
+            Dados completos, frequência, mensalidades e exames
+        </p>
+
+    </div>
+
+    <a
+        href="/alunos"
+        class="btn btn-dark"
+    >
+
+        <i class="bi bi-arrow-left"></i>
+
+        Voltar
+
+    </a>
+
+</div>
+
 <div class="row g-4">
 
     <!-- PERFIL -->
 
     <div class="col-lg-4">
 
-        <div class="card p-4 text-center">
+        <div class="card border-0 shadow-sm p-4 text-center rounded-4">
+
+            <span class="badge bg-primary mb-3 p-2">
+                Perfil do Aluno
+            </span>
 
             {% if aluno.foto %}
 
                 <img
                     src="{{ url_for('static', filename='uploads/' + aluno.foto) }}"
-                    class="mx-auto mb-3"
+                    class="mx-auto mb-3 shadow-sm"
                     style="
                         width:180px;
                         height:180px;
                         object-fit:cover;
                         border-radius:50%;
+                        border: 5px solid #f1f5f9;
                     "
                 >
 
+            {% else %}
+
+                <div
+                    class="bg-light mx-auto mb-3 d-flex align-items-center justify-content-center shadow-sm"
+                    style="
+                        width:180px;
+                        height:180px;
+                        border-radius:50%;
+                        border: 5px solid #f1f5f9;
+                    "
+                >
+
+                    <i
+                        class="bi bi-person-fill text-secondary"
+                        style="font-size:80px;"
+                    ></i>
+
+                </div>
+
             {% endif %}
 
-            <h3 class="fw-bold">
+            <h3 class="fw-bold mb-1">
 
                 {{ aluno.nome }}
 
             </h3>
 
-            <p class="text-muted">
+            <span class="badge bg-dark p-2 mb-3">
 
                 {{ aluno.faixa }}
 
-            </p>
+            </span>
 
             <hr>
 
             <div class="text-start">
+
+                <p>
+                    <strong>ID:</strong>
+                    #{{ aluno.id }}
+                </p>
+
+                <p>
+                    <strong>Nascimento:</strong>
+                    {{ aluno.nascimento or aluno.idade or 'Não informado' }}
+                </p>
+
+                <p>
+                    <strong>Responsável:</strong>
+                    {{ aluno.responsavel or aluno.sexo or 'Não informado' }}
+                </p>
 
                 <p>
                     <strong>WhatsApp:</strong>
@@ -48,7 +116,7 @@
 
                 <p>
                     <strong>Mensalidade:</strong>
-                    R$ {{ aluno.mensalidade }}
+                    R$ {{ "%.2f"|format(aluno.mensalidade or 0) }}
                 </p>
 
                 <p>
@@ -66,7 +134,7 @@
 
                 <i class="bi bi-whatsapp"></i>
 
-                Conversar
+                Conversar no WhatsApp
 
             </a>
 
@@ -80,27 +148,80 @@
 
         <!-- FREQUÊNCIA -->
 
-        <div class="card p-4 mb-4">
+        <div class="card border-0 shadow-sm p-4 mb-4 rounded-4">
 
-            <h4 class="fw-bold mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
 
-                Frequência
+                <h4 class="fw-bold mb-0">
 
-            </h4>
+                    Frequência
+
+                </h4>
+
+                {% if percentual >= 75 %}
+
+                    <span class="badge bg-success p-2">
+                        Excelente
+                    </span>
+
+                {% elif percentual >= 50 %}
+
+                    <span class="badge bg-warning text-dark p-2">
+                        Atenção
+                    </span>
+
+                {% else %}
+
+                    <span class="badge bg-danger p-2">
+                        Baixa Frequência
+                    </span>
+
+                {% endif %}
+
+            </div>
 
             <div
                 class="progress"
-                style="height: 25px;"
+                style="
+                    height: 28px;
+                    border-radius: 20px;
+                "
             >
 
-                <div
-                    class="progress-bar bg-success"
-                    style="width: {{ percentual }}%;"
-                >
+                {% if percentual >= 75 %}
 
-                    {{ percentual }}%
+                    <div
+                        class="progress-bar bg-success fw-bold"
+                        style="width: {{ percentual }}%;"
+                    >
 
-                </div>
+                        {{ percentual }}%
+
+                    </div>
+
+                {% elif percentual >= 50 %}
+
+                    <div
+                        class="progress-bar bg-warning text-dark fw-bold"
+                        style="width: {{ percentual }}%;"
+                    >
+
+                        {{ percentual }}%
+
+                    </div>
+
+                {% else %}
+
+                    <div
+                        class="progress-bar bg-danger fw-bold"
+                        style="width: {{ percentual }}%;"
+                    >
+
+                        {{ percentual }}%
+
+                    </div>
+
+                {% endif %}
 
             </div>
 
@@ -108,19 +229,29 @@
 
         <!-- MENSALIDADES -->
 
-        <div class="card p-4 mb-4">
+        <div class="card border-0 shadow-sm p-4 mb-4 rounded-4">
 
-            <h4 class="fw-bold mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
 
-                Mensalidades
+                <h4 class="fw-bold mb-0">
 
-            </h4>
+                    Mensalidades
+
+                </h4>
+
+                <span class="badge bg-dark p-2">
+
+                    {{ mensalidades|length }} registros
+
+                </span>
+
+            </div>
 
             <div class="table-responsive">
 
-                <table class="table">
+                <table class="table align-middle">
 
-                    <thead>
+                    <thead class="table-light">
 
                         <tr>
 
@@ -139,7 +270,9 @@
                         <tr>
 
                             <td>
-                                R$ {{ mensalidade.valor }}
+                                <strong class="text-success">
+                                    R$ {{ "%.2f"|format(mensalidade.valor or 0) }}
+                                </strong>
                             </td>
 
                             <td>
@@ -150,7 +283,7 @@
 
                                 {% if mensalidade.status == 'PAGO' %}
 
-                                    <span class="badge bg-success">
+                                    <span class="badge bg-success p-2">
 
                                         PAGO
 
@@ -158,7 +291,7 @@
 
                                 {% else %}
 
-                                    <span class="badge bg-danger">
+                                    <span class="badge bg-danger p-2">
 
                                         PENDENTE
 
@@ -172,6 +305,23 @@
 
                         {% endfor %}
 
+                        {% if mensalidades|length == 0 %}
+
+                        <tr>
+
+                            <td
+                                colspan="3"
+                                class="text-center text-muted py-4"
+                            >
+
+                                Nenhuma mensalidade registrada.
+
+                            </td>
+
+                        </tr>
+
+                        {% endif %}
+
                     </tbody>
 
                 </table>
@@ -182,22 +332,33 @@
 
         <!-- EXAMES -->
 
-        <div class="card p-4">
+        <div class="card border-0 shadow-sm p-4 rounded-4">
 
-            <h4 class="fw-bold mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
 
-                Histórico de Exames
+                <h4 class="fw-bold mb-0">
 
-            </h4>
+                    Histórico de Exames
+
+                </h4>
+
+                <span class="badge bg-dark p-2">
+
+                    {{ exames|length }} registros
+
+                </span>
+
+            </div>
 
             <div class="table-responsive">
 
-                <table class="table">
+                <table class="table align-middle">
 
-                    <thead>
+                    <thead class="table-light">
 
                         <tr>
 
+                            <th>Data</th>
                             <th>Faixa Atual</th>
                             <th>Nova Faixa</th>
                             <th>Resultado</th>
@@ -213,6 +374,10 @@
                         <tr>
 
                             <td>
+                                {{ exame.data_exame }}
+                            </td>
+
+                            <td>
                                 {{ exame.faixa_atual }}
                             </td>
 
@@ -224,7 +389,7 @@
 
                                 {% if exame.resultado == 'APROVADO' %}
 
-                                    <span class="badge bg-success">
+                                    <span class="badge bg-success p-2">
 
                                         APROVADO
 
@@ -232,7 +397,7 @@
 
                                 {% else %}
 
-                                    <span class="badge bg-danger">
+                                    <span class="badge bg-danger p-2">
 
                                         REPROVADO
 
@@ -245,6 +410,23 @@
                         </tr>
 
                         {% endfor %}
+
+                        {% if exames|length == 0 %}
+
+                        <tr>
+
+                            <td
+                                colspan="4"
+                                class="text-center text-muted py-4"
+                            >
+
+                                Nenhum exame registrado.
+
+                            </td>
+
+                        </tr>
+
+                        {% endif %}
 
                     </tbody>
 
