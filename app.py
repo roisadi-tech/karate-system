@@ -661,14 +661,54 @@ def presencas():
         Aluno.nome.asc()
     ).all()
 
-    lista_presencas = Presenca.query.order_by(
+    filtro_aluno = request.args.get('aluno_id')
+    filtro_data = request.args.get('data')
+    filtro_status = request.args.get('status')
+
+    query = Presenca.query
+
+    if filtro_aluno:
+
+        query = query.filter(
+            Presenca.aluno_id == filtro_aluno
+        )
+
+    if filtro_data:
+
+        query = query.filter(
+            Presenca.data == filtro_data
+        )
+
+    if filtro_status:
+
+        query = query.filter(
+            Presenca.status == filtro_status
+        )
+
+    lista_presencas = query.order_by(
         Presenca.data.desc()
     ).all()
+
+    total_registros = Presenca.query.count()
+
+    total_presentes = Presenca.query.filter_by(
+        status='PRESENTE'
+    ).count()
+
+    total_faltas = Presenca.query.filter_by(
+        status='FALTA'
+    ).count()
 
     return render_template(
         'presencas.html',
         alunos=alunos,
-        presencas=lista_presencas
+        presencas=lista_presencas,
+        total_registros=total_registros,
+        total_presentes=total_presentes,
+        total_faltas=total_faltas,
+        filtro_aluno=filtro_aluno,
+        filtro_data=filtro_data,
+        filtro_status=filtro_status
     )
 
 
