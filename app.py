@@ -909,46 +909,154 @@ def recibo(id):
 
     c = canvas.Canvas(nome_arquivo)
 
-    c.setFont("Helvetica-Bold", 22)
+    largura, altura = 595, 842
 
-    c.drawString(200, 800, "RECIBO")
+    # FUNDO / BORDA
+
+    c.setLineWidth(2)
+    c.rect(40, 40, largura - 80, altura - 80)
+
+    # CABEÇALHO
+
+    c.setFont("Helvetica-Bold", 22)
+    c.drawCentredString(
+        largura / 2,
+        790,
+        "RECIBO DE PAGAMENTO"
+    )
+
+    c.setFont("Helvetica-Bold", 15)
+    c.drawCentredString(
+        largura / 2,
+        760,
+        "Academia de Karatê"
+    )
+
+    c.setFont("Helvetica", 10)
+    c.drawCentredString(
+        largura / 2,
+        742,
+        "Sistema de Gestão da Academia"
+    )
+
+    # LINHA
+
+    c.line(70, 720, largura - 70, 720)
+
+    # DADOS DO RECIBO
+
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(
+        70,
+        690,
+        f"Recibo Nº: {mensalidade.id}"
+    )
+
+    c.drawString(
+        360,
+        690,
+        f"Data: {datetime.now().strftime('%d/%m/%Y')}"
+    )
+
+    # TEXTO PRINCIPAL
+
+    c.setFont("Helvetica", 12)
+
+    texto = (
+        f"Recebemos de {mensalidade.aluno.nome}, "
+        f"a importância de R$ {mensalidade.valor:.2f}, "
+        "referente ao pagamento de mensalidade da academia."
+    )
+
+    text_object = c.beginText()
+    text_object.setTextOrigin(70, 640)
+    text_object.setLeading(18)
+
+    linhas = [
+        texto[:80],
+        texto[80:160],
+        texto[160:]
+    ]
+
+    for linha in linhas:
+
+        if linha.strip():
+
+            text_object.textLine(linha)
+
+    c.drawText(text_object)
+
+    # DADOS DO PAGAMENTO
+
+    c.setFont("Helvetica-Bold", 13)
+    c.drawString(
+        70,
+        560,
+        "Dados do Pagamento"
+    )
 
     c.setFont("Helvetica", 12)
 
     c.drawString(
-        100,
-        730,
-        f'Aluno: {mensalidade.aluno.nome}'
+        90,
+        530,
+        f"Aluno: {mensalidade.aluno.nome}"
     )
 
     c.drawString(
-        100,
-        700,
-        f'Valor: R$ {mensalidade.valor:.2f}'
+        90,
+        505,
+        f"Valor: R$ {mensalidade.valor:.2f}"
     )
 
     c.drawString(
-        100,
-        670,
-        f'Vencimento: {mensalidade.vencimento}'
+        90,
+        480,
+        f"Vencimento: {mensalidade.vencimento}"
     )
 
     c.drawString(
-        100,
-        640,
-        f'Status: {mensalidade.status}'
+        90,
+        455,
+        f"Status: {mensalidade.status}"
     )
 
     c.drawString(
-        100,
-        580,
-        'Academia de Karatê'
+        90,
+        430,
+        f"Emitido em: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
     )
 
+    # OBSERVAÇÃO
+
+    c.setFont("Helvetica-Oblique", 10)
+
     c.drawString(
-        100,
-        540,
-        f'Gerado em: {datetime.now().strftime("%d/%m/%Y %H:%M")}'
+        70,
+        370,
+        "Este recibo foi gerado automaticamente pelo sistema Karate System."
+    )
+
+    # ASSINATURA
+
+    c.line(170, 250, 425, 250)
+
+    c.setFont("Helvetica", 11)
+
+    c.drawCentredString(
+        largura / 2,
+        230,
+        "Assinatura do responsável"
+    )
+
+    # RODAPÉ
+
+    c.setFont("Helvetica", 9)
+
+    c.drawCentredString(
+        largura / 2,
+        70,
+        "Karate System - Gestão de Alunos, Frequência e Mensalidades"
     )
 
     c.save()
