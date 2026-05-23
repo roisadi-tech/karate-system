@@ -40,7 +40,7 @@
 
                     <h2 class="fw-bold mt-2">
 
-                        {{ mensalidades|length }}
+                        {{ total_registros }}
 
                     </h2>
 
@@ -74,10 +74,7 @@
 
                     <h2 class="fw-bold mt-2 text-success">
 
-                        {{ mensalidades
-                            | selectattr('status', 'equalto', 'PAGO')
-                            | list
-                            | length }}
+                        {{ total_pagos }}
 
                     </h2>
 
@@ -111,10 +108,7 @@
 
                     <h2 class="fw-bold mt-2 text-danger">
 
-                        {{ mensalidades
-                            | selectattr('status', 'equalto', 'PENDENTE')
-                            | list
-                            | length }}
+                        {{ total_pendentes }}
 
                     </h2>
 
@@ -212,6 +206,95 @@
 </div>
 
 {% endif %}
+
+<!-- FILTROS -->
+
+<div class="card border-0 shadow-sm p-4 mb-4 rounded-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+
+        <div>
+
+            <h4 class="fw-bold mb-1">
+
+                Filtros Financeiros
+
+            </h4>
+
+            <small class="text-muted">
+
+                Filtre as mensalidades por situação
+
+            </small>
+
+        </div>
+
+        <span class="badge bg-dark p-2">
+
+            {{ mensalidades|length }} encontrados
+
+        </span>
+
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+
+        <a
+            href="/mensalidades?filtro=todas"
+            class="btn {% if filtro == 'todas' %}btn-dark{% else %}btn-outline-dark{% endif %}"
+        >
+
+            Todas
+
+        </a>
+
+        <a
+            href="/mensalidades?filtro=pagas"
+            class="btn {% if filtro == 'pagas' %}btn-success{% else %}btn-outline-success{% endif %}"
+        >
+
+            <i class="bi bi-check-circle-fill"></i>
+
+            Pagas
+
+        </a>
+
+        <a
+            href="/mensalidades?filtro=pendentes"
+            class="btn {% if filtro == 'pendentes' %}btn-secondary{% else %}btn-outline-secondary{% endif %}"
+        >
+
+            <i class="bi bi-hourglass-split"></i>
+
+            Pendentes
+
+        </a>
+
+        <a
+            href="/mensalidades?filtro=vencidas"
+            class="btn {% if filtro == 'vencidas' %}btn-danger{% else %}btn-outline-danger{% endif %}"
+        >
+
+            <i class="bi bi-exclamation-triangle-fill"></i>
+
+            Vencidas
+
+        </a>
+
+        <a
+            href="/mensalidades?filtro=hoje"
+            class="btn {% if filtro == 'hoje' %}btn-warning{% else %}btn-outline-warning{% endif %}"
+        >
+
+            <i class="bi bi-clock-fill"></i>
+
+            Vence Hoje
+
+        </a>
+
+    </div>
+
+</div>
 
 <!-- FORMULÁRIO -->
 

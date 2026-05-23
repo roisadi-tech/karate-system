@@ -710,15 +710,66 @@ def mensalidades():
         Aluno.nome.asc()
     ).all()
 
-    lista = Mensalidade.query.order_by(
+    filtro = request.args.get(
+        'filtro',
+        'todas'
+    )
+
+    hoje = date.today()
+
+    hoje_str = hoje.strftime('%Y-%m-%d')
+
+    query = Mensalidade.query
+
+    if filtro == 'pagas':
+
+        query = query.filter(
+            Mensalidade.status == 'PAGO'
+        )
+
+    elif filtro == 'pendentes':
+
+        query = query.filter(
+            Mensalidade.status == 'PENDENTE'
+        )
+
+    elif filtro == 'vencidas':
+
+        query = query.filter(
+            Mensalidade.status == 'PENDENTE',
+            Mensalidade.vencimento < hoje_str
+        )
+
+    elif filtro == 'hoje':
+
+        query = query.filter(
+            Mensalidade.status == 'PENDENTE',
+            Mensalidade.vencimento == hoje_str
+        )
+
+    lista = query.order_by(
         Mensalidade.vencimento.desc()
     ).all()
+
+    total_registros = Mensalidade.query.count()
+
+    total_pagos = Mensalidade.query.filter_by(
+        status='PAGO'
+    ).count()
+
+    total_pendentes = Mensalidade.query.filter_by(
+        status='PENDENTE'
+    ).count()
 
     return render_template(
         'mensalidades.html',
         alunos=alunos,
         mensalidades=lista,
-        hoje=date.today()
+        hoje=hoje,
+        filtro=filtro,
+        total_registros=total_registros,
+        total_pagos=total_pagos,
+        total_pendentes=total_pendentes
     )
 
 
