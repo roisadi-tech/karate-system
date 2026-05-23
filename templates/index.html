@@ -4,17 +4,34 @@
 
 <!-- TÍTULO -->
 
-<div class="mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4">
 
-    <h2 class="fw-bold">
-        🥋 Dashboard
-    </h2>
+    <div>
 
-    <p class="text-muted mb-0">
+        <h2 class="fw-bold">
 
-        Bem-vindo ao sistema da academia
+            👋 Olá, {{ session.usuario }}
 
-    </p>
+        </h2>
+
+        <p class="text-muted mb-0">
+
+            Bem-vindo ao painel da academia
+
+        </p>
+
+    </div>
+
+    <a
+        href="/cadastrar_aluno"
+        class="btn btn-danger"
+    >
+
+        <i class="bi bi-plus-circle"></i>
+
+        Novo Aluno
+
+    </a>
 
 </div>
 
@@ -33,7 +50,9 @@
                 <div>
 
                     <small class="text-muted">
+
                         Total de Alunos
+
                     </small>
 
                     <h2 class="fw-bold mt-2">
@@ -67,7 +86,9 @@
                 <div>
 
                     <small class="text-muted">
+
                         Faturamento
+
                     </small>
 
                     <h2 class="fw-bold mt-2 text-success">
@@ -101,7 +122,9 @@
                 <div>
 
                     <small class="text-muted">
+
                         Inadimplentes
+
                     </small>
 
                     <h2 class="fw-bold mt-2 text-danger">
@@ -135,7 +158,9 @@
                 <div>
 
                     <small class="text-muted">
+
                         Aptos para Exame
+
                     </small>
 
                     <h2 class="fw-bold mt-2 text-warning">
@@ -162,7 +187,7 @@
 
 <!-- ATALHOS -->
 
-<div class="row g-4">
+<div class="row g-4 mb-4">
 
     <!-- ALUNOS -->
 
@@ -189,7 +214,7 @@
 
                 <p class="text-muted mb-0">
 
-                    Gerenciar alunos cadastrados
+                    Gerenciar alunos
 
                 </p>
 
@@ -301,6 +326,280 @@
             </div>
 
         </a>
+
+    </div>
+
+</div>
+
+<!-- LINHA INFERIOR -->
+
+<div class="row g-4">
+
+    <!-- ÚLTIMOS ALUNOS -->
+
+    <div class="col-lg-7">
+
+        <div class="card p-4 h-100">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <h5 class="fw-bold mb-0">
+
+                    Últimos Alunos
+
+                </h5>
+
+                <a
+                    href="/alunos"
+                    class="btn btn-sm btn-dark"
+                >
+
+                    Ver Todos
+
+                </a>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Foto</th>
+                            <th>Nome</th>
+                            <th>Faixa</th>
+                            <th>WhatsApp</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for aluno in ultimos_alunos %}
+
+                        <tr>
+
+                            <td>
+
+                                {% if aluno.foto %}
+
+                                    <img
+                                        src="{{ url_for('static', filename='uploads/' + aluno.foto) }}"
+                                        width="50"
+                                        height="50"
+                                        style="
+                                            object-fit: cover;
+                                            border-radius: 50%;
+                                        "
+                                    >
+
+                                {% else %}
+
+                                    <div
+                                        class="bg-secondary text-white d-flex justify-content-center align-items-center"
+                                        style="
+                                            width: 50px;
+                                            height: 50px;
+                                            border-radius: 50%;
+                                        "
+                                    >
+
+                                        <i class="bi bi-person"></i>
+
+                                    </div>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td class="fw-semibold">
+
+                                {{ aluno.nome }}
+
+                            </td>
+
+                            <td>
+
+                                {{ aluno.faixa }}
+
+                            </td>
+
+                            <td>
+
+                                {{ aluno.whatsapp }}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- MENSALIDADES PENDENTES -->
+
+    <div class="col-lg-5">
+
+        <div class="card p-4 h-100">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <h5 class="fw-bold mb-0">
+
+                    Mensalidades Pendentes
+
+                </h5>
+
+                <a
+                    href="/mensalidades"
+                    class="btn btn-sm btn-danger"
+                >
+
+                    Financeiro
+
+                </a>
+
+            </div>
+
+            {% for item in pendencias %}
+
+            <div
+                class="d-flex justify-content-between align-items-center border rounded-4 p-3 mb-3"
+            >
+
+                <div>
+
+                    <div class="fw-bold">
+
+                        {{ item.aluno.nome }}
+
+                    </div>
+
+                    <small class="text-muted">
+
+                        Vencimento:
+                        {{ item.vencimento }}
+
+                    </small>
+
+                </div>
+
+                <div class="text-danger fw-bold">
+
+                    R$ {{ item.valor }}
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- AVISOS + AÇÕES -->
+
+<div class="row g-4 mt-1">
+
+    <!-- AVISOS -->
+
+    <div class="col-lg-6">
+
+        <div class="card p-4 h-100">
+
+            <h5 class="fw-bold mb-4">
+
+                📌 Avisos da Academia
+
+            </h5>
+
+            <div class="alert alert-primary">
+
+                Próximo exame de faixa em breve.
+
+            </div>
+
+            <div class="alert alert-warning">
+
+                Atualize as mensalidades pendentes.
+
+            </div>
+
+            <div class="alert alert-success">
+
+                Sistema funcionando normalmente.
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- AÇÕES -->
+
+    <div class="col-lg-6">
+
+        <div class="card p-4 h-100">
+
+            <h5 class="fw-bold mb-4">
+
+                ⚡ Ações Rápidas
+
+            </h5>
+
+            <div class="d-grid gap-3">
+
+                <a
+                    href="/cadastrar_aluno"
+                    class="btn btn-primary"
+                >
+
+                    <i class="bi bi-person-plus"></i>
+
+                    Cadastrar Novo Aluno
+
+                </a>
+
+                <a
+                    href="/presencas"
+                    class="btn btn-success"
+                >
+
+                    <i class="bi bi-check2-square"></i>
+
+                    Registrar Presença
+
+                </a>
+
+                <a
+                    href="/backup"
+                    class="btn btn-dark"
+                >
+
+                    <i class="bi bi-download"></i>
+
+                    Fazer Backup
+
+                </a>
+
+            </div>
+
+        </div>
 
     </div>
 

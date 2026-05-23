@@ -21,7 +21,7 @@ from models import (
 import os
 import shutil
 
-from datetime import datetime
+from datetime import datetime, date
 
 from functools import wraps
 
@@ -35,6 +35,8 @@ from werkzeug.security import (
 from reportlab.pdfgen import canvas
 
 from flask_migrate import Migrate
+
+from flask_moment import Moment
 
 
 # =====================================
@@ -70,7 +72,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 migrate = Migrate(app, db)
-
+moment = Moment(app)
 
 # =====================================
 # LOGIN OBRIGATÓRIO
@@ -161,12 +163,24 @@ def index():
 
                 aptos += 1
 
+    ultimos_alunos = Aluno.query.order_by(
+        Aluno.id.desc()
+    ).limit(5).all()
+
+    pendencias = Mensalidade.query.filter_by(
+        status='PENDENTE'
+    ).order_by(
+        Mensalidade.vencimento.asc()
+    ).limit(5).all()
+
     return render_template(
         'index.html',
         total_alunos=total_alunos,
         faturamento=faturamento,
         inadimplentes=inadimplentes,
-        aptos=aptos
+        aptos=aptos,
+        ultimos_alunos=ultimos_alunos,
+        pendencias=pendencias
     )
 
 
@@ -224,37 +238,6 @@ def logout():
     )
 
     return redirect('/login')
-
-
-# =====================================
-# CRIAR ADMIN
-# =====================================
-
-@app.route('/criar_admin')
-def criar_admin():
-
-    existe = Usuario.query.filter_by(
-        usuario='admin'
-    ).first()
-
-    if existe:
-
-        return 'Admin já existe.'
-
-    admin = Usuario(
-
-        usuario='admin',
-
-        senha=generate_password_hash('1234'),
-
-        tipo='admin'
-    )
-
-    db.session.add(admin)
-
-    db.session.commit()
-
-    return 'Admin criado com sucesso.'
 
 
 # =====================================
@@ -604,10 +587,33 @@ def mensalidades():
     ).all()
 
     return render_template(
-        'mensalidades.html',
-        alunos=alunos,
-        mensalidades=lista
+    'mensalidades.html',
+    alunos=alunos,
+    mensalidades=lista,
+    hoje=date.today()
     )
+
+
+# =====================================
+# MARCAR MENSALIDADE COMO PAGA
+# =====================================
+
+@app.route('/pagar_mensalidade/<int:id>')
+@login_obrigatorio
+def pagar_mensalidade(id):
+
+    mensalidade = Mensalidade.query.get_or_404(id)
+
+    mensalidade.status = 'PAGO'
+
+    db.session.commit()
+
+    flash(
+        'Mensalidade marcada como paga.',
+        'success'
+    )
+
+    return redirect('/mensalidades')
 
 
 # =====================================

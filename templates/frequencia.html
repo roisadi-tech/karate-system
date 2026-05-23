@@ -2,6 +2,8 @@
 
 {% block conteudo %}
 
+<!-- TOPO -->
+
 <div class="d-flex justify-content-between align-items-center mb-4">
 
     <div>
@@ -18,17 +20,141 @@
 
 </div>
 
-<!-- CARD -->
+<!-- CARDS -->
+
+<div class="row g-4 mb-4">
+
+    <!-- TOTAL -->
+
+    <div class="col-md-4">
+
+        <div class="card p-4 h-100">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <small class="text-muted">
+                        Total de Alunos
+                    </small>
+
+                    <h2 class="fw-bold mt-2">
+
+                        {{ relatorio|length }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-primary text-white p-3 rounded-4">
+
+                    <i class="bi bi-people-fill fs-2"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- APTOS -->
+
+    <div class="col-md-4">
+
+        <div class="card p-4 h-100">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <small class="text-muted">
+                        Aptos para Exame
+                    </small>
+
+                    <h2 class="fw-bold mt-2 text-success">
+
+                        {{ relatorio
+                            | selectattr('percentual', 'ge', 75)
+                            | list
+                            | length }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-success text-white p-3 rounded-4">
+
+                    <i class="bi bi-award-fill fs-2"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- BAIXA FREQUÊNCIA -->
+
+    <div class="col-md-4">
+
+        <div class="card p-4 h-100">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <small class="text-muted">
+                        Baixa Frequência
+                    </small>
+
+                    <h2 class="fw-bold mt-2 text-danger">
+
+                        {{ relatorio
+                            | selectattr('percentual', 'lt', 50)
+                            | list
+                            | length }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-danger text-white p-3 rounded-4">
+
+                    <i class="bi bi-exclamation-triangle-fill fs-2"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- RELATÓRIO -->
 
 <div class="card p-4">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
 
-        <h4 class="fw-bold">
+        <div>
 
-            Relatório de Frequência
+            <h4 class="fw-bold mb-1">
 
-        </h4>
+                Relatório de Frequência
+
+            </h4>
+
+            <small class="text-muted">
+
+                Desempenho geral dos alunos
+
+            </small>
+
+        </div>
 
         <span class="badge bg-dark p-2">
 
@@ -48,11 +174,13 @@
 
                     <th>Aluno</th>
 
-                    <th>Total de Aulas</th>
+                    <th>Total</th>
 
                     <th>Presenças</th>
 
-                    <th>Frequência</th>
+                    <th width="320">
+                        Frequência
+                    </th>
 
                     <th>Status</th>
 
@@ -66,15 +194,37 @@
 
                 <tr>
 
-                    <!-- NOME -->
+                    <!-- ALUNO -->
 
                     <td>
 
-                        <strong>
+                        <div class="d-flex align-items-center gap-3">
 
-                            {{ item.nome }}
+                            <div
+                                class="bg-dark text-white d-flex align-items-center justify-content-center"
+                                style="
+                                    width:55px;
+                                    height:55px;
+                                    border-radius:50%;
+                                    font-size:20px;
+                                "
+                            >
 
-                        </strong>
+                                <i class="bi bi-person-fill"></i>
+
+                            </div>
+
+                            <div>
+
+                                <strong>
+
+                                    {{ item.nome }}
+
+                                </strong>
+
+                            </div>
+
+                        </div>
 
                     </td>
 
@@ -82,7 +232,11 @@
 
                     <td>
 
-                        {{ item.total }}
+                        <span class="fw-semibold">
+
+                            {{ item.total }}
+
+                        </span>
 
                     </td>
 
@@ -90,22 +244,32 @@
 
                     <td>
 
-                        {{ item.presentes }}
+                        <span class="text-success fw-bold">
+
+                            {{ item.presentes }}
+
+                        </span>
 
                     </td>
 
                     <!-- PROGRESSO -->
 
-                    <td width="300">
+                    <td>
 
                         <div class="d-flex align-items-center gap-3">
 
-                            <div class="progress w-100" style="height: 20px;">
+                            <div
+                                class="progress w-100"
+                                style="
+                                    height: 22px;
+                                    border-radius: 20px;
+                                "
+                            >
 
                                 {% if item.percentual >= 75 %}
 
                                     <div
-                                        class="progress-bar bg-success"
+                                        class="progress-bar bg-success fw-semibold"
                                         style="width: {{ item.percentual }}%;"
                                     >
 
@@ -116,7 +280,7 @@
                                 {% elif item.percentual >= 50 %}
 
                                     <div
-                                        class="progress-bar bg-warning"
+                                        class="progress-bar bg-warning text-dark fw-semibold"
                                         style="width: {{ item.percentual }}%;"
                                     >
 
@@ -127,7 +291,7 @@
                                 {% else %}
 
                                     <div
-                                        class="progress-bar bg-danger"
+                                        class="progress-bar bg-danger fw-semibold"
                                         style="width: {{ item.percentual }}%;"
                                     >
 
@@ -151,13 +315,17 @@
 
                             <span class="badge bg-success p-2">
 
-                                APTO PARA EXAME
+                                <i class="bi bi-award-fill"></i>
+
+                                APTO
 
                             </span>
 
                         {% elif item.percentual >= 50 %}
 
                             <span class="badge bg-warning text-dark p-2">
+
+                                <i class="bi bi-exclamation-circle-fill"></i>
 
                                 ATENÇÃO
 
@@ -167,7 +335,9 @@
 
                             <span class="badge bg-danger p-2">
 
-                                BAIXA FREQUÊNCIA
+                                <i class="bi bi-x-circle-fill"></i>
+
+                                BAIXA
 
                             </span>
 

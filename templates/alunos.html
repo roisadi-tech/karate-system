@@ -2,6 +2,8 @@
 
 {% block conteudo %}
 
+<!-- TOPO -->
+
 <div class="d-flex justify-content-between align-items-center mb-4">
 
     <div>
@@ -29,23 +31,145 @@
 
 </div>
 
+<!-- CARDS -->
+
+<div class="row g-4 mb-4">
+
+    <!-- TOTAL -->
+
+    <div class="col-md-4">
+
+        <div class="card p-4 border-0 shadow-sm h-100">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <small class="text-muted">
+                        Total de Alunos
+                    </small>
+
+                    <h2 class="fw-bold mt-2">
+
+                        {{ alunos|length }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-primary text-white p-3 rounded-4">
+
+                    <i class="bi bi-people-fill fs-2"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ATIVOS -->
+
+    <div class="col-md-4">
+
+        <div class="card p-4 border-0 shadow-sm h-100">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <small class="text-muted">
+                        Alunos Ativos
+                    </small>
+
+                    <h2 class="fw-bold mt-2 text-success">
+
+                        {{ alunos|length }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-success text-white p-3 rounded-4">
+
+                    <i class="bi bi-person-check-fill fs-2"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- EXAMES -->
+
+    <div class="col-md-4">
+
+        <div class="card p-4 border-0 shadow-sm h-100">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <small class="text-muted">
+                        Aptos para Exame
+                    </small>
+
+                    <h2 class="fw-bold mt-2 text-warning">
+
+                        {{ alunos|length }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-warning text-white p-3 rounded-4">
+
+                    <i class="bi bi-award-fill fs-2"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 <!-- BUSCA -->
 
-<div class="card p-4 mb-4">
+<div class="card border-0 shadow-sm p-4 mb-4">
 
     <form method="GET">
 
-        <div class="row g-3">
+        <div class="row g-3 align-items-center">
 
             <div class="col-md-10">
 
-                <input
-                    type="text"
-                    name="busca"
-                    class="form-control form-control-lg"
-                    placeholder="Buscar aluno pelo nome..."
-                    value="{{ request.args.get('busca', '') }}"
-                >
+                <div class="position-relative">
+
+                    <i
+                        class="bi bi-search position-absolute"
+                        style="
+                            left: 18px;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            color: #6c757d;
+                        "
+                    ></i>
+
+                    <input
+                        type="text"
+                        name="busca"
+                        class="form-control form-control-lg ps-5"
+                        placeholder="Buscar aluno pelo nome..."
+                        value="{{ request.args.get('busca', '') }}"
+                    >
+
+                </div>
 
             </div>
 
@@ -54,8 +178,6 @@
                 <button
                     class="btn btn-dark btn-lg"
                 >
-
-                    <i class="bi bi-search"></i>
 
                     Buscar
 
@@ -71,7 +193,23 @@
 
 <!-- TABELA -->
 
-<div class="card p-4">
+<div class="card border-0 shadow-sm p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h5 class="fw-bold mb-0">
+
+            Lista de Alunos
+
+        </h5>
+
+        <span class="badge bg-dark p-2">
+
+            {{ alunos|length }} registros
+
+        </span>
+
+    </div>
 
     <div class="table-responsive">
 
@@ -81,9 +219,7 @@
 
                 <tr>
 
-                    <th>Foto</th>
-
-                    <th>Nome</th>
+                    <th>Aluno</th>
 
                     <th>WhatsApp</th>
 
@@ -91,7 +227,7 @@
 
                     <th>Mensalidade</th>
 
-                    <th width="220">
+                    <th class="text-center">
                         Ações
                     </th>
 
@@ -105,48 +241,59 @@
 
                 <tr>
 
-                    <!-- FOTO -->
+                    <!-- ALUNO -->
 
                     <td>
 
-                        {% if aluno.foto %}
+                        <div class="d-flex align-items-center gap-3">
 
-                            <img
-                                src="{{ url_for('static', filename='uploads/' + aluno.foto) }}"
-                                width="60"
-                                height="60"
-                                style="
-                                    object-fit: cover;
-                                    border-radius: 50%;
-                                "
-                            >
+                            {% if aluno.foto %}
 
-                        {% else %}
+                                <img
+                                    src="{{ url_for('static', filename='uploads/' + aluno.foto) }}"
+                                    width="70"
+                                    height="70"
+                                    style="
+                                        object-fit: cover;
+                                        border-radius: 50%;
+                                        border: 3px solid #f1f5f9;
+                                    "
+                                >
 
-                            <div
-                                class="bg-secondary text-white d-flex align-items-center justify-content-center"
-                                style="
-                                    width:60px;
-                                    height:60px;
-                                    border-radius:50%;
-                                "
-                            >
+                            {% else %}
 
-                                <i class="bi bi-person-fill"></i>
+                                <div
+                                    class="bg-secondary text-white d-flex align-items-center justify-content-center"
+                                    style="
+                                        width:70px;
+                                        height:70px;
+                                        border-radius:50%;
+                                    "
+                                >
+
+                                    <i class="bi bi-person-fill fs-3"></i>
+
+                                </div>
+
+                            {% endif %}
+
+                            <div>
+
+                                <div class="fw-bold">
+
+                                    {{ aluno.nome }}
+
+                                </div>
+
+                                <small class="text-muted">
+
+                                    ID #{{ aluno.id }}
+
+                                </small>
 
                             </div>
 
-                        {% endif %}
-
-                    </td>
-
-                    <!-- NOME -->
-
-                    <td>
-
-                        <strong>
-                            {{ aluno.nome }}
-                        </strong>
+                        </div>
 
                     </td>
 
@@ -154,7 +301,17 @@
 
                     <td>
 
-                        {{ aluno.whatsapp }}
+                        <a
+                            href="https://wa.me/55{{ aluno.whatsapp }}"
+                            target="_blank"
+                            class="text-decoration-none"
+                        >
+
+                            <i class="bi bi-whatsapp text-success"></i>
+
+                            {{ aluno.whatsapp }}
+
+                        </a>
 
                     </td>
 
@@ -162,7 +319,7 @@
 
                     <td>
 
-                        <span class="badge bg-dark p-2">
+                        <span class="badge bg-dark p-2 px-3">
 
                             {{ aluno.faixa }}
 
@@ -174,11 +331,11 @@
 
                     <td>
 
-                        <strong class="text-success">
+                        <span class="fw-bold text-success">
 
                             R$ {{ aluno.mensalidade }}
 
-                        </strong>
+                        </span>
 
                     </td>
 
@@ -186,22 +343,28 @@
 
                     <td>
 
-                        <div class="d-flex gap-2">
+                        <div class="d-flex justify-content-center gap-2">
+
+                            <!-- EDITAR -->
 
                             <a
                                 href="/editar_aluno/{{ aluno.id }}"
-                                class="btn btn-primary btn-sm"
+                                class="btn btn-primary btn-sm rounded-3"
+                                title="Editar"
                             >
 
                                 <i class="bi bi-pencil-fill"></i>
 
                             </a>
 
+                            <!-- EXCLUIR -->
+
                             {% if session.tipo == 'admin' %}
 
                             <a
                                 href="/excluir_aluno/{{ aluno.id }}"
-                                class="btn btn-danger btn-sm"
+                                class="btn btn-danger btn-sm rounded-3"
+                                title="Excluir"
                                 onclick="return confirm('Deseja excluir este aluno?')"
                             >
 
@@ -218,6 +381,41 @@
                 </tr>
 
                 {% endfor %}
+
+                <!-- SEM ALUNOS -->
+
+                {% if alunos|length == 0 %}
+
+                <tr>
+
+                    <td
+                        colspan="5"
+                        class="text-center py-5"
+                    >
+
+                        <div class="text-muted">
+
+                            <i class="bi bi-people fs-1"></i>
+
+                            <h5 class="mt-3">
+
+                                Nenhum aluno encontrado
+
+                            </h5>
+
+                            <p>
+
+                                Cadastre o primeiro aluno da academia
+
+                            </p>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endif %}
 
             </tbody>
 

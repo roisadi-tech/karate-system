@@ -2,6 +2,8 @@
 
 {% block conteudo %}
 
+<!-- TOPO -->
+
 <div class="d-flex justify-content-between align-items-center mb-4">
 
     <div>
@@ -11,7 +13,7 @@
         </h2>
 
         <p class="text-muted mb-0">
-            Visão geral da academia
+            Visão estratégica da academia
         </p>
 
     </div>
@@ -20,9 +22,9 @@
 
 <!-- CARDS -->
 
-<div class="row g-4 mb-4">
+<div class="row g-4 mb-5">
 
-    <!-- TOTAL ALUNOS -->
+    <!-- ALUNOS -->
 
     <div class="col-md-4">
 
@@ -44,9 +46,9 @@
 
                 </div>
 
-                <div class="bg-primary text-white p-3 rounded-4">
+                <div class="bg-primary text-white p-3 rounded-4 shadow-sm">
 
-                    <i class="bi bi-people-fill fs-3"></i>
+                    <i class="bi bi-people-fill fs-2"></i>
 
                 </div>
 
@@ -67,7 +69,7 @@
                 <div>
 
                     <small class="text-muted">
-                        Total Recebido
+                        Valor Recebido
                     </small>
 
                     <h2 class="fw-bold mt-2 text-success">
@@ -78,9 +80,9 @@
 
                 </div>
 
-                <div class="bg-success text-white p-3 rounded-4">
+                <div class="bg-success text-white p-3 rounded-4 shadow-sm">
 
-                    <i class="bi bi-cash-stack fs-3"></i>
+                    <i class="bi bi-cash-stack fs-2"></i>
 
                 </div>
 
@@ -101,7 +103,7 @@
                 <div>
 
                     <small class="text-muted">
-                        Total Pendente
+                        Valor Pendente
                     </small>
 
                     <h2 class="fw-bold mt-2 text-danger">
@@ -112,9 +114,9 @@
 
                 </div>
 
-                <div class="bg-danger text-white p-3 rounded-4">
+                <div class="bg-danger text-white p-3 rounded-4 shadow-sm">
 
-                    <i class="bi bi-exclamation-circle-fill fs-3"></i>
+                    <i class="bi bi-exclamation-triangle-fill fs-2"></i>
 
                 </div>
 
@@ -126,17 +128,27 @@
 
 </div>
 
-<!-- FAIXAS -->
+<!-- DISTRIBUIÇÃO -->
 
 <div class="card p-4">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
 
-        <h4 class="fw-bold">
+        <div>
 
-            Distribuição por Faixa
+            <h4 class="fw-bold mb-1">
 
-        </h4>
+                Distribuição por Faixa
+
+            </h4>
+
+            <small class="text-muted">
+
+                Quantidade de alunos por graduação
+
+            </small>
+
+        </div>
 
         <span class="badge bg-dark p-2">
 
@@ -156,9 +168,15 @@
 
                     <th>Faixa</th>
 
-                    <th>Quantidade de Alunos</th>
+                    <th>Total de Alunos</th>
 
-                    <th>Indicador</th>
+                    <th width="420">
+                        Indicador
+                    </th>
+
+                    <th>
+                        Participação
+                    </th>
 
                 </tr>
 
@@ -168,13 +186,15 @@
 
                 {% for faixa, total in faixas %}
 
+                {% set percentual = ((total / total_alunos) * 100) | round(1) %}
+
                 <tr>
 
                     <!-- FAIXA -->
 
                     <td>
 
-                        <span class="badge bg-dark p-2">
+                        <span class="badge bg-dark p-2 fs-6">
 
                             {{ faixa }}
 
@@ -194,25 +214,86 @@
 
                     </td>
 
-                    <!-- BARRA -->
+                    <!-- PROGRESSO -->
 
-                    <td width="350">
+                    <td>
 
                         <div
                             class="progress"
-                            style="height: 22px;"
+                            style="
+                                height: 24px;
+                                border-radius: 20px;
+                            "
                         >
 
-                            <div
-                                class="progress-bar"
-                                style="width: {{ total * 10 }}%;"
-                            >
+                            {% if percentual >= 50 %}
 
-                                {{ total }}
+                                <div
+                                    class="progress-bar bg-success fw-semibold"
+                                    style="width: {{ percentual }}%;"
+                                >
 
-                            </div>
+                                    {{ percentual }}%
+
+                                </div>
+
+                            {% elif percentual >= 25 %}
+
+                                <div
+                                    class="progress-bar bg-warning text-dark fw-semibold"
+                                    style="width: {{ percentual }}%;"
+                                >
+
+                                    {{ percentual }}%
+
+                                </div>
+
+                            {% else %}
+
+                                <div
+                                    class="progress-bar bg-primary fw-semibold"
+                                    style="width: {{ percentual }}%;"
+                                >
+
+                                    {{ percentual }}%
+
+                                </div>
+
+                            {% endif %}
 
                         </div>
+
+                    </td>
+
+                    <!-- PARTICIPAÇÃO -->
+
+                    <td>
+
+                        {% if percentual >= 50 %}
+
+                            <span class="badge bg-success p-2">
+
+                                MAIORIA
+
+                            </span>
+
+                        {% elif percentual >= 25 %}
+
+                            <span class="badge bg-warning text-dark p-2">
+
+                                MÉDIA
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-primary p-2">
+
+                                BAIXA
+
+                            </span>
+
+                        {% endif %}
 
                     </td>
 
