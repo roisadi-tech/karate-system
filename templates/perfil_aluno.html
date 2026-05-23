@@ -43,7 +43,7 @@
                 Perfil do Aluno
             </span>
 
-            {% if aluno.foto %}
+            {% if aluno.foto and aluno.foto != '' %}
 
                 <img
                     src="{{ url_for('static', filename='uploads/' + aluno.foto) }}"
@@ -84,7 +84,54 @@
 
             </h3>
 
-            <span class="badge bg-dark p-2 mb-3">
+            <!-- FAIXA COLORIDA -->
+
+            {% if aluno.faixa == 'Branca' %}
+
+                <span class="badge bg-light text-dark border p-2 px-3 mb-3">
+
+            {% elif aluno.faixa == 'Cinza' %}
+
+                <span class="badge bg-secondary p-2 px-3 mb-3">
+
+            {% elif aluno.faixa == 'Azul' %}
+
+                <span class="badge bg-primary p-2 px-3 mb-3">
+
+            {% elif aluno.faixa == 'Amarela' %}
+
+                <span class="badge bg-warning text-dark p-2 px-3 mb-3">
+
+            {% elif aluno.faixa == 'Laranja' %}
+
+                <span
+                    class="badge p-2 px-3 mb-3"
+                    style="background: orange;"
+                >
+
+            {% elif aluno.faixa == 'Verde' %}
+
+                <span class="badge bg-success p-2 px-3 mb-3">
+
+            {% elif aluno.faixa == 'Roxa' %}
+
+                <span
+                    class="badge p-2 px-3 mb-3"
+                    style="background: #6f42c1;"
+                >
+
+            {% elif aluno.faixa == 'Marrom' %}
+
+                <span
+                    class="badge p-2 px-3 mb-3"
+                    style="background: #8b4513;"
+                >
+
+            {% else %}
+
+                <span class="badge bg-dark p-2 px-3 mb-3">
+
+            {% endif %}
 
                 {{ aluno.faixa }}
 
@@ -106,10 +153,15 @@
 
                 <p>
                     <strong>Idade:</strong>
+
                     {% if idade %}
+
                         {{ idade }} anos
+
                     {% else %}
+
                         Não informado
+
                     {% endif %}
                 </p>
 
@@ -120,7 +172,7 @@
 
                 <p>
                     <strong>WhatsApp:</strong>
-                    {{ aluno.whatsapp }}
+                    {{ formatar_whatsapp(aluno.whatsapp) }}
                 </p>
 
                 <p>
@@ -133,7 +185,35 @@
                     {{ percentual }}%
                 </p>
 
+                <!-- STATUS FINANCEIRO -->
+
+                <p>
+
+                    <strong>Status Financeiro:</strong>
+
+                    {% if pendentes > 0 %}
+
+                        <span class="badge bg-danger">
+
+                            Inadimplente
+
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge bg-success">
+
+                            Em dia
+
+                        </span>
+
+                    {% endif %}
+
+                </p>
+
             </div>
+
+            <!-- BOTÃO WHATSAPP -->
 
             <a
                 href="https://wa.me/55{{ aluno.whatsapp }}"
@@ -144,6 +224,19 @@
                 <i class="bi bi-whatsapp"></i>
 
                 Conversar no WhatsApp
+
+            </a>
+
+            <!-- BOTÃO EDITAR -->
+
+            <a
+                href="/editar_aluno/{{ aluno.id }}"
+                class="btn btn-primary w-100 mt-2"
+            >
+
+                <i class="bi bi-pencil-fill"></i>
+
+                Editar Aluno
 
             </a>
 
@@ -231,6 +324,152 @@
                     </div>
 
                 {% endif %}
+
+            </div>
+
+        </div>
+
+        <!-- ESTATÍSTICAS -->
+
+        <div class="row g-3 mb-4">
+
+            <div class="col-md-4">
+
+                <div class="card border-0 bg-primary text-white p-3 rounded-4">
+
+                    <small>Total de Presenças</small>
+
+                    <h3 class="fw-bold mb-0">
+
+                        {{ presencas|length }}
+
+                    </h3>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <div class="card border-0 bg-success text-white p-3 rounded-4">
+
+                    <small>Mensalidades</small>
+
+                    <h3 class="fw-bold mb-0">
+
+                        {{ mensalidades|length }}
+
+                    </h3>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <div class="card border-0 bg-warning text-dark p-3 rounded-4">
+
+                    <small>Exames</small>
+
+                    <h3 class="fw-bold mb-0">
+
+                        {{ exames|length }}
+
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- PRESENÇAS -->
+
+        <div class="card border-0 shadow-sm p-4 rounded-4 mb-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <h4 class="fw-bold mb-0">
+                    Últimas Presenças
+                </h4>
+
+                <span class="badge bg-dark p-2">
+                    {{ presencas|length }} registros
+                </span>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table align-middle">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>Data</th>
+                            <th>Status</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for presenca in presencas %}
+
+                        <tr>
+
+                            <td>
+                                {{ presenca.data }}
+                            </td>
+
+                            <td>
+
+                                {% if presenca.status == 'PRESENTE' %}
+
+                                    <span class="badge bg-success p-2">
+
+                                        PRESENTE
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-danger p-2">
+
+                                        FALTOU
+
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                        {% if presencas|length == 0 %}
+
+                        <tr>
+
+                            <td
+                                colspan="2"
+                                class="text-center text-muted py-4"
+                            >
+
+                                Nenhuma presença registrada.
+
+                            </td>
+
+                        </tr>
+
+                        {% endif %}
+
+                    </tbody>
+
+                </table>
 
             </div>
 

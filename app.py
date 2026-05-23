@@ -36,21 +36,43 @@ from reportlab.pdfgen import canvas
 
 
 # =====================================
+# FORMATAR WHATSAPP
+# =====================================
+
+def formatar_whatsapp(numero):
+
+    numero = ''.join(
+        filter(str.isdigit, str(numero))
+    )
+
+    if len(numero) == 11:
+
+        return f'({numero[:2]}) {numero[2:7]}-{numero[7:]}'
+
+    return numero
+
+
+# =====================================
 # APP
 # =====================================
 
 app = Flask(__name__)
+
+app.secret_key = os.getenv(
+    'SECRET_KEY',
+    'karate_secret'
+)
+
 
 @app.context_processor
 def inject_data():
 
     return {
 
-        'current_date': datetime.now().strftime('%d/%m/%Y')
+        'current_date': datetime.now().strftime('%d/%m/%Y'),
+        'formatar_whatsapp': formatar_whatsapp
 
     }
-
-app.secret_key = 'karate_secret'
 
 
 # =====================================
@@ -72,7 +94,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 )
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 
 db.init_app(app)
 
@@ -340,7 +361,7 @@ def cadastrar_aluno():
             responsavel=responsavel,
             whatsapp=whatsapp,
             faixa=faixa,
-            mensalidade=mensalidade,
+            mensalidade=float(mensalidade),
             foto=nome_arquivo
         )
 
@@ -378,7 +399,7 @@ def editar_aluno(id):
         aluno.responsavel = request.form['responsavel']
         aluno.whatsapp = request.form['whatsapp']
         aluno.faixa = request.form['faixa']
-        aluno.mensalidade = request.form['mensalidade']
+        aluno.mensalidade = float(request.form['mensalidade'])
 
         foto = request.files.get('foto')
 
@@ -483,6 +504,11 @@ def perfil_aluno(id):
             1
         )
 
+    pendentes = Mensalidade.query.filter_by(
+        aluno_id=id,
+        status='PENDENTE'
+    ).count()
+
     idade = None
 
     data_nascimento = aluno.nascimento
@@ -521,7 +547,8 @@ def perfil_aluno(id):
         mensalidades=mensalidades,
         exames=exames,
         percentual=percentual,
-        idade=idade
+        idade=idade,
+        pendentes=pendentes
     )
 
 
@@ -663,7 +690,7 @@ def mensalidades():
         nova_mensalidade = Mensalidade(
 
             aluno_id=request.form['aluno_id'],
-            valor=request.form['valor'],
+            valor=float(request.form['valor']),
             vencimento=request.form['vencimento'],
             status=request.form['status']
         )
@@ -688,10 +715,10 @@ def mensalidades():
     ).all()
 
     return render_template(
-    'mensalidades.html',
-    alunos=alunos,
-    mensalidades=lista,
-    hoje=date.today()
+        'mensalidades.html',
+        alunos=alunos,
+        mensalidades=lista,
+        hoje=date.today()
     )
 
 
@@ -825,7 +852,7 @@ def recibo(id):
     c.drawString(
         100,
         700,
-        f'Valor: R$ {mensalidade.valor}'
+        f'Valor: R$ {mensalidade.valor:.2f}'
     )
 
     c.drawString(
@@ -876,6 +903,15 @@ def backup():
     nome_backup = f'backup_{data}.db'
 
     origem = 'database.db'
+
+    if not os.path.exists(origem):
+
+        flash(
+            'Backup disponível apenas quando estiver usando SQLite local.',
+            'warning'
+        )
+
+        return redirect('/')
 
     if not os.path.exists('backups'):
 
@@ -980,19 +1016,18 @@ def cadastrar_usuario():
         senha_form = request.form['senha']
         tipo_form = request.form['tipo']
 
-        # VERIFICA DUPLICADO
-
         existe = Usuario.query.filter_by(
             usuario=usuario_form
         ).first()
 
         if existe:
 
-            flash('Este usuário já existe.')
+            flash(
+                'Este usuário já existe.',
+                'danger'
+            )
 
             return redirect('/cadastrar_usuario')
-
-        # CRIPTOGRAFA SENHA
 
         senha_hash = generate_password_hash(
             senha_form
@@ -1009,7 +1044,10 @@ def cadastrar_usuario():
 
         db.session.commit()
 
-        flash('Usuário cadastrado com sucesso.')
+        flash(
+            'Usuário cadastrado com sucesso.',
+            'success'
+        )
 
         return redirect('/usuarios')
 
@@ -1035,8 +1073,6 @@ def editar_usuario(id):
         tipo_form = request.form['tipo']
         senha_form = request.form['senha']
 
-        # VERIFICA SE JÁ EXISTE OUTRO USUÁRIO
-
         existe = Usuario.query.filter(
             Usuario.usuario == usuario_form,
             Usuario.id != id
@@ -1044,16 +1080,15 @@ def editar_usuario(id):
 
         if existe:
 
-            flash('Já existe outro usuário com este nome.')
+            flash(
+                'Já existe outro usuário com este nome.',
+                'danger'
+            )
 
             return redirect(f'/editar_usuario/{id}')
 
-        # ATUALIZA DADOS
-
         usuario.usuario = usuario_form
         usuario.tipo = tipo_form
-
-        # ALTERA SENHA SOMENTE SE PREENCHER
 
         if senha_form != '':
 
@@ -1063,7 +1098,10 @@ def editar_usuario(id):
 
         db.session.commit()
 
-        flash('Usuário atualizado com sucesso.')
+        flash(
+            'Usuário atualizado com sucesso.',
+            'success'
+        )
 
         return redirect('/usuarios')
 
@@ -1084,15 +1122,14 @@ def excluir_usuario(id):
 
     usuario = Usuario.query.get_or_404(id)
 
-    # NÃO PODE EXCLUIR A SI MESMO
-
     if usuario.usuario == session['usuario']:
 
-        flash('Você não pode excluir sua própria conta.')
+        flash(
+            'Você não pode excluir sua própria conta.',
+            'danger'
+        )
 
         return redirect('/usuarios')
-
-    # VERIFICA QUANTOS ADMINS EXISTEM
 
     if usuario.tipo == 'admin':
 
@@ -1102,7 +1139,10 @@ def excluir_usuario(id):
 
         if total_admins <= 1:
 
-            flash('O sistema precisa ter pelo menos um administrador.')
+            flash(
+                'O sistema precisa ter pelo menos um administrador.',
+                'danger'
+            )
 
             return redirect('/usuarios')
 
@@ -1110,7 +1150,10 @@ def excluir_usuario(id):
 
     db.session.commit()
 
-    flash('Usuário excluído com sucesso.')
+    flash(
+        'Usuário excluído com sucesso.',
+        'success'
+    )
 
     return redirect('/usuarios')
 

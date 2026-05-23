@@ -309,7 +309,7 @@
 
                             <i class="bi bi-whatsapp text-success"></i>
 
-                            {{ aluno.whatsapp }}
+                            {{ formatar_whatsapp(aluno.whatsapp) }}
 
                         </a>
 
@@ -317,15 +317,60 @@
 
                     <!-- FAIXA -->
 
-                    <td>
+<td>
 
-                        <span class="badge bg-dark p-2 px-3 rounded-3">
+    {% if aluno.faixa == 'Branca' %}
 
-                            {{ aluno.faixa }}
+        <span class="badge bg-light text-dark border p-2 px-3 rounded-3">
 
-                        </span>
+    {% elif aluno.faixa == 'Cinza' %}
 
-                    </td>
+        <span class="badge bg-secondary p-2 px-3 rounded-3">
+
+    {% elif aluno.faixa == 'Azul' %}
+
+        <span class="badge bg-primary p-2 px-3 rounded-3">
+
+    {% elif aluno.faixa == 'Amarela' %}
+
+        <span class="badge bg-warning text-dark p-2 px-3 rounded-3">
+
+    {% elif aluno.faixa == 'Laranja' %}
+
+        <span
+            class="badge p-2 px-3 rounded-3"
+            style="background: orange;"
+        >
+
+    {% elif aluno.faixa == 'Verde' %}
+
+        <span class="badge bg-success p-2 px-3 rounded-3">
+
+    {% elif aluno.faixa == 'Roxa' %}
+
+        <span
+            class="badge p-2 px-3 rounded-3"
+            style="background: #6f42c1;"
+        >
+
+    {% elif aluno.faixa == 'Marrom' %}
+
+        <span
+            class="badge p-2 px-3 rounded-3"
+            style="background: #8b4513;"
+        >
+
+    {% else %}
+
+        <span class="badge bg-dark p-2 px-3 rounded-3">
+
+    {% endif %}
+
+        {{ aluno.faixa }}
+
+    </span>
+
+</td>
 
                     <!-- MENSALIDADE -->
 
