@@ -105,6 +105,15 @@
                 </p>
 
                 <p>
+                    <strong>Idade:</strong>
+                    {% if idade %}
+                        {{ idade }} anos
+                    {% else %}
+                        Não informado
+                    {% endif %}
+                </p>
+
+                <p>
                     <strong>Responsável:</strong>
                     {{ aluno.responsavel or aluno.sexo or 'Não informado' }}
                 </p>

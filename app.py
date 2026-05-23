@@ -474,13 +474,45 @@ def perfil_aluno(id):
             1
         )
 
+    idade = None
+
+    data_nascimento = aluno.nascimento or aluno.idade
+
+    if data_nascimento:
+
+        try:
+
+            nascimento = datetime.strptime(
+                data_nascimento,
+                '%Y-%m-%d'
+            ).date()
+
+            hoje = date.today()
+
+            idade = hoje.year - nascimento.year
+
+            if (
+                hoje.month,
+                hoje.day
+            ) < (
+                nascimento.month,
+                nascimento.day
+            ):
+
+                idade -= 1
+
+        except Exception:
+
+            idade = None
+
     return render_template(
         'perfil_aluno.html',
         aluno=aluno,
         presencas=presencas,
         mensalidades=mensalidades,
         exames=exames,
-        percentual=percentual
+        percentual=percentual,
+        idade=idade
     )
 
 
