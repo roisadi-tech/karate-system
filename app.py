@@ -428,6 +428,62 @@ def editar_aluno(id):
 
 
 # =====================================
+# PERFIL DO ALUNO
+# =====================================
+
+@app.route('/aluno/<int:id>')
+@login_obrigatorio
+def perfil_aluno(id):
+
+    aluno = Aluno.query.get_or_404(id)
+
+    presencas = Presenca.query.filter_by(
+        aluno_id=id
+    ).order_by(
+        Presenca.data.desc()
+    ).all()
+
+    mensalidades = Mensalidade.query.filter_by(
+        aluno_id=id
+    ).order_by(
+        Mensalidade.vencimento.desc()
+    ).all()
+
+    exames = Exame.query.filter_by(
+        aluno_id=id
+    ).order_by(
+        Exame.data_exame.desc()
+    ).all()
+
+    total = Presenca.query.filter_by(
+        aluno_id=id
+    ).count()
+
+    presentes = Presenca.query.filter_by(
+        aluno_id=id,
+        status='PRESENTE'
+    ).count()
+
+    percentual = 0
+
+    if total > 0:
+
+        percentual = round(
+            (presentes / total) * 100,
+            1
+        )
+
+    return render_template(
+        'perfil_aluno.html',
+        aluno=aluno,
+        presencas=presencas,
+        mensalidades=mensalidades,
+        exames=exames,
+        percentual=percentual
+    )
+
+
+# =====================================
 # EXCLUIR ALUNO
 # =====================================
 

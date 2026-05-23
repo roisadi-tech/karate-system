@@ -39,7 +39,7 @@
 
     <div class="col-md-4">
 
-        <div class="card p-4 border-0 shadow-sm h-100">
+        <div class="card p-4 border-0 shadow-sm h-100 rounded-4">
 
             <div class="d-flex justify-content-between align-items-center">
 
@@ -73,7 +73,7 @@
 
     <div class="col-md-4">
 
-        <div class="card p-4 border-0 shadow-sm h-100">
+        <div class="card p-4 border-0 shadow-sm h-100 rounded-4">
 
             <div class="d-flex justify-content-between align-items-center">
 
@@ -107,7 +107,7 @@
 
     <div class="col-md-4">
 
-        <div class="card p-4 border-0 shadow-sm h-100">
+        <div class="card p-4 border-0 shadow-sm h-100 rounded-4">
 
             <div class="d-flex justify-content-between align-items-center">
 
@@ -141,7 +141,7 @@
 
 <!-- BUSCA -->
 
-<div class="card border-0 shadow-sm p-4 mb-4">
+<div class="card border-0 shadow-sm p-4 mb-4 rounded-4">
 
     <form method="GET">
 
@@ -164,7 +164,7 @@
                     <input
                         type="text"
                         name="busca"
-                        class="form-control form-control-lg ps-5"
+                        class="form-control form-control-lg ps-5 rounded-4"
                         placeholder="Buscar aluno pelo nome..."
                         value="{{ request.args.get('busca', '') }}"
                     >
@@ -176,7 +176,7 @@
             <div class="col-md-2 d-grid">
 
                 <button
-                    class="btn btn-dark btn-lg"
+                    class="btn btn-dark btn-lg rounded-4"
                 >
 
                     Buscar
@@ -193,7 +193,7 @@
 
 <!-- TABELA -->
 
-<div class="card border-0 shadow-sm p-4">
+<div class="card border-0 shadow-sm p-4 rounded-4">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
 
@@ -203,7 +203,7 @@
 
         </h5>
 
-        <span class="badge bg-dark p-2">
+        <span class="badge bg-dark p-2 px-3 rounded-3">
 
             {{ alunos|length }} registros
 
@@ -213,9 +213,9 @@
 
     <div class="table-responsive">
 
-        <table class="table align-middle">
+        <table class="table align-middle table-hover">
 
-            <thead>
+            <thead class="table-light">
 
                 <tr>
 
@@ -279,7 +279,7 @@
 
                             <div>
 
-                                <div class="fw-bold">
+                                <div class="fw-bold fs-6">
 
                                     {{ aluno.nome }}
 
@@ -304,7 +304,7 @@
                         <a
                             href="https://wa.me/55{{ aluno.whatsapp }}"
                             target="_blank"
-                            class="text-decoration-none"
+                            class="text-decoration-none fw-semibold"
                         >
 
                             <i class="bi bi-whatsapp text-success"></i>
@@ -319,7 +319,7 @@
 
                     <td>
 
-                        <span class="badge bg-dark p-2 px-3">
+                        <span class="badge bg-dark p-2 px-3 rounded-3">
 
                             {{ aluno.faixa }}
 
@@ -331,7 +331,7 @@
 
                     <td>
 
-                        <span class="fw-bold text-success">
+                        <span class="fw-bold text-success fs-6">
 
                             R$ {{ aluno.mensalidade }}
 
@@ -343,7 +343,19 @@
 
                     <td>
 
-                        <div class="d-flex justify-content-center gap-2">
+                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+
+                            <!-- PERFIL -->
+
+                            <a
+                                href="/perfil_aluno/{{ aluno.id }}"
+                                class="btn btn-dark btn-sm rounded-3"
+                                title="Ver Perfil"
+                            >
+
+                                <i class="bi bi-person-vcard-fill"></i>
+
+                            </a>
 
                             <!-- EDITAR -->
 

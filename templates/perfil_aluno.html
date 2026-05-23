@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<div class="row g-4">
+
+    <!-- PERFIL -->
+
+    <div class="col-lg-4">
+
+        <div class="card p-4 text-center">
+
+            {% if aluno.foto %}
+
+                <img
+                    src="{{ url_for('static', filename='uploads/' + aluno.foto) }}"
+                    class="mx-auto mb-3"
+                    style="
+                        width:180px;
+                        height:180px;
+                        object-fit:cover;
+                        border-radius:50%;
+                    "
+                >
+
+            {% endif %}
+
+            <h3 class="fw-bold">
+
+                {{ aluno.nome }}
+
+            </h3>
+
+            <p class="text-muted">
+
+                {{ aluno.faixa }}
+
+            </p>
+
+            <hr>
+
+            <div class="text-start">
+
+                <p>
+                    <strong>WhatsApp:</strong>
+                    {{ aluno.whatsapp }}
+                </p>
+
+                <p>
+                    <strong>Mensalidade:</strong>
+                    R$ {{ aluno.mensalidade }}
+                </p>
+
+                <p>
+                    <strong>Frequência:</strong>
+                    {{ percentual }}%
+                </p>
+
+            </div>
+
+            <a
+                href="https://wa.me/55{{ aluno.whatsapp }}"
+                target="_blank"
+                class="btn btn-success w-100 mt-3"
+            >
+
+                <i class="bi bi-whatsapp"></i>
+
+                Conversar
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- HISTÓRICO -->
+
+    <div class="col-lg-8">
+
+        <!-- FREQUÊNCIA -->
+
+        <div class="card p-4 mb-4">
+
+            <h4 class="fw-bold mb-3">
+
+                Frequência
+
+            </h4>
+
+            <div
+                class="progress"
+                style="height: 25px;"
+            >
+
+                <div
+                    class="progress-bar bg-success"
+                    style="width: {{ percentual }}%;"
+                >
+
+                    {{ percentual }}%
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- MENSALIDADES -->
+
+        <div class="card p-4 mb-4">
+
+            <h4 class="fw-bold mb-3">
+
+                Mensalidades
+
+            </h4>
+
+            <div class="table-responsive">
+
+                <table class="table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Valor</th>
+                            <th>Vencimento</th>
+                            <th>Status</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for mensalidade in mensalidades %}
+
+                        <tr>
+
+                            <td>
+                                R$ {{ mensalidade.valor }}
+                            </td>
+
+                            <td>
+                                {{ mensalidade.vencimento }}
+                            </td>
+
+                            <td>
+
+                                {% if mensalidade.status == 'PAGO' %}
+
+                                    <span class="badge bg-success">
+
+                                        PAGO
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-danger">
+
+                                        PENDENTE
+
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        <!-- EXAMES -->
+
+        <div class="card p-4">
+
+            <h4 class="fw-bold mb-3">
+
+                Histórico de Exames
+
+            </h4>
+
+            <div class="table-responsive">
+
+                <table class="table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Faixa Atual</th>
+                            <th>Nova Faixa</th>
+                            <th>Resultado</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for exame in exames %}
+
+                        <tr>
+
+                            <td>
+                                {{ exame.faixa_atual }}
+                            </td>
+
+                            <td>
+                                {{ exame.nova_faixa }}
+                            </td>
+
+                            <td>
+
+                                {% if exame.resultado == 'APROVADO' %}
+
+                                    <span class="badge bg-success">
+
+                                        APROVADO
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-danger">
+
+                                        REPROVADO
+
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
