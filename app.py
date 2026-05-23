@@ -1074,6 +1074,36 @@ def excluir_usuario(id):
 
 
 # =====================================
+# ATUALIZAR BANCO TEMPORÁRIO
+# =====================================
+
+@app.route('/atualizar_banco')
+def atualizar_banco():
+
+    try:
+        db.session.execute(
+            db.text(
+                'ALTER TABLE alunos ADD COLUMN nascimento VARCHAR(30)'
+            )
+        )
+    except Exception:
+        pass
+
+    try:
+        db.session.execute(
+            db.text(
+                'ALTER TABLE alunos ADD COLUMN responsavel VARCHAR(200)'
+            )
+        )
+    except Exception:
+        pass
+
+    db.session.commit()
+
+    return 'Banco atualizado com sucesso.'
+
+
+# =====================================
 # CRIAR TABELAS
 # =====================================
 
