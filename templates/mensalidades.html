@@ -415,6 +415,7 @@
         <a
             href="/recibo/{{ mensalidade.id }}"
             class="btn btn-primary btn-sm"
+            title="Gerar recibo"
         >
 
             <i class="bi bi-file-earmark-pdf-fill"></i>
@@ -423,23 +424,24 @@
 
         <!-- WHATSAPP -->
 
-{% set mensagem = 
-"Olá " ~ mensalidade.aluno.nome ~ 
-", sua mensalidade da academia está pendente.\n\n" ~
-"Valor: R$ " ~ mensalidade.valor ~ "\n" ~
-"Vencimento: " ~ mensalidade.vencimento ~ "\n\n" ~
-"Qualquer dúvida estamos à disposição. 🥋"
-%}
+        {% set mensagem =
+            "Olá " ~ mensalidade.aluno.nome ~
+            ", sua mensalidade da academia está pendente.\n\n" ~
+            "Valor: R$ " ~ mensalidade.valor ~ "\n" ~
+            "Vencimento: " ~ mensalidade.vencimento ~ "\n\n" ~
+            "Qualquer dúvida estamos à disposição. 🥋"
+        %}
 
-<a
-    href="https://wa.me/55{{ mensalidade.aluno.whatsapp }}?text={{ mensagem | urlencode }}"
-    target="_blank"
-    class="btn btn-success btn-sm"
->
+        <a
+            href="https://wa.me/55{{ mensalidade.aluno.whatsapp }}?text={{ mensagem | urlencode }}"
+            target="_blank"
+            class="btn btn-success btn-sm"
+            title="Enviar cobrança no WhatsApp"
+        >
 
-    <i class="bi bi-whatsapp"></i>
+            <i class="bi bi-whatsapp"></i>
 
-</a>
+        </a>
 
         <!-- MARCAR COMO PAGO -->
 
@@ -448,10 +450,40 @@
         <a
             href="/pagar_mensalidade/{{ mensalidade.id }}"
             class="btn btn-warning btn-sm"
+            title="Marcar como pago"
             onclick="return confirm('Confirmar pagamento?')"
         >
 
             <i class="bi bi-check-circle-fill"></i>
+
+        </a>
+
+        {% endif %}
+
+        <!-- EDITAR -->
+
+        <a
+            href="/editar_mensalidade/{{ mensalidade.id }}"
+            class="btn btn-dark btn-sm"
+            title="Editar mensalidade"
+        >
+
+            <i class="bi bi-pencil-fill"></i>
+
+        </a>
+
+        <!-- EXCLUIR -->
+
+        {% if session.tipo == 'admin' %}
+
+        <a
+            href="/excluir_mensalidade/{{ mensalidade.id }}"
+            class="btn btn-danger btn-sm"
+            title="Excluir mensalidade"
+            onclick="return confirm('Deseja excluir esta mensalidade?')"
+        >
+
+            <i class="bi bi-trash-fill"></i>
 
         </a>
 

@@ -723,6 +723,66 @@ def mensalidades():
 
 
 # =====================================
+# EDITAR MENSALIDADE
+# =====================================
+
+@app.route('/editar_mensalidade/<int:id>', methods=['GET', 'POST'])
+@login_obrigatorio
+def editar_mensalidade(id):
+
+    mensalidade = Mensalidade.query.get_or_404(id)
+
+    if request.method == 'POST':
+
+        mensalidade.aluno_id = request.form['aluno_id']
+        mensalidade.valor = float(request.form['valor'])
+        mensalidade.vencimento = request.form['vencimento']
+        mensalidade.status = request.form['status']
+
+        db.session.commit()
+
+        flash(
+            'Mensalidade atualizada com sucesso.',
+            'success'
+        )
+
+        return redirect('/mensalidades')
+
+    alunos = Aluno.query.order_by(
+        Aluno.nome.asc()
+    ).all()
+
+    return render_template(
+        'editar_mensalidade.html',
+        mensalidade=mensalidade,
+        alunos=alunos
+    )
+
+
+# =====================================
+# EXCLUIR MENSALIDADE
+# =====================================
+
+@app.route('/excluir_mensalidade/<int:id>')
+@login_obrigatorio
+@admin_obrigatorio
+def excluir_mensalidade(id):
+
+    mensalidade = Mensalidade.query.get_or_404(id)
+
+    db.session.delete(mensalidade)
+
+    db.session.commit()
+
+    flash(
+        'Mensalidade excluída com sucesso.',
+        'success'
+    )
+
+    return redirect('/mensalidades')
+
+
+# =====================================
 # MARCAR MENSALIDADE COMO PAGA
 # =====================================
 

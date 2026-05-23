@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<!-- TOPO -->
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h2 class="fw-bold">
+            ✏️ Editar Mensalidade
+        </h2>
+
+        <p class="text-muted mb-0">
+            Atualize os dados da mensalidade
+        </p>
+
+    </div>
+
+    <a
+        href="/mensalidades"
+        class="btn btn-dark"
+    >
+
+        <i class="bi bi-arrow-left"></i>
+
+        Voltar
+
+    </a>
+
+</div>
+
+<!-- FORM -->
+
+<div class="card border-0 shadow-sm p-4 rounded-4">
+
+    <form method="POST">
+
+        <div class="row g-3">
+
+            <!-- ALUNO -->
+
+            <div class="col-md-4">
+
+                <label class="form-label fw-semibold">
+
+                    Aluno
+
+                </label>
+
+                <select
+                    name="aluno_id"
+                    class="form-select form-select-lg"
+                    required
+                >
+
+                    {% for aluno in alunos %}
+
+                    <option
+                        value="{{ aluno.id }}"
+                        {% if mensalidade.aluno_id == aluno.id %}
+                            selected
+                        {% endif %}
+                    >
+
+                        {{ aluno.nome }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <!-- VALOR -->
+
+            <div class="col-md-3">
+
+                <label class="form-label fw-semibold">
+
+                    Valor
+
+                </label>
+
+                <input
+                    type="number"
+                    step="0.01"
+                    name="valor"
+                    value="{{ mensalidade.valor }}"
+                    class="form-control form-control-lg"
+                    required
+                >
+
+            </div>
+
+            <!-- VENCIMENTO -->
+
+            <div class="col-md-3">
+
+                <label class="form-label fw-semibold">
+
+                    Vencimento
+
+                </label>
+
+                <input
+                    type="date"
+                    name="vencimento"
+                    value="{{ mensalidade.vencimento }}"
+                    class="form-control form-control-lg"
+                    required
+                >
+
+            </div>
+
+            <!-- STATUS -->
+
+            <div class="col-md-2">
+
+                <label class="form-label fw-semibold">
+
+                    Status
+
+                </label>
+
+                <select
+                    name="status"
+                    class="form-select form-select-lg"
+                    required
+                >
+
+                    <option
+                        value="PENDENTE"
+                        {% if mensalidade.status == 'PENDENTE' %}
+                            selected
+                        {% endif %}
+                    >
+                        PENDENTE
+                    </option>
+
+                    <option
+                        value="PAGO"
+                        {% if mensalidade.status == 'PAGO' %}
+                            selected
+                        {% endif %}
+                    >
+                        PAGO
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+        <div class="mt-4 d-flex gap-3">
+
+            <button
+                class="btn btn-warning btn-lg text-white"
+            >
+
+                <i class="bi bi-save-fill"></i>
+
+                Salvar Alterações
+
+            </button>
+
+            <a
+                href="/mensalidades"
+                class="btn btn-secondary btn-lg"
+            >
+
+                Cancelar
+
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}
