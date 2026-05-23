@@ -34,14 +34,21 @@ from werkzeug.security import (
 
 from reportlab.pdfgen import canvas
 
-from flask_moment import Moment
-
 
 # =====================================
 # APP
 # =====================================
 
 app = Flask(__name__)
+
+@app.context_processor
+def inject_data():
+
+    return {
+
+        'current_date': datetime.now().strftime('%d/%m/%Y')
+
+    }
 
 app.secret_key = 'karate_secret'
 
@@ -69,7 +76,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
-moment = Moment(app)
 
 # =====================================
 # LOGIN OBRIGATÓRIO
