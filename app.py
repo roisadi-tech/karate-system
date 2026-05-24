@@ -1458,9 +1458,22 @@ def usuarios():
         Usuario.id.desc()
     ).all()
 
+    total_usuarios = Usuario.query.count()
+
+    total_admins = Usuario.query.filter_by(
+        tipo='admin'
+    ).count()
+
+    total_professores = Usuario.query.filter_by(
+        tipo='professor'
+    ).count()
+
     return render_template(
         'usuarios.html',
-        usuarios=lista_usuarios
+        usuarios=lista_usuarios,
+        total_usuarios=total_usuarios,
+        total_admins=total_admins,
+        total_professores=total_professores
     )
 
 
