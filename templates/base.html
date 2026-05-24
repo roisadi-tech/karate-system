@@ -57,6 +57,8 @@
 
             overflow-x: hidden;
 
+            color: #0f172a;
+
         }
 
         .sidebar {
@@ -77,11 +79,13 @@
 
             top: 0;
 
-            padding: 25px;
+            padding: 24px;
 
             box-shadow: 4px 0 20px rgba(0,0,0,0.08);
 
             z-index: 1000;
+
+            overflow-y: auto;
 
         }
 
@@ -89,11 +93,17 @@
 
             color: white;
 
-            font-size: 28px;
+            font-size: 26px;
 
             font-weight: 700;
 
-            margin-bottom: 35px;
+            margin-bottom: 28px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
 
         }
 
@@ -101,11 +111,13 @@
 
             background: rgba(255,255,255,0.08);
 
+            border: 1px solid rgba(255,255,255,0.08);
+
             border-radius: 18px;
 
             padding: 15px;
 
-            margin-bottom: 30px;
+            margin-bottom: 25px;
 
             color: white;
 
@@ -123,21 +135,79 @@
 
             font-weight: 600;
 
+            word-break: break-word;
+
+        }
+
+        .badge-admin {
+
+            background: #dc3545;
+
+            padding: 8px 14px;
+
+            border-radius: 12px;
+
+            color: white;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            display: inline-block;
+
+        }
+
+        .badge-professor {
+
+            background: #0d6efd;
+
+            padding: 8px 14px;
+
+            border-radius: 12px;
+
+            color: white;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            display: inline-block;
+
+        }
+
+        .menu-label {
+
+            color: #94a3b8;
+
+            font-size: 12px;
+
+            font-weight: 600;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.6px;
+
+            margin: 18px 0 8px 12px;
+
         }
 
         .nav-link {
 
             color: #cbd5e1;
 
-            margin-bottom: 10px;
+            margin-bottom: 8px;
 
             border-radius: 14px;
 
-            padding: 14px 16px;
+            padding: 13px 15px;
 
-            transition: 0.3s;
+            transition: 0.25s;
 
             font-weight: 500;
+
+            display: flex;
+
+            align-items: center;
 
         }
 
@@ -169,13 +239,33 @@
 
         }
 
+        .nav-link.logout {
+
+            color: #fecaca;
+
+            border: 1px solid rgba(220,53,69,0.35);
+
+            margin-top: 10px;
+
+        }
+
+        .nav-link.logout:hover {
+
+            background: #dc3545;
+
+            color: white;
+
+        }
+
         .content {
 
             margin-left: 270px;
 
-            padding: 35px;
+            padding: 32px;
 
             width: calc(100% - 270px);
+
+            min-height: 100vh;
 
         }
 
@@ -195,13 +285,15 @@
 
             align-items: center;
 
+            gap: 15px;
+
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
 
         }
 
         .topbar-title {
 
-            font-size: 24px;
+            font-size: 22px;
 
             font-weight: 700;
 
@@ -209,35 +301,19 @@
 
         }
 
-        .badge-admin {
+        .topbar-date {
 
-            background: #dc3545;
+            background: #f8fafc;
 
-            padding: 8px 14px;
+            border-radius: 14px;
 
-            border-radius: 12px;
+            padding: 10px 14px;
 
-            color: white;
+            color: #475569;
 
-            font-size: 13px;
+            font-weight: 500;
 
-            font-weight: 600;
-
-        }
-
-        .badge-professor {
-
-            background: #0d6efd;
-
-            padding: 8px 14px;
-
-            border-radius: 12px;
-
-            color: white;
-
-            font-size: 13px;
-
-            font-weight: 600;
+            white-space: nowrap;
 
         }
 
@@ -277,9 +353,63 @@
 
         }
 
+        .table-light th {
+
+            background: #f8fafc !important;
+
+            color: #0f172a !important;
+
+        }
+
         .alert {
 
-            border-radius: 15px;
+            border-radius: 16px;
+
+            border: none;
+
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+
+        }
+
+        .card-hover {
+
+            transition: 0.3s;
+
+        }
+
+        .card-hover:hover {
+
+            transform: translateY(-5px);
+
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+
+        }
+
+        .dashboard-icon {
+
+            width: 70px;
+
+            height: 70px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border-radius: 20px;
+
+        }
+
+        .footer-system {
+
+            margin-top: 35px;
+
+            color: #94a3b8;
+
+            font-size: 13px;
+
+            text-align: center;
 
         }
 
@@ -293,6 +423,20 @@
 
                 position: relative;
 
+                padding: 20px;
+
+            }
+
+            .logo {
+
+                margin-bottom: 18px;
+
+            }
+
+            .usuario-box {
+
+                margin-bottom: 18px;
+
             }
 
             .content {
@@ -301,39 +445,53 @@
 
                 width: 100%;
 
+                padding: 20px;
+
+            }
+
+            .topbar {
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+            }
+
+            .topbar-title {
+
+                font-size: 19px;
+
+            }
+
+            .nav-link:hover {
+
+                transform: none;
+
             }
 
         }
 
-        .card-hover {
+        @media (max-width: 576px) {
 
-    transition: 0.3s;
+            .content {
 
-}
+                padding: 15px;
 
-.card-hover:hover {
+            }
 
-    transform: translateY(-5px);
+            .topbar {
 
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+                padding: 16px;
 
-}
+            }
 
-.dashboard-icon {
+            .sidebar {
 
-    width: 70px;
+                padding: 16px;
 
-    height: 70px;
+            }
 
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    border-radius: 20px;
-
-}
+        }
 
     </style>
 
@@ -347,7 +505,9 @@
 
     <div class="logo">
 
-        🥋 Karate System
+        <span>🥋</span>
+
+        <span>Karate System</span>
 
     </div>
 
@@ -370,12 +530,14 @@
             {% if session.tipo == 'admin' %}
 
                 <span class="badge-admin">
+                    <i class="bi bi-shield-lock-fill"></i>
                     ADMIN
                 </span>
 
             {% else %}
 
                 <span class="badge-professor">
+                    <i class="bi bi-person-badge-fill"></i>
                     PROFESSOR
                 </span>
 
@@ -389,9 +551,13 @@
 
     <nav class="nav flex-column">
 
+        <div class="menu-label">
+            Principal
+        </div>
+
         <a
             href="/"
-            class="nav-link"
+            class="nav-link {% if request.path == '/' %}active{% endif %}"
         >
             <i class="bi bi-speedometer2"></i>
             Dashboard
@@ -399,15 +565,19 @@
 
         <a
             href="/alunos"
-            class="nav-link"
+            class="nav-link {% if request.path.startswith('/alunos') or request.path.startswith('/aluno') or request.path.startswith('/cadastrar_aluno') or request.path.startswith('/editar_aluno') %}active{% endif %}"
         >
             <i class="bi bi-people"></i>
             Alunos
         </a>
 
+        <div class="menu-label">
+            Frequência
+        </div>
+
         <a
             href="/presencas"
-            class="nav-link"
+            class="nav-link {% if request.path.startswith('/presencas') %}active{% endif %}"
         >
             <i class="bi bi-check2-square"></i>
             Presenças
@@ -415,15 +585,19 @@
 
         <a
             href="/frequencia"
-            class="nav-link"
+            class="nav-link {% if request.path.startswith('/frequencia') %}active{% endif %}"
         >
             <i class="bi bi-bar-chart-line"></i>
             Frequência
         </a>
 
+        <div class="menu-label">
+            Financeiro
+        </div>
+
         <a
             href="/mensalidades"
-            class="nav-link"
+            class="nav-link {% if request.path.startswith('/mensalidades') or request.path.startswith('/editar_mensalidade') %}active{% endif %}"
         >
             <i class="bi bi-cash-stack"></i>
             Mensalidades
@@ -431,15 +605,19 @@
 
         <a
             href="/cobrar"
-            class="nav-link"
+            class="nav-link {% if request.path.startswith('/cobrar') %}active{% endif %}"
         >
             <i class="bi bi-whatsapp"></i>
             Cobranças
         </a>
 
+        <div class="menu-label">
+            Gestão
+        </div>
+
         <a
             href="/exames"
-            class="nav-link"
+            class="nav-link {% if request.path.startswith('/exames') %}active{% endif %}"
         >
             <i class="bi bi-award"></i>
             Exames
@@ -447,7 +625,7 @@
 
         <a
             href="/relatorios"
-            class="nav-link"
+            class="nav-link {% if request.path.startswith('/relatorios') %}active{% endif %}"
         >
             <i class="bi bi-graph-up-arrow"></i>
             Relatórios
@@ -455,9 +633,13 @@
 
         {% if session.tipo == 'admin' %}
 
+        <div class="menu-label">
+            Administração
+        </div>
+
         <a
             href="/usuarios"
-            class="nav-link"
+            class="nav-link {% if request.path.startswith('/usuarios') or request.path.startswith('/cadastrar_usuario') or request.path.startswith('/editar_usuario') %}active{% endif %}"
         >
             <i class="bi bi-person-gear"></i>
             Usuários
@@ -465,7 +647,7 @@
 
         <a
             href="/backup"
-            class="nav-link"
+            class="nav-link {% if request.path.startswith('/backup') %}active{% endif %}"
         >
             <i class="bi bi-download"></i>
             Backup
@@ -477,7 +659,7 @@
 
         <a
             href="/logout"
-            class="nav-link text-danger"
+            class="nav-link logout"
         >
             <i class="bi bi-box-arrow-right"></i>
             Sair
@@ -501,7 +683,7 @@
 
         </div>
 
-        <div>
+        <div class="topbar-date">
 
             <i class="bi bi-calendar-check"></i>
 
@@ -513,16 +695,34 @@
 
     <!-- FLASH MESSAGES -->
 
-    {% with mensagens = get_flashed_messages() %}
+    {% with mensagens = get_flashed_messages(with_categories=true) %}
 
         {% if mensagens %}
 
-            {% for msg in mensagens %}
+            {% for categoria, msg in mensagens %}
 
                 <div
-                    class="alert alert-success alert-dismissible fade show"
+                    class="alert alert-{{ categoria }} alert-dismissible fade show"
                     role="alert"
                 >
+
+                    {% if categoria == 'success' %}
+
+                        <i class="bi bi-check-circle-fill"></i>
+
+                    {% elif categoria == 'danger' %}
+
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+
+                    {% elif categoria == 'warning' %}
+
+                        <i class="bi bi-exclamation-circle-fill"></i>
+
+                    {% else %}
+
+                        <i class="bi bi-info-circle-fill"></i>
+
+                    {% endif %}
 
                     {{ msg }}
 
@@ -545,6 +745,12 @@
     {% block conteudo %}
 
     {% endblock %}
+
+    <div class="footer-system">
+
+        Karate System © {{ current_date[-4:] }} — Sistema de Gestão da Academia
+
+    </div>
 
 </div>
 
