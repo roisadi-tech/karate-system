@@ -65,7 +65,7 @@
 
             width: 270px;
 
-            min-height: 100vh;
+            height: 100vh;
 
             background: linear-gradient(
                 180deg,
@@ -79,7 +79,7 @@
 
             top: 0;
 
-            padding: 24px;
+            padding: 20px;
 
             box-shadow: 4px 0 20px rgba(0,0,0,0.08);
 
@@ -87,17 +87,45 @@
 
             overflow-y: auto;
 
+            overflow-x: hidden;
+
+        }
+
+        .sidebar::-webkit-scrollbar {
+
+            width: 6px;
+
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+
+            background: transparent;
+
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+
+            background: rgba(255,255,255,0.25);
+
+            border-radius: 20px;
+
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+
+            background: rgba(255,255,255,0.4);
+
         }
 
         .logo {
 
             color: white;
 
-            font-size: 26px;
+            font-size: 24px;
 
             font-weight: 700;
 
-            margin-bottom: 28px;
+            margin-bottom: 22px;
 
             display: flex;
 
@@ -115,9 +143,9 @@
 
             border-radius: 18px;
 
-            padding: 15px;
+            padding: 13px;
 
-            margin-bottom: 25px;
+            margin-bottom: 20px;
 
             color: white;
 
@@ -179,7 +207,7 @@
 
             color: #94a3b8;
 
-            font-size: 12px;
+            font-size: 11px;
 
             font-weight: 600;
 
@@ -187,7 +215,7 @@
 
             letter-spacing: 0.6px;
 
-            margin: 18px 0 8px 12px;
+            margin: 14px 0 6px 12px;
 
         }
 
@@ -195,11 +223,11 @@
 
             color: #cbd5e1;
 
-            margin-bottom: 8px;
+            margin-bottom: 6px;
 
             border-radius: 14px;
 
-            padding: 13px 15px;
+            padding: 11px 14px;
 
             transition: 0.25s;
 
@@ -419,11 +447,17 @@
 
                 width: 100%;
 
+                height: auto;
+
+                max-height: none;
+
                 min-height: auto;
 
                 position: relative;
 
                 padding: 20px;
+
+                overflow-y: visible;
 
             }
 
@@ -745,6 +779,8 @@
     {% block conteudo %}
 
     {% endblock %}
+
+    <!-- RODAPÉ -->
 
     <div class="footer-system">
 
