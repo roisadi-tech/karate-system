@@ -573,19 +573,38 @@
 
                     <!-- AÇÕES -->
 
-                    <td class="text-center">
+<td class="text-center">
 
-                        <a
-                            href="/aluno/{{ presenca.aluno.id }}"
-                            class="btn btn-dark btn-sm rounded-3"
-                            title="Ver perfil do aluno"
-                        >
+    <div class="d-flex gap-2 justify-content-center flex-wrap">
 
-                            <i class="bi bi-person-vcard-fill"></i>
+        <!-- PERFIL -->
 
-                        </a>
+        <a
+            href="/aluno/{{ presenca.aluno.id }}"
+            class="btn btn-dark btn-sm rounded-3"
+            title="Ver perfil do aluno"
+        >
 
-                    </td>
+            <i class="bi bi-person-vcard-fill"></i>
+
+        </a>
+
+        <!-- EXCLUIR -->
+
+        <a
+            href="/excluir_presenca/{{ presenca.id }}"
+            class="btn btn-danger btn-sm rounded-3"
+            title="Excluir presença"
+            onclick="return confirm('Deseja realmente excluir este registro de presença?')"
+        >
+
+            <i class="bi bi-trash-fill"></i>
+
+        </a>
+
+    </div>
+
+</td>
 
                 </tr>
 

@@ -713,6 +713,28 @@ def presencas():
 
 
 # =====================================
+# EXCLUIR PRESENÇA
+# =====================================
+
+@app.route('/excluir_presenca/<int:id>')
+@login_obrigatorio
+def excluir_presenca(id):
+
+    presenca = Presenca.query.get_or_404(id)
+
+    db.session.delete(presenca)
+
+    db.session.commit()
+
+    flash(
+        'Registro de presença excluído com sucesso.',
+        'success'
+    )
+
+    return redirect('/presencas')
+
+
+# =====================================
 # FREQUÊNCIA
 # =====================================
 
