@@ -735,6 +735,42 @@ def excluir_presenca(id):
 
 
 # =====================================
+# EDITAR PRESENÇA
+# =====================================
+
+@app.route('/editar_presenca/<int:id>', methods=['GET', 'POST'])
+@login_obrigatorio
+def editar_presenca(id):
+
+    presenca = Presenca.query.get_or_404(id)
+
+    alunos = Aluno.query.order_by(
+        Aluno.nome.asc()
+    ).all()
+
+    if request.method == 'POST':
+
+        presenca.aluno_id = request.form['aluno_id']
+        presenca.data = request.form['data']
+        presenca.status = request.form['status']
+
+        db.session.commit()
+
+        flash(
+            'Presença atualizada com sucesso.',
+            'success'
+        )
+
+        return redirect('/presencas')
+
+    return render_template(
+        'editar_presenca.html',
+        presenca=presenca,
+        alunos=alunos
+    )
+
+
+# =====================================
 # FREQUÊNCIA
 # =====================================
 

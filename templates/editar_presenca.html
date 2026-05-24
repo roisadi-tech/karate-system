@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<!-- TOPO -->
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+    <div>
+
+        <h2 class="fw-bold">
+            ✏️ Editar Presença
+        </h2>
+
+        <p class="text-muted mb-0">
+            Atualize o aluno, a data ou o status da presença
+        </p>
+
+    </div>
+
+    <a
+        href="/presencas"
+        class="btn btn-dark"
+    >
+
+        <i class="bi bi-arrow-left"></i>
+
+        Voltar
+
+    </a>
+
+</div>
+
+<!-- CARD -->
+
+<div class="card border-0 shadow-sm rounded-4 p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+
+        <div>
+
+            <h4 class="fw-bold mb-1">
+
+                Dados da Presença
+
+            </h4>
+
+            <small class="text-muted">
+
+                Altere somente as informações necessárias
+
+            </small>
+
+        </div>
+
+        <span class="badge bg-warning text-dark p-2">
+
+            ID #{{ presenca.id }}
+
+        </span>
+
+    </div>
+
+    <form method="POST">
+
+        <div class="row g-3">
+
+            <!-- ALUNO -->
+
+            <div class="col-md-4">
+
+                <label class="form-label fw-semibold">
+
+                    Aluno
+
+                </label>
+
+                <select
+                    name="aluno_id"
+                    class="form-select form-select-lg"
+                    required
+                >
+
+                    {% for aluno in alunos %}
+
+                    <option
+                        value="{{ aluno.id }}"
+                        {% if presenca.aluno_id == aluno.id %}
+                            selected
+                        {% endif %}
+                    >
+
+                        {{ aluno.nome }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <!-- DATA -->
+
+            <div class="col-md-4">
+
+                <label class="form-label fw-semibold">
+
+                    Data
+
+                </label>
+
+                <input
+                    type="date"
+                    name="data"
+                    value="{{ presenca.data }}"
+                    class="form-control form-control-lg"
+                    required
+                >
+
+            </div>
+
+            <!-- STATUS -->
+
+            <div class="col-md-4">
+
+                <label class="form-label fw-semibold">
+
+                    Status
+
+                </label>
+
+                <select
+                    name="status"
+                    class="form-select form-select-lg"
+                    required
+                >
+
+                    <option
+                        value="PRESENTE"
+                        {% if presenca.status == 'PRESENTE' %}
+                            selected
+                        {% endif %}
+                    >
+                        ✅ PRESENTE
+                    </option>
+
+                    <option
+                        value="FALTA"
+                        {% if presenca.status == 'FALTA' %}
+                            selected
+                        {% endif %}
+                    >
+                        ❌ FALTA
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+        <!-- RESUMO -->
+
+        <div class="alert alert-info mt-4 mb-0">
+
+            <i class="bi bi-info-circle-fill"></i>
+
+            Ao salvar, este registro será atualizado no histórico de presenças.
+
+        </div>
+
+        <!-- BOTÕES -->
+
+        <div class="d-flex justify-content-end gap-2 mt-4 flex-wrap">
+
+            <a
+                href="/presencas"
+                class="btn btn-outline-secondary btn-lg"
+            >
+
+                Cancelar
+
+            </a>
+
+            <button
+                type="submit"
+                class="btn btn-success btn-lg"
+            >
+
+                <i class="bi bi-check-circle-fill"></i>
+
+                Salvar Alterações
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}
