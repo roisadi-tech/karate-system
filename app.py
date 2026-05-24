@@ -1055,6 +1055,9 @@ def exames():
 @login_obrigatorio
 def cobrar():
 
+    hoje = date.today()
+    hoje_str = hoje.strftime('%Y-%m-%d')
+
     dados = Mensalidade.query.filter_by(
         status='PENDENTE'
     ).order_by(
@@ -1071,11 +1074,30 @@ def cobrar():
 
         total_pendente = 0
 
+    vencidas = Mensalidade.query.filter(
+        Mensalidade.status == 'PENDENTE',
+        Mensalidade.vencimento < hoje_str
+    ).count()
+
+    vence_hoje = Mensalidade.query.filter(
+        Mensalidade.status == 'PENDENTE',
+        Mensalidade.vencimento == hoje_str
+    ).count()
+
+    pendentes_futuras = Mensalidade.query.filter(
+        Mensalidade.status == 'PENDENTE',
+        Mensalidade.vencimento > hoje_str
+    ).count()
+
     return render_template(
         'cobrar.html',
         dados=dados,
-        hoje=date.today(),
-        total_pendente=total_pendente
+        hoje=hoje,
+        hoje_str=hoje_str,
+        total_pendente=total_pendente,
+        vencidas=vencidas,
+        vence_hoje=vence_hoje,
+        pendentes_futuras=pendentes_futuras
     )
 
 

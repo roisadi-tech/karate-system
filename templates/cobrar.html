@@ -4,7 +4,7 @@
 
 <!-- TOPO -->
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
 
     <div>
 
@@ -18,16 +18,31 @@
 
     </div>
 
-    <a
-        href="/mensalidades"
-        class="btn btn-dark"
-    >
+    <div class="d-flex gap-2">
 
-        <i class="bi bi-cash-stack"></i>
+        <a
+            href="/mensalidades"
+            class="btn btn-dark"
+        >
 
-        Mensalidades
+            <i class="bi bi-cash-stack"></i>
 
-    </a>
+            Mensalidades
+
+        </a>
+
+        <a
+            href="/relatorios"
+            class="btn btn-outline-dark"
+        >
+
+            <i class="bi bi-graph-up-arrow"></i>
+
+            Relatórios
+
+        </a>
+
+    </div>
 
 </div>
 
@@ -37,7 +52,7 @@
 
     <!-- TOTAL PENDENTE -->
 
-    <div class="col-md-4">
+    <div class="col-md-3">
 
         <div class="card border-0 shadow-sm p-4 h-100 rounded-4">
 
@@ -46,7 +61,7 @@
                 <div>
 
                     <small class="text-muted">
-                        Mensalidades Pendentes
+                        Pendências
                     </small>
 
                     <h2 class="fw-bold mt-2 text-danger">
@@ -71,7 +86,7 @@
 
     <!-- VALOR PENDENTE -->
 
-    <div class="col-md-4">
+    <div class="col-md-3">
 
         <div class="card border-0 shadow-sm p-4 h-100 rounded-4">
 
@@ -85,7 +100,7 @@
 
                     <h2 class="fw-bold mt-2 text-warning">
 
-                        R$ {{ "%.2f"|format(total_pendente or 0) }}
+                        {{ formatar_moeda(total_pendente) }}
 
                     </h2>
 
@@ -103,9 +118,9 @@
 
     </div>
 
-    <!-- WHATSAPP -->
+    <!-- VENCIDAS -->
 
-    <div class="col-md-4">
+    <div class="col-md-3">
 
         <div class="card border-0 shadow-sm p-4 h-100 rounded-4">
 
@@ -114,20 +129,54 @@
                 <div>
 
                     <small class="text-muted">
-                        Cobranças via WhatsApp
+                        Vencidas
                     </small>
 
-                    <h2 class="fw-bold mt-2 text-success">
+                    <h2 class="fw-bold mt-2 text-danger">
 
-                        Ativo
+                        {{ vencidas }}
 
                     </h2>
 
                 </div>
 
-                <div class="bg-success text-white p-3 rounded-4">
+                <div class="bg-danger text-white p-3 rounded-4">
 
-                    <i class="bi bi-whatsapp fs-2"></i>
+                    <i class="bi bi-calendar-x-fill fs-2"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- VENCE HOJE -->
+
+    <div class="col-md-3">
+
+        <div class="card border-0 shadow-sm p-4 h-100 rounded-4">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <small class="text-muted">
+                        Vence Hoje
+                    </small>
+
+                    <h2 class="fw-bold mt-2 text-primary">
+
+                        {{ vence_hoje }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-primary text-white p-3 rounded-4">
+
+                    <i class="bi bi-calendar-event-fill fs-2"></i>
 
                 </div>
 
@@ -139,11 +188,77 @@
 
 </div>
 
+<!-- ALERTA DE PRIORIDADE -->
+
+{% if vencidas > 0 %}
+
+<div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4">
+
+    <div class="d-flex align-items-center gap-3">
+
+        <i class="bi bi-exclamation-triangle-fill fs-3"></i>
+
+        <div>
+
+            <strong>
+                Atenção:
+            </strong>
+
+            existem {{ vencidas }} mensalidade(s) vencida(s). Priorize essas cobranças.
+
+        </div>
+
+    </div>
+
+</div>
+
+{% elif vence_hoje > 0 %}
+
+<div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4">
+
+    <div class="d-flex align-items-center gap-3">
+
+        <i class="bi bi-clock-fill fs-3"></i>
+
+        <div>
+
+            <strong>
+                Lembrete:
+            </strong>
+
+            existem {{ vence_hoje }} mensalidade(s) vencendo hoje.
+
+        </div>
+
+    </div>
+
+</div>
+
+{% else %}
+
+<div class="alert alert-success border-0 shadow-sm rounded-4 mb-4">
+
+    <div class="d-flex align-items-center gap-3">
+
+        <i class="bi bi-check-circle-fill fs-3"></i>
+
+        <div>
+
+            Nenhuma cobrança vencida para hoje.
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
+
 <!-- TABELA -->
 
 <div class="card border-0 shadow-sm p-4 rounded-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
 
         <div>
 
@@ -161,11 +276,27 @@
 
         </div>
 
-        <span class="badge bg-dark p-2">
+        <div class="d-flex gap-2 flex-wrap">
 
-            {{ dados|length }} pendências
+            <span class="badge bg-danger p-2">
 
-        </span>
+                {{ vencidas }} vencidas
+
+            </span>
+
+            <span class="badge bg-primary p-2">
+
+                {{ vence_hoje }} hoje
+
+            </span>
+
+            <span class="badge bg-secondary p-2">
+
+                {{ pendentes_futuras }} futuras
+
+            </span>
+
+        </div>
 
     </div>
 
@@ -187,7 +318,9 @@
 
                     <th>Status</th>
 
-                    <th>Ações</th>
+                    <th class="text-center">
+                        Ações
+                    </th>
 
                 </tr>
 
@@ -197,17 +330,76 @@
 
                 {% for item in dados %}
 
-                <tr>
+                {% set vencimento = item.vencimento|string %}
+
+                {% if vencimento < hoje_str %}
+
+                    <tr class="table-danger">
+
+                {% elif vencimento == hoje_str %}
+
+                    <tr class="table-warning">
+
+                {% else %}
+
+                    <tr>
+
+                {% endif %}
 
                     <!-- ALUNO -->
 
                     <td>
 
-                        <strong>
+                        <div class="d-flex align-items-center gap-3">
 
-                            {{ item.aluno.nome }}
+                            {% if item.aluno.foto and item.aluno.foto != '' %}
 
-                        </strong>
+                                <img
+                                    src="{{ url_for('static', filename='uploads/' + item.aluno.foto) }}"
+                                    width="48"
+                                    height="48"
+                                    style="
+                                        object-fit: cover;
+                                        border-radius: 50%;
+                                    "
+                                >
+
+                            {% else %}
+
+                                <div
+                                    class="bg-secondary text-white d-flex align-items-center justify-content-center"
+                                    style="
+                                        width:48px;
+                                        height:48px;
+                                        border-radius:50%;
+                                    "
+                                >
+
+                                    <i class="bi bi-person-fill"></i>
+
+                                </div>
+
+                            {% endif %}
+
+                            <div>
+
+                                <strong>
+
+                                    {{ item.aluno.nome }}
+
+                                </strong>
+
+                                <br>
+
+                                <small class="text-muted">
+
+                                    ID #{{ item.aluno.id }}
+
+                                </small>
+
+                            </div>
+
+                        </div>
 
                     </td>
 
@@ -245,7 +437,11 @@
 
                     <td>
 
-                        {{ formatar_data(item.vencimento) }}
+                        <strong>
+
+                            {{ formatar_data(item.vencimento) }}
+
+                        </strong>
 
                     </td>
 
@@ -253,9 +449,7 @@
 
                     <td>
 
-                        {% set vencimento = item.vencimento|string %}
-
-                        {% if vencimento < hoje|string %}
+                        {% if vencimento < hoje_str %}
 
                             <span class="badge bg-danger p-2">
 
@@ -265,7 +459,7 @@
 
                             </span>
 
-                        {% elif vencimento == hoje|string %}
+                        {% elif vencimento == hoje_str %}
 
                             <span class="badge bg-warning text-dark p-2">
 
@@ -291,16 +485,30 @@
 
                     <!-- AÇÕES -->
 
-                    <td>
+                    <td class="text-center">
 
-                        <div class="d-flex gap-2 flex-wrap">
+                        <div class="d-flex gap-2 justify-content-center flex-wrap">
 
                             <!-- MENSAGEM WHATSAPP -->
+
+                            {% if vencimento < hoje_str %}
+
+                                {% set texto_status = "encontra-se vencida" %}
+
+                            {% elif vencimento == hoje_str %}
+
+                                {% set texto_status = "vence hoje" %}
+
+                            {% else %}
+
+                                {% set texto_status = "está pendente" %}
+
+                            {% endif %}
 
                             {% set mensagem =
                                 "Olá " ~ item.aluno.nome ~
                                 ", tudo bem?\n\n" ~
-                                "Estamos entrando em contato para lembrar que sua mensalidade da academia de karatê está pendente.\n\n" ~
+                                "Estamos entrando em contato para lembrar que sua mensalidade da academia de karatê " ~ texto_status ~ ".\n\n" ~
                                 "Valor: " ~ formatar_moeda(item.valor) ~ "\n" ~
                                 "Vencimento: " ~ formatar_data(item.vencimento) ~ "\n\n" ~
                                 "Qualquer dúvida estamos à disposição. 🥋"
@@ -309,7 +517,7 @@
                             <a
                                 target="_blank"
                                 href="https://wa.me/55{{ item.aluno.whatsapp }}?text={{ mensagem | urlencode }}"
-                                class="btn btn-success btn-sm"
+                                class="btn btn-success btn-sm rounded-3"
                                 title="Enviar cobrança"
                             >
 
@@ -321,7 +529,7 @@
 
                             <a
                                 href="/pagar_mensalidade/{{ item.id }}"
-                                class="btn btn-warning btn-sm"
+                                class="btn btn-warning btn-sm rounded-3"
                                 title="Marcar como pago"
                                 onclick="return confirm('Confirmar pagamento desta mensalidade?')"
                             >
@@ -334,11 +542,23 @@
 
                             <a
                                 href="/editar_mensalidade/{{ item.id }}"
-                                class="btn btn-dark btn-sm"
+                                class="btn btn-dark btn-sm rounded-3"
                                 title="Editar mensalidade"
                             >
 
                                 <i class="bi bi-pencil-fill"></i>
+
+                            </a>
+
+                            <!-- PERFIL -->
+
+                            <a
+                                href="/aluno/{{ item.aluno.id }}"
+                                class="btn btn-outline-dark btn-sm rounded-3"
+                                title="Ver perfil do aluno"
+                            >
+
+                                <i class="bi bi-person-vcard-fill"></i>
 
                             </a>
 
