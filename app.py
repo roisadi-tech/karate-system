@@ -1372,11 +1372,40 @@ def relatorios():
     if pendente is None:
         pendente = 0
 
+    total_financeiro = recebido + pendente
+
+    percentual_recebido = 0
+    percentual_pendente = 0
+
+    if total_financeiro > 0:
+
+        percentual_recebido = round(
+            (recebido / total_financeiro) * 100,
+            1
+        )
+
+        percentual_pendente = round(
+            (pendente / total_financeiro) * 100,
+            1
+        )
+
+    total_mensalidades = Mensalidade.query.count()
+
+    mensalidades_pagas = Mensalidade.query.filter_by(
+        status='PAGO'
+    ).count()
+
+    mensalidades_pendentes = Mensalidade.query.filter_by(
+        status='PENDENTE'
+    ).count()
+
     faixas = db.session.query(
         Aluno.faixa,
         db.func.count(Aluno.id)
     ).group_by(
         Aluno.faixa
+    ).order_by(
+        db.func.count(Aluno.id).desc()
     ).all()
 
     return render_template(
@@ -1384,6 +1413,12 @@ def relatorios():
         total_alunos=total_alunos,
         recebido=recebido,
         pendente=pendente,
+        total_financeiro=total_financeiro,
+        percentual_recebido=percentual_recebido,
+        percentual_pendente=percentual_pendente,
+        total_mensalidades=total_mensalidades,
+        mensalidades_pagas=mensalidades_pagas,
+        mensalidades_pendentes=mensalidades_pendentes,
         faixas=faixas
     )
 

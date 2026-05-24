@@ -4,7 +4,7 @@
 
 <!-- TOPO -->
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
 
     <div>
 
@@ -18,17 +18,43 @@
 
     </div>
 
+    <div class="d-flex gap-2">
+
+        <a
+            href="/alunos"
+            class="btn btn-dark"
+        >
+
+            <i class="bi bi-people-fill"></i>
+
+            Alunos
+
+        </a>
+
+        <a
+            href="/cobrar"
+            class="btn btn-danger"
+        >
+
+            <i class="bi bi-whatsapp"></i>
+
+            Cobranças
+
+        </a>
+
+    </div>
+
 </div>
 
-<!-- CARDS -->
+<!-- CARDS PRINCIPAIS -->
 
-<div class="row g-4 mb-5">
+<div class="row g-4 mb-4">
 
     <!-- ALUNOS -->
 
-    <div class="col-md-4">
+    <div class="col-md-3">
 
-        <div class="card p-4 h-100">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
 
             <div class="d-flex justify-content-between align-items-center">
 
@@ -60,9 +86,9 @@
 
     <!-- RECEBIDO -->
 
-    <div class="col-md-4">
+    <div class="col-md-3">
 
-        <div class="card p-4 h-100">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
 
             <div class="d-flex justify-content-between align-items-center">
 
@@ -74,9 +100,15 @@
 
                     <h2 class="fw-bold mt-2 text-success">
 
-                        R$ {{ recebido }}
+                        {{ formatar_moeda(recebido) }}
 
                     </h2>
+
+                    <small class="text-muted">
+
+                        {{ percentual_recebido }}% do financeiro
+
+                    </small>
 
                 </div>
 
@@ -94,9 +126,9 @@
 
     <!-- PENDENTE -->
 
-    <div class="col-md-4">
+    <div class="col-md-3">
 
-        <div class="card p-4 h-100">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
 
             <div class="d-flex justify-content-between align-items-center">
 
@@ -108,9 +140,15 @@
 
                     <h2 class="fw-bold mt-2 text-danger">
 
-                        R$ {{ pendente }}
+                        {{ formatar_moeda(pendente) }}
 
                     </h2>
+
+                    <small class="text-muted">
+
+                        {{ percentual_pendente }}% do financeiro
+
+                    </small>
 
                 </div>
 
@@ -126,13 +164,239 @@
 
     </div>
 
+    <!-- TOTAL FINANCEIRO -->
+
+    <div class="col-md-3">
+
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <small class="text-muted">
+                        Total Financeiro
+                    </small>
+
+                    <h2 class="fw-bold mt-2 text-dark">
+
+                        {{ formatar_moeda(total_financeiro) }}
+
+                    </h2>
+
+                    <small class="text-muted">
+
+                        Pago + pendente
+
+                    </small>
+
+                </div>
+
+                <div class="bg-dark text-white p-3 rounded-4 shadow-sm">
+
+                    <i class="bi bi-wallet2 fs-2"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
 
-<!-- DISTRIBUIÇÃO -->
+<!-- CARDS SECUNDÁRIOS -->
 
-<div class="card p-4">
+<div class="row g-4 mb-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- TOTAL MENSALIDADES -->
+
+    <div class="col-md-4">
+
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <small class="text-muted">
+                        Total de Mensalidades
+                    </small>
+
+                    <h2 class="fw-bold mt-2">
+
+                        {{ total_mensalidades }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-primary text-white p-3 rounded-4">
+
+                    <i class="bi bi-receipt fs-2"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- PAGAS -->
+
+    <div class="col-md-4">
+
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <small class="text-muted">
+                        Mensalidades Pagas
+                    </small>
+
+                    <h2 class="fw-bold mt-2 text-success">
+
+                        {{ mensalidades_pagas }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-success text-white p-3 rounded-4">
+
+                    <i class="bi bi-check-circle-fill fs-2"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- PENDENTES -->
+
+    <div class="col-md-4">
+
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <small class="text-muted">
+                        Mensalidades Pendentes
+                    </small>
+
+                    <h2 class="fw-bold mt-2 text-danger">
+
+                        {{ mensalidades_pendentes }}
+
+                    </h2>
+
+                </div>
+
+                <div class="bg-danger text-white p-3 rounded-4">
+
+                    <i class="bi bi-x-circle-fill fs-2"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- RESUMO FINANCEIRO -->
+
+<div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+
+        <div>
+
+            <h4 class="fw-bold mb-1">
+
+                Resumo Financeiro
+
+            </h4>
+
+            <small class="text-muted">
+
+                Relação entre valores recebidos e pendentes
+
+            </small>
+
+        </div>
+
+        <a
+            href="/mensalidades"
+            class="btn btn-sm btn-dark rounded-3"
+        >
+
+            Ver Mensalidades
+
+        </a>
+
+    </div>
+
+    <div
+        class="progress"
+        style="
+            height: 32px;
+            border-radius: 30px;
+        "
+    >
+
+        {% if total_financeiro > 0 %}
+
+            <div
+                class="progress-bar bg-success fw-semibold"
+                style="width: {{ percentual_recebido }}%;"
+            >
+
+                Recebido {{ percentual_recebido }}%
+
+            </div>
+
+            <div
+                class="progress-bar bg-danger fw-semibold"
+                style="width: {{ percentual_pendente }}%;"
+            >
+
+                Pendente {{ percentual_pendente }}%
+
+            </div>
+
+        {% else %}
+
+            <div
+                class="progress-bar bg-secondary fw-semibold"
+                style="width: 100%;"
+            >
+
+                Nenhum dado financeiro cadastrado
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+<!-- DISTRIBUIÇÃO POR FAIXA -->
+
+<div class="card border-0 shadow-sm rounded-4 p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
 
         <div>
 
@@ -160,9 +424,9 @@
 
     <div class="table-responsive">
 
-        <table class="table align-middle">
+        <table class="table align-middle table-hover">
 
-            <thead>
+            <thead class="table-light">
 
                 <tr>
 
@@ -186,7 +450,15 @@
 
                 {% for faixa, total in faixas %}
 
-                {% set percentual = ((total / total_alunos) * 100) | round(1) %}
+                    {% if total_alunos > 0 %}
+
+                        {% set percentual = ((total / total_alunos) * 100) | round(1) %}
+
+                    {% else %}
+
+                        {% set percentual = 0 %}
+
+                    {% endif %}
 
                 <tr>
 
@@ -194,9 +466,54 @@
 
                     <td>
 
-                        <span class="badge bg-dark p-2 fs-6">
+                        {% if faixa == 'Branca' %}
 
-                            {{ faixa }}
+                            <span class="badge bg-light text-dark border p-2 fs-6">
+
+                        {% elif faixa == 'Cinza' %}
+
+                            <span class="badge bg-secondary p-2 fs-6">
+
+                        {% elif faixa == 'Azul' %}
+
+                            <span class="badge bg-primary p-2 fs-6">
+
+                        {% elif faixa == 'Amarela' %}
+
+                            <span class="badge bg-warning text-dark p-2 fs-6">
+
+                        {% elif faixa == 'Laranja' %}
+
+                            <span
+                                class="badge p-2 fs-6"
+                                style="background: orange;"
+                            >
+
+                        {% elif faixa == 'Verde' %}
+
+                            <span class="badge bg-success p-2 fs-6">
+
+                        {% elif faixa == 'Roxa' %}
+
+                            <span
+                                class="badge p-2 fs-6"
+                                style="background: #6f42c1;"
+                            >
+
+                        {% elif faixa == 'Marrom' %}
+
+                            <span
+                                class="badge p-2 fs-6"
+                                style="background: #8b4513;"
+                            >
+
+                        {% else %}
+
+                            <span class="badge bg-dark p-2 fs-6">
+
+                        {% endif %}
+
+                            {{ faixa or 'Não informada' }}
 
                         </span>
 
@@ -300,6 +617,39 @@
                 </tr>
 
                 {% endfor %}
+
+                {% if faixas|length == 0 %}
+
+                <tr>
+
+                    <td
+                        colspan="4"
+                        class="text-center py-5"
+                    >
+
+                        <div class="text-muted">
+
+                            <i class="bi bi-bar-chart-line fs-1"></i>
+
+                            <h5 class="mt-3">
+
+                                Nenhum dado encontrado
+
+                            </h5>
+
+                            <p class="mb-0">
+
+                                Cadastre alunos para visualizar a distribuição por faixa.
+
+                            </p>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endif %}
 
             </tbody>
 
