@@ -54,6 +54,8 @@
 
             font-family: 'Poppins', sans-serif;
 
+            box-sizing: border-box;
+
         }
 
         body {
@@ -67,6 +69,16 @@
             align-items: center;
 
             background:
+                radial-gradient(
+                    circle at top left,
+                    rgba(220,53,69,0.28),
+                    transparent 35%
+                ),
+                radial-gradient(
+                    circle at bottom right,
+                    rgba(13,110,253,0.25),
+                    transparent 35%
+                ),
                 linear-gradient(
                     135deg,
                     #020617,
@@ -74,9 +86,11 @@
                     #111827
                 );
 
-            overflow: hidden;
+            overflow-x: hidden;
 
             position: relative;
+
+            padding: 24px;
 
         }
 
@@ -93,6 +107,8 @@
             opacity: 0.25;
 
             animation: float 8s ease-in-out infinite;
+
+            pointer-events: none;
 
         }
 
@@ -140,7 +156,7 @@
 
             100% {
 
-                transform: translateY(0px);
+                transform: translateY(0);
 
             }
 
@@ -152,17 +168,17 @@
 
             width: 100%;
 
-            max-width: 440px;
+            max-width: 430px;
 
             background: rgba(255,255,255,0.08);
 
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.12);
 
             backdrop-filter: blur(22px);
 
-            border-radius: 32px;
+            border-radius: 28px;
 
-            padding: 45px;
+            padding: 38px;
 
             position: relative;
 
@@ -199,11 +215,13 @@
 
         .logo {
 
-            font-size: 34px;
+            font-size: 30px;
 
             font-weight: 700;
 
             color: white;
+
+            line-height: 1.2;
 
         }
 
@@ -211,7 +229,7 @@
 
             color: #cbd5e1;
 
-            font-size: 15px;
+            font-size: 14px;
 
         }
 
@@ -219,11 +237,11 @@
 
         .icon-box {
 
-            width: 95px;
+            width: 82px;
 
-            height: 95px;
+            height: 82px;
 
-            border-radius: 28px;
+            border-radius: 24px;
 
             background: rgba(255,255,255,0.12);
 
@@ -235,17 +253,56 @@
 
             margin: auto;
 
-            margin-bottom: 28px;
+            margin-bottom: 24px;
 
             border: 1px solid rgba(255,255,255,0.08);
+
+            box-shadow:
+                inset 0 0 25px rgba(255,255,255,0.04);
 
         }
 
         .icon-box i {
 
-            font-size: 44px;
+            font-size: 38px;
 
             color: white;
+
+        }
+
+        /* ACESSO */
+
+        .access-info {
+
+            background: rgba(255,255,255,0.08);
+
+            border: 1px solid rgba(255,255,255,0.08);
+
+            border-radius: 16px;
+
+            color: #cbd5e1;
+
+            font-size: 13px;
+
+            padding: 12px 14px;
+
+            display: flex;
+
+            gap: 10px;
+
+            align-items: flex-start;
+
+            margin-bottom: 20px;
+
+        }
+
+        .access-info i {
+
+            color: #ffc107;
+
+            font-size: 18px;
+
+            margin-top: 1px;
 
         }
 
@@ -257,15 +314,41 @@
 
             font-weight: 500;
 
-            margin-bottom: 10px;
+            margin-bottom: 9px;
+
+            font-size: 14px;
 
         }
 
         /* INPUT */
 
+        .input-box {
+
+            position: relative;
+
+        }
+
+        .input-icon {
+
+            position: absolute;
+
+            top: 50%;
+
+            left: 17px;
+
+            transform: translateY(-50%);
+
+            color: #cbd5e1;
+
+            font-size: 18px;
+
+            pointer-events: none;
+
+        }
+
         .form-control {
 
-            height: 58px;
+            height: 56px;
 
             border-radius: 16px;
 
@@ -275,7 +358,7 @@
 
             color: white;
 
-            padding-left: 18px;
+            padding-left: 48px;
 
             transition: 0.3s;
 
@@ -314,6 +397,12 @@
 
         }
 
+        .senha-box .form-control {
+
+            padding-right: 52px;
+
+        }
+
         .toggle-password {
 
             position: absolute;
@@ -330,13 +419,21 @@
 
             font-size: 20px;
 
+            transition: 0.2s;
+
+        }
+
+        .toggle-password:hover {
+
+            color: white;
+
         }
 
         /* BOTÃO */
 
         .btn-login {
 
-            height: 58px;
+            height: 56px;
 
             border-radius: 16px;
 
@@ -354,6 +451,8 @@
 
             transition: 0.3s;
 
+            color: white;
+
             box-shadow:
                 0 10px 25px rgba(220,53,69,0.35);
 
@@ -363,8 +462,16 @@
 
             transform: translateY(-2px);
 
+            color: white;
+
             box-shadow:
                 0 14px 28px rgba(220,53,69,0.45);
+
+        }
+
+        .btn-login:active {
+
+            transform: scale(0.98);
 
         }
 
@@ -376,17 +483,71 @@
 
             border: none;
 
+            font-size: 14px;
+
+            padding: 13px 15px;
+
+        }
+
+        .alert i {
+
+            margin-right: 6px;
+
+        }
+
+        .footer-login {
+
+            text-align: center;
+
+            color: #94a3b8;
+
+            font-size: 12px;
+
+            margin-top: 22px;
+
         }
 
         /* MOBILE */
 
         @media (max-width: 576px) {
 
+            body {
+
+                align-items: flex-start;
+
+                padding: 20px 14px;
+
+            }
+
             .login-card {
 
-                margin: 20px;
+                padding: 30px 22px;
 
-                padding: 35px 25px;
+                border-radius: 24px;
+
+                margin-top: 15px;
+
+            }
+
+            .logo {
+
+                font-size: 26px;
+
+            }
+
+            .icon-box {
+
+                width: 74px;
+
+                height: 74px;
+
+                margin-bottom: 20px;
+
+            }
+
+            .icon-box i {
+
+                font-size: 34px;
 
             }
 
@@ -434,6 +595,20 @@
 
     </div>
 
+    <!-- INFORMAÇÃO -->
+
+    <div class="access-info">
+
+        <i class="bi bi-info-circle-fill"></i>
+
+        <div>
+
+            Acesso restrito a administradores e professores autorizados.
+
+        </div>
+
+    </div>
+
     <!-- ALERTAS -->
 
     {% with mensagens = get_flashed_messages(with_categories=true) %}
@@ -444,7 +619,26 @@
 
                 <div
                     class="alert alert-{{ categoria }}"
+                    role="alert"
                 >
+
+                    {% if categoria == 'success' %}
+
+                        <i class="bi bi-check-circle-fill"></i>
+
+                    {% elif categoria == 'danger' %}
+
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+
+                    {% elif categoria == 'warning' %}
+
+                        <i class="bi bi-exclamation-circle-fill"></i>
+
+                    {% else %}
+
+                        <i class="bi bi-info-circle-fill"></i>
+
+                    {% endif %}
 
                     {{ msg }}
 
@@ -470,13 +664,20 @@
 
             </label>
 
-            <input
-                type="text"
-                name="usuario"
-                class="form-control"
-                placeholder="Digite seu usuário"
-                required
-            >
+            <div class="input-box">
+
+                <i class="bi bi-person-fill input-icon"></i>
+
+                <input
+                    type="text"
+                    name="usuario"
+                    class="form-control"
+                    placeholder="Digite seu usuário"
+                    autocomplete="username"
+                    required
+                >
+
+            </div>
 
         </div>
 
@@ -490,7 +691,9 @@
 
             </label>
 
-            <div class="senha-box">
+            <div class="input-box senha-box">
+
+                <i class="bi bi-lock-fill input-icon"></i>
 
                 <input
                     type="password"
@@ -498,6 +701,7 @@
                     id="senha"
                     class="form-control"
                     placeholder="Digite sua senha"
+                    autocomplete="current-password"
                     required
                 >
 
@@ -513,6 +717,7 @@
         <!-- BOTÃO -->
 
         <button
+            type="submit"
             class="btn btn-login w-100"
             id="btnLogin"
         >
@@ -524,6 +729,14 @@
         </button>
 
     </form>
+
+    <!-- RODAPÉ -->
+
+    <div class="footer-login">
+
+        Karate System © 2026 — Gestão da Academia
+
+    </div>
 
 </div>
 
