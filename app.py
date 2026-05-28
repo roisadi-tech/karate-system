@@ -639,6 +639,20 @@ def presencas():
 
     if request.method == 'POST':
 
+        presenca_existente = Presenca.query.filter_by(
+            aluno_id=request.form['aluno_id'],
+            data=request.form['data']
+        ).first()
+
+        if presenca_existente:
+
+            flash(
+                'Este aluno já possui presença registrada nesta data.',
+                'warning'
+            )
+
+            return redirect('/presencas')
+
         nova_presenca = Presenca(
 
             aluno_id=request.form['aluno_id'],
