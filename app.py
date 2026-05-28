@@ -843,6 +843,20 @@ def mensalidades():
 
     if request.method == 'POST':
 
+        mensalidade_existente = Mensalidade.query.filter_by(
+            aluno_id=request.form['aluno_id'],
+            vencimento=request.form['vencimento']
+        ).first()
+
+        if mensalidade_existente:
+
+            flash(
+                'Este aluno já possui mensalidade cadastrada para este vencimento.',
+                'warning'
+            )
+
+            return redirect('/mensalidades')
+
         nova_mensalidade = Mensalidade(
 
             aluno_id=request.form['aluno_id'],
