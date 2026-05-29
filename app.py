@@ -1068,6 +1068,15 @@ def excluir_mensalidade(id):
 
     mensalidade = Mensalidade.query.get_or_404(id)
 
+    if mensalidade.status == 'PAGO':
+
+        flash(
+            'Não é possível excluir uma mensalidade já paga. Para manter o histórico financeiro, edite o registro se necessário.',
+            'warning'
+        )
+
+        return redirect('/mensalidades')
+
     db.session.delete(mensalidade)
 
     db.session.commit()
@@ -1089,6 +1098,15 @@ def excluir_mensalidade(id):
 def pagar_mensalidade(id):
 
     mensalidade = Mensalidade.query.get_or_404(id)
+
+    if mensalidade.status == 'PAGO':
+
+        flash(
+            'Esta mensalidade já está marcada como paga.',
+            'warning'
+        )
+
+        return redirect('/mensalidades')
 
     mensalidade.status = 'PAGO'
 
