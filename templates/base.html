@@ -724,16 +724,24 @@
         </a>
 
         <div class="menu-label">
-            Gestão
-        </div>
+    Gestão
+</div>
 
-        <a
-            href="/exames"
-            class="nav-link {% if request.path.startswith('/exames') %}active{% endif %}"
-        >
-            <i class="bi bi-award"></i>
-            Exames
-        </a>
+<a
+    href="/aniversariantes"
+    class="nav-link {% if request.path.startswith('/aniversariantes') %}active{% endif %}"
+>
+    <i class="bi bi-gift-fill"></i>
+    Aniversariantes
+</a>
+
+<a
+    href="/exames"
+    class="nav-link {% if request.path.startswith('/exames') %}active{% endif %}"
+>
+    <i class="bi bi-award"></i>
+    Exames
+</a>
 
         <a
             href="/relatorios"
