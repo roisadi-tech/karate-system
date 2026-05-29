@@ -559,7 +559,10 @@ def index():
     ).scalar()
 
     if faturamento is None:
+
         faturamento = 0
+
+    faturamento = float(faturamento)
 
     inadimplentes = Mensalidade.query.filter_by(
         status='PENDENTE'
@@ -618,10 +621,23 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
+    if 'usuario' in session:
+
+        return redirect('/')
+
     if request.method == 'POST':
 
-        usuario_form = request.form['usuario']
-        senha_form = request.form['senha']
+        usuario_form = request.form['usuario'].strip()
+        senha_form = request.form['senha'].strip()
+
+        if usuario_form == '' or senha_form == '':
+
+            flash(
+                'Informe usuário e senha.',
+                'warning'
+            )
+
+            return redirect('/login')
 
         usuario = Usuario.query.filter_by(
             usuario=usuario_form
@@ -632,6 +648,7 @@ def login():
             senha_form
         ):
 
+            session['usuario_id'] = usuario.id
             session['usuario'] = usuario.usuario
             session['tipo'] = usuario.tipo
 
@@ -647,7 +664,9 @@ def login():
             'danger'
         )
 
-    return render_template('login.html')
+    return render_template(
+        'login.html'
+    )
 
 
 # =====================================
