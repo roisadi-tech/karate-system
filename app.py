@@ -631,7 +631,7 @@ def index():
 
                 aptos += 1
 
-    ultimos_alunos = Aluno.query.order_by(
+        ultimos_alunos = Aluno.query.order_by(
         Aluno.id.desc()
     ).limit(5).all()
 
@@ -641,6 +641,36 @@ def index():
         Mensalidade.vencimento.asc()
     ).limit(5).all()
 
+    hoje = date.today()
+
+    aniversariantes_mes = 0
+    aniversariantes_hoje = 0
+
+    for aluno in alunos:
+
+        if not aluno.nascimento:
+
+            continue
+
+        try:
+
+            nascimento = datetime.strptime(
+                aluno.nascimento,
+                '%Y-%m-%d'
+            ).date()
+
+            if nascimento.month == hoje.month:
+
+                aniversariantes_mes += 1
+
+                if nascimento.day == hoje.day:
+
+                    aniversariantes_hoje += 1
+
+        except Exception:
+
+            continue
+
     return render_template(
         'index.html',
         total_alunos=total_alunos,
@@ -648,7 +678,9 @@ def index():
         inadimplentes=inadimplentes,
         aptos=aptos,
         ultimos_alunos=ultimos_alunos,
-        pendencias=pendencias
+        pendencias=pendencias,
+        aniversariantes_mes=aniversariantes_mes,
+        aniversariantes_hoje=aniversariantes_hoje
     )
 
 
