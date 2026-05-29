@@ -538,7 +538,9 @@ def editar_aluno(id):
 
                 return redirect(request.url)
 
-            nome_arquivo = gerar_nome_foto(foto.filename)
+            nome_arquivo = gerar_nome_foto(
+                foto.filename
+            )
 
             if not os.path.exists('static/uploads'):
 
@@ -550,6 +552,17 @@ def editar_aluno(id):
             )
 
             foto.save(caminho)
+
+            if aluno.foto:
+
+                caminho_foto_antiga = os.path.join(
+                    'static/uploads',
+                    aluno.foto
+                )
+
+                if os.path.exists(caminho_foto_antiga):
+
+                    os.remove(caminho_foto_antiga)
 
             aluno.foto = nome_arquivo
 
