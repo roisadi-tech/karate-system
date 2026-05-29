@@ -185,6 +185,98 @@
 
 </div>
 
+<!-- ANIVERSARIANTES -->
+
+<div class="row g-4 mb-4">
+
+    <!-- ANIVERSARIANTES DO MÊS -->
+
+    <div class="col-md-6">
+
+        <a
+            href="/aniversariantes"
+            class="text-decoration-none"
+        >
+
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <div>
+
+                        <small class="text-muted">
+
+                            Aniversariantes do mês
+
+                        </small>
+
+                        <h2 class="fw-bold mt-2 text-primary">
+
+                            {{ aniversariantes_mes }}
+
+                        </h2>
+
+                    </div>
+
+                    <div class="bg-primary text-white p-3 rounded-4">
+
+                        <i class="bi bi-gift-fill fs-2"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+    <!-- ANIVERSARIANTES DE HOJE -->
+
+    <div class="col-md-6">
+
+        <a
+            href="/aniversariantes"
+            class="text-decoration-none"
+        >
+
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <div>
+
+                        <small class="text-muted">
+
+                            Aniversariantes de hoje
+
+                        </small>
+
+                        <h2 class="fw-bold mt-2 text-success">
+
+                            {{ aniversariantes_hoje }}
+
+                        </h2>
+
+                    </div>
+
+                    <div class="bg-success text-white p-3 rounded-4">
+
+                        <i class="bi bi-balloon-fill fs-2"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+</div>
+
 <!-- ATALHOS -->
 
 <div class="row g-4 mb-4">
@@ -490,17 +582,29 @@
 
                             <td>
 
-                                <a
-                                    href="https://wa.me/55{{ aluno.whatsapp }}"
-                                    target="_blank"
-                                    class="text-decoration-none"
-                                >
+                                {% if aluno.whatsapp %}
 
-                                    <i class="bi bi-whatsapp text-success"></i>
+                                    <a
+                                        href="https://wa.me/55{{ aluno.whatsapp }}"
+                                        target="_blank"
+                                        class="text-decoration-none"
+                                    >
 
-                                    {{ formatar_whatsapp(aluno.whatsapp) }}
+                                        <i class="bi bi-whatsapp text-success"></i>
 
-                                </a>
+                                        {{ formatar_whatsapp(aluno.whatsapp) }}
+
+                                    </a>
+
+                                {% else %}
+
+                                    <span class="text-muted">
+
+                                        Não informado
+
+                                    </span>
+
+                                {% endif %}
 
                             </td>
 
@@ -631,6 +735,8 @@
 
                     </div>
 
+                    {% if item.aluno.whatsapp %}
+
                     <a
                         href="https://wa.me/55{{ item.aluno.whatsapp }}?text=Olá%20{{ item.aluno.nome }},%20sua%20mensalidade%20da%20academia%20está%20pendente."
                         target="_blank"
@@ -640,6 +746,8 @@
                         <i class="bi bi-whatsapp"></i>
 
                     </a>
+
+                    {% endif %}
 
                 </div>
 
@@ -690,6 +798,19 @@
                 📌 Avisos da Academia
 
             </h5>
+
+            {% if aniversariantes_hoje > 0 %}
+
+            <div class="alert alert-success">
+
+                🎉 Hoje temos {{ aniversariantes_hoje }} aniversariante(s). 
+                <a href="/aniversariantes" class="alert-link">
+                    Ver lista
+                </a>.
+
+            </div>
+
+            {% endif %}
 
             <div class="alert alert-primary">
 
@@ -746,6 +867,17 @@
                     <i class="bi bi-check2-square"></i>
 
                     Registrar Presença
+
+                </a>
+
+                <a
+                    href="/aniversariantes"
+                    class="btn btn-warning btn-lg text-white"
+                >
+
+                    <i class="bi bi-gift-fill"></i>
+
+                    Ver Aniversariantes
 
                 </a>
 
