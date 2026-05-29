@@ -2335,7 +2335,10 @@ def relatorios():
     ).scalar()
 
     if recebido is None:
+
         recebido = 0
+
+    recebido = float(recebido)
 
     pendente = db.session.query(
         db.func.sum(Mensalidade.valor)
@@ -2344,7 +2347,10 @@ def relatorios():
     ).scalar()
 
     if pendente is None:
+
         pendente = 0
+
+    pendente = float(pendente)
 
     total_financeiro = recebido + pendente
 
@@ -2376,6 +2382,8 @@ def relatorios():
     faixas = db.session.query(
         Aluno.faixa,
         db.func.count(Aluno.id)
+    ).filter(
+        Aluno.faixa != None
     ).group_by(
         Aluno.faixa
     ).order_by(
@@ -2674,7 +2682,7 @@ with app.app_context():
 
 
 # =====================================
-# INICIAR SERVIDOR
+# INICIAR SERVIDOR LOCAL
 # =====================================
 
 if __name__ == '__main__':
@@ -2682,5 +2690,5 @@ if __name__ == '__main__':
     app.run(
         host='0.0.0.0',
         port=5000,
-        debug=True
+        debug=False
     )
