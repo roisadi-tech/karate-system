@@ -140,6 +140,320 @@ def gerar_nome_foto(nome_original):
 
 
 # =====================================
+# FORMATAR NOME
+# =====================================
+
+def formatar_nome(nome):
+
+    nome = str(nome).strip()
+
+    nome = ' '.join(
+        nome.split()
+    )
+
+    return nome.title()
+
+
+# =====================================
+# LIMPAR WHATSAPP
+# =====================================
+
+def limpar_whatsapp(numero):
+
+    numero = ''.join(
+        filter(str.isdigit, str(numero))
+    )
+
+    if numero.startswith('55') and len(numero) == 13:
+
+        numero = numero[2:]
+
+    return numero
+
+
+# =====================================
+# VALIDAR WHATSAPP
+# =====================================
+
+def validar_whatsapp(numero):
+
+    numero = limpar_whatsapp(numero)
+
+    if numero == '':
+
+        return True
+
+    if len(numero) == 10 or len(numero) == 11:
+
+        return True
+
+    return False
+
+
+# =====================================
+# VALIDAR NASCIMENTO
+# =====================================
+
+def validar_nascimento(data_nascimento):
+
+    if not data_nascimento:
+
+        return True
+
+    try:
+
+        nascimento = datetime.strptime(
+            data_nascimento,
+            '%Y-%m-%d'
+        ).date()
+
+        hoje = date.today()
+
+        if nascimento > hoje:
+
+            return False
+
+        return True
+
+    except Exception:
+
+        return False
+
+
+# =====================================
+# VALIDAR FAIXA
+# =====================================
+
+def validar_faixa(faixa):
+
+    faixas_permitidas = [
+        'Branca',
+        'Cinza',
+        'Amarela',
+        'Laranja',
+        'Verde',
+        'Azul',
+        'Roxa',
+        'Marrom',
+        'Preta'
+    ]
+
+    if faixa in faixas_permitidas:
+
+        return True
+
+    return False
+
+
+# =====================================
+# VALIDAR SEXO
+# =====================================
+
+def validar_sexo(sexo):
+
+    sexos_permitidos = [
+        'Masculino',
+        'Feminino'
+    ]
+
+    if sexo in sexos_permitidos:
+
+        return True
+
+    return False
+
+
+# =====================================
+# VALIDAR STATUS MENSALIDADE
+# =====================================
+
+def validar_status_mensalidade(status):
+
+    status_permitidos = [
+        'PAGO',
+        'PENDENTE'
+    ]
+
+    if status in status_permitidos:
+
+        return True
+
+    return False
+
+
+# =====================================
+# VALIDAR STATUS PRESENÇA
+# =====================================
+
+def validar_status_presenca(status):
+
+    status_permitidos = [
+        'PRESENTE',
+        'FALTA'
+    ]
+
+    if status in status_permitidos:
+
+        return True
+
+    return False
+
+
+# =====================================
+# VALIDAR RESULTADO EXAME
+# =====================================
+
+def validar_resultado_exame(resultado):
+
+    resultados_permitidos = [
+        'APROVADO',
+        'REPROVADO'
+    ]
+
+    if resultado in resultados_permitidos:
+
+        return True
+
+    return False
+
+
+# =====================================
+# VALIDAR DATA EXAME
+# =====================================
+
+def validar_data_exame(data_exame):
+
+    if not data_exame:
+
+        return False
+
+    try:
+
+        data_convertida = datetime.strptime(
+            data_exame,
+            '%Y-%m-%d'
+        ).date()
+
+        hoje = date.today()
+
+        if data_convertida > hoje:
+
+            return False
+
+        return True
+
+    except Exception:
+
+        return False
+
+
+# =====================================
+# VALIDAR DATA VENCIMENTO
+# =====================================
+
+def validar_data_vencimento(data_vencimento):
+
+    if not data_vencimento:
+
+        return False
+
+    try:
+
+        datetime.strptime(
+            data_vencimento,
+            '%Y-%m-%d'
+        ).date()
+
+        return True
+
+    except Exception:
+
+        return False
+
+
+# =====================================
+# BUSCAR ALUNO VÁLIDO
+# =====================================
+
+def buscar_aluno_valido(aluno_id):
+
+    try:
+
+        aluno_id = int(aluno_id)
+
+    except Exception:
+
+        return None
+
+    aluno = Aluno.query.get(aluno_id)
+
+    return aluno
+
+
+# =====================================
+# VALIDAR DATA PRESENÇA
+# =====================================
+
+def validar_data_presenca(data_presenca):
+
+    if not data_presenca:
+
+        return False
+
+    try:
+
+        data_convertida = datetime.strptime(
+            data_presenca,
+            '%Y-%m-%d'
+        ).date()
+
+        hoje = date.today()
+
+        if data_convertida > hoje:
+
+            return False
+
+        return True
+
+    except Exception:
+
+        return False
+    
+
+# =====================================
+# VALIDAR TIPO DE USUÁRIO
+# =====================================
+
+def validar_tipo_usuario(tipo):
+
+    tipos_permitidos = [
+        'admin',
+        'professor'
+    ]
+
+    if tipo in tipos_permitidos:
+
+        return True
+
+    return False
+
+
+# =====================================
+# VALIDAR SENHA
+# =====================================
+
+def validar_senha(senha):
+
+    senha = str(senha).strip()
+
+    if len(senha) < 4:
+
+        return False
+
+    return True
+
+
+# =====================================
 # APP
 # =====================================
 
@@ -365,16 +679,18 @@ def alunos():
 
     if busca:
 
+        busca = busca.strip()
+
         lista_alunos = Aluno.query.filter(
             Aluno.nome.ilike(f'%{busca}%')
         ).order_by(
-            Aluno.id.desc()
+            Aluno.nome.asc()
         ).all()
 
     else:
 
         lista_alunos = Aluno.query.order_by(
-            Aluno.id.desc()
+            Aluno.nome.asc()
         ).all()
 
     return render_template(
@@ -393,16 +709,76 @@ def cadastrar_aluno():
 
     if request.method == 'POST':
 
-        nome = request.form['nome']
+        nome = formatar_nome(
+            request.form['nome']
+        )
+
         nascimento = request.form['nascimento']
+
+        if not validar_nascimento(nascimento):
+
+            flash(
+                'Informe uma data de nascimento válida. A data não pode ser futura.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        aluno_existente = Aluno.query.filter(
+            Aluno.nome == nome,
+            Aluno.nascimento == nascimento
+        ).first()
+
+        if aluno_existente:
+
+            flash(
+                'Já existe um aluno cadastrado com este nome e esta data de nascimento.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
         sexo = request.form['sexo']
-        responsavel = request.form['responsavel']
-        whatsapp = request.form['whatsapp']
+
+        if not validar_sexo(sexo):
+
+            flash(
+                'Selecione um sexo válido para o aluno.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        responsavel = formatar_nome(
+            request.form['responsavel']
+        )
+
+        whatsapp = limpar_whatsapp(
+            request.form['whatsapp']
+        )
+
+        if not validar_whatsapp(whatsapp):
+
+            flash(
+                'Informe um WhatsApp válido com DDD. Exemplo: 88999998888.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
         faixa = request.form['faixa']
-        mensalidade = request.form['mensalidade']
+
+        if not validar_faixa(faixa):
+
+            flash(
+                'Selecione uma faixa válida para o aluno.',
+                'warning'
+            )
+
+            return redirect(request.url)
 
         mensalidade_convertida = converter_mensalidade(
-            mensalidade
+            request.form['mensalidade']
         )
 
         if mensalidade_convertida is None:
@@ -434,13 +810,15 @@ def cadastrar_aluno():
             if extensao not in extensoes_permitidas:
 
                 flash(
-                    'Formato de imagem inválido.',
+                    'Formato de imagem inválido. Use PNG, JPG, JPEG ou WEBP.',
                     'danger'
                 )
 
                 return redirect(request.url)
 
-            nome_arquivo = gerar_nome_foto(foto.filename)
+            nome_arquivo = gerar_nome_foto(
+                foto.filename
+            )
 
             if not os.path.exists('static/uploads'):
 
@@ -493,6 +871,71 @@ def editar_aluno(id):
 
     if request.method == 'POST':
 
+        nome_form = formatar_nome(
+            request.form['nome']
+        )
+
+        nascimento_form = request.form['nascimento']
+
+        if not validar_nascimento(nascimento_form):
+
+            flash(
+                'Informe uma data de nascimento válida. A data não pode ser futura.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        aluno_existente = Aluno.query.filter(
+            Aluno.nome == nome_form,
+            Aluno.nascimento == nascimento_form,
+            Aluno.id != id
+        ).first()
+
+        if aluno_existente:
+
+            flash(
+                'Já existe outro aluno cadastrado com este nome e esta data de nascimento.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        sexo_form = request.form['sexo']
+
+        if not validar_sexo(sexo_form):
+
+            flash(
+                'Selecione um sexo válido para o aluno.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        faixa_form = request.form['faixa']
+
+        if not validar_faixa(faixa_form):
+
+            flash(
+                'Selecione uma faixa válida para o aluno.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        whatsapp_form = limpar_whatsapp(
+            request.form['whatsapp']
+        )
+
+        if not validar_whatsapp(whatsapp_form):
+
+            flash(
+                'Informe um WhatsApp válido com DDD. Exemplo: 88999998888.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
         mensalidade_convertida = converter_mensalidade(
             request.form['mensalidade']
         )
@@ -506,12 +949,14 @@ def editar_aluno(id):
 
             return redirect(request.url)
 
-        aluno.nome = request.form['nome']
-        aluno.nascimento = request.form['nascimento']
-        aluno.sexo = request.form['sexo']
-        aluno.responsavel = request.form['responsavel']
-        aluno.whatsapp = request.form['whatsapp']
-        aluno.faixa = request.form['faixa']
+        aluno.nome = nome_form
+        aluno.nascimento = nascimento_form
+        aluno.sexo = sexo_form
+        aluno.responsavel = formatar_nome(
+            request.form['responsavel']
+        )
+        aluno.whatsapp = whatsapp_form
+        aluno.faixa = faixa_form
         aluno.mensalidade = mensalidade_convertida
 
         foto = request.files.get('foto')
@@ -532,7 +977,7 @@ def editar_aluno(id):
             if extensao not in extensoes_permitidas:
 
                 flash(
-                    'Formato de imagem inválido.',
+                    'Formato de imagem inválido. Use PNG, JPG, JPEG ou WEBP.',
                     'danger'
                 )
 
@@ -744,9 +1189,44 @@ def presencas():
 
     if request.method == 'POST':
 
+        aluno = buscar_aluno_valido(
+            request.form['aluno_id']
+        )
+
+        if not aluno:
+
+            flash(
+                'Aluno inválido. Selecione um aluno cadastrado.',
+                'warning'
+            )
+
+            return redirect('/presencas')
+
+        data_form = request.form['data']
+
+        if not validar_data_presenca(data_form):
+
+            flash(
+                'Informe uma data de presença válida. A data não pode ser futura.',
+                'warning'
+            )
+
+            return redirect('/presencas')
+
+        status_form = request.form['status']
+
+        if not validar_status_presenca(status_form):
+
+            flash(
+                'Status de presença inválido.',
+                'warning'
+            )
+
+            return redirect('/presencas')
+
         presenca_existente = Presenca.query.filter_by(
-            aluno_id=request.form['aluno_id'],
-            data=request.form['data']
+            aluno_id=aluno.id,
+            data=data_form
         ).first()
 
         if presenca_existente:
@@ -760,9 +1240,9 @@ def presencas():
 
         nova_presenca = Presenca(
 
-            aluno_id=request.form['aluno_id'],
-            data=request.form['data'],
-            status=request.form['status']
+            aluno_id=aluno.id,
+            data=data_form,
+            status=status_form
         )
 
         db.session.add(nova_presenca)
@@ -869,11 +1349,43 @@ def editar_presenca(id):
 
     if request.method == 'POST':
 
-        aluno_id_form = request.form['aluno_id']
+        aluno = buscar_aluno_valido(
+            request.form['aluno_id']
+        )
+
+        if not aluno:
+
+            flash(
+                'Aluno inválido. Selecione um aluno cadastrado.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
         data_form = request.form['data']
 
+        if not validar_data_presenca(data_form):
+
+            flash(
+                'Informe uma data de presença válida. A data não pode ser futura.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        status_form = request.form['status']
+
+        if not validar_status_presenca(status_form):
+
+            flash(
+                'Status de presença inválido.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
         presenca_existente = Presenca.query.filter(
-            Presenca.aluno_id == aluno_id_form,
+            Presenca.aluno_id == aluno.id,
             Presenca.data == data_form,
             Presenca.id != id
         ).first()
@@ -887,9 +1399,9 @@ def editar_presenca(id):
 
             return redirect(f'/editar_presenca/{id}')
 
-        presenca.aluno_id = aluno_id_form
+        presenca.aluno_id = aluno.id
         presenca.data = data_form
-        presenca.status = request.form['status']
+        presenca.status = status_form
 
         db.session.commit()
 
@@ -966,9 +1478,57 @@ def mensalidades():
 
     if request.method == 'POST':
 
+        aluno = buscar_aluno_valido(
+            request.form['aluno_id']
+        )
+
+        if not aluno:
+
+            flash(
+                'Aluno inválido. Selecione um aluno cadastrado.',
+                'warning'
+            )
+
+            return redirect('/mensalidades')
+
+        valor_form = converter_mensalidade(
+            request.form['valor']
+        )
+
+        if valor_form is None:
+
+            flash(
+                'Informe um valor de mensalidade válido. Use valores como 80, 80.00 ou 80,00.',
+                'warning'
+            )
+
+            return redirect('/mensalidades')
+
+        vencimento_form = request.form['vencimento']
+
+        if not validar_data_vencimento(vencimento_form):
+
+            flash(
+                'Informe uma data de vencimento válida.',
+                'warning'
+            )
+
+            return redirect('/mensalidades')
+
+        status_form = request.form['status']
+
+        if not validar_status_mensalidade(status_form):
+
+            flash(
+                'Status de mensalidade inválido.',
+                'warning'
+            )
+
+            return redirect('/mensalidades')
+
         mensalidade_existente = Mensalidade.query.filter_by(
-            aluno_id=request.form['aluno_id'],
-            vencimento=request.form['vencimento']
+            aluno_id=aluno.id,
+            vencimento=vencimento_form
         ).first()
 
         if mensalidade_existente:
@@ -982,10 +1542,10 @@ def mensalidades():
 
         nova_mensalidade = Mensalidade(
 
-            aluno_id=request.form['aluno_id'],
-            valor=float(request.form['valor']),
-            vencimento=request.form['vencimento'],
-            status=request.form['status']
+            aluno_id=aluno.id,
+            valor=valor_form,
+            vencimento=vencimento_form,
+            status=status_form
         )
 
         db.session.add(nova_mensalidade)
@@ -1077,6 +1637,15 @@ def gerar_mensalidades():
 
     vencimento = request.form['vencimento']
 
+    if not validar_data_vencimento(vencimento):
+
+        flash(
+            'Informe uma data de vencimento válida.',
+            'warning'
+        )
+
+        return redirect('/mensalidades')
+
     alunos = Aluno.query.order_by(
         Aluno.nome.asc()
     ).all()
@@ -1097,10 +1666,18 @@ def gerar_mensalidades():
 
             continue
 
+        valor_aluno = converter_mensalidade(
+            aluno.mensalidade
+        )
+
+        if valor_aluno is None:
+
+            valor_aluno = 0
+
         nova_mensalidade = Mensalidade(
 
             aluno_id=aluno.id,
-            valor=float(aluno.mensalidade or 0),
+            valor=valor_aluno,
             vencimento=vencimento,
             status='PENDENTE'
         )
@@ -1140,11 +1717,56 @@ def editar_mensalidade(id):
 
     if request.method == 'POST':
 
-        aluno_id_form = request.form['aluno_id']
+        aluno = buscar_aluno_valido(
+            request.form['aluno_id']
+        )
+
+        if not aluno:
+
+            flash(
+                'Aluno inválido. Selecione um aluno cadastrado.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        valor_form = converter_mensalidade(
+            request.form['valor']
+        )
+
+        if valor_form is None:
+
+            flash(
+                'Informe um valor de mensalidade válido. Use valores como 80, 80.00 ou 80,00.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
         vencimento_form = request.form['vencimento']
 
+        if not validar_data_vencimento(vencimento_form):
+
+            flash(
+                'Informe uma data de vencimento válida.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        status_form = request.form['status']
+
+        if not validar_status_mensalidade(status_form):
+
+            flash(
+                'Status de mensalidade inválido.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
         mensalidade_existente = Mensalidade.query.filter(
-            Mensalidade.aluno_id == aluno_id_form,
+            Mensalidade.aluno_id == aluno.id,
             Mensalidade.vencimento == vencimento_form,
             Mensalidade.id != id
         ).first()
@@ -1158,10 +1780,10 @@ def editar_mensalidade(id):
 
             return redirect(f'/editar_mensalidade/{id}')
 
-        mensalidade.aluno_id = aluno_id_form
-        mensalidade.valor = float(request.form['valor'])
+        mensalidade.aluno_id = aluno.id
+        mensalidade.valor = valor_form
         mensalidade.vencimento = vencimento_form
-        mensalidade.status = request.form['status']
+        mensalidade.status = status_form
 
         db.session.commit()
 
@@ -1256,26 +1878,77 @@ def exames():
 
     if request.method == 'POST':
 
-        aluno_id = request.form['aluno_id']
+        aluno = buscar_aluno_valido(
+            request.form['aluno_id']
+        )
+
+        if not aluno:
+
+            flash(
+                'Aluno inválido. Selecione um aluno cadastrado.',
+                'warning'
+            )
+
+            return redirect('/exames')
+
+        faixa_atual_form = request.form['faixa_atual']
+
+        if not validar_faixa(faixa_atual_form):
+
+            flash(
+                'Faixa atual inválida.',
+                'warning'
+            )
+
+            return redirect('/exames')
+
+        nova_faixa_form = request.form['nova_faixa']
+
+        if not validar_faixa(nova_faixa_form):
+
+            flash(
+                'Nova faixa inválida.',
+                'warning'
+            )
+
+            return redirect('/exames')
+
+        data_exame_form = request.form['data_exame']
+
+        if not validar_data_exame(data_exame_form):
+
+            flash(
+                'Informe uma data de exame válida. A data não pode ser futura.',
+                'warning'
+            )
+
+            return redirect('/exames')
+
+        resultado_form = request.form['resultado']
+
+        if not validar_resultado_exame(resultado_form):
+
+            flash(
+                'Resultado de exame inválido.',
+                'warning'
+            )
+
+            return redirect('/exames')
 
         novo_exame = Exame(
 
-            aluno_id=aluno_id,
-            faixa_atual=request.form['faixa_atual'],
-            nova_faixa=request.form['nova_faixa'],
-            data_exame=request.form['data_exame'],
-            resultado=request.form['resultado']
+            aluno_id=aluno.id,
+            faixa_atual=faixa_atual_form,
+            nova_faixa=nova_faixa_form,
+            data_exame=data_exame_form,
+            resultado=resultado_form
         )
 
         db.session.add(novo_exame)
 
-        if request.form['resultado'] == 'APROVADO':
+        if resultado_form == 'APROVADO':
 
-            aluno = Aluno.query.get(aluno_id)
-
-            if aluno:
-
-                aluno.faixa = request.form['nova_faixa']
+            aluno.faixa = nova_faixa_form
 
         db.session.commit()
 
@@ -1367,13 +2040,38 @@ def recibo(id):
 
     mensalidade = Mensalidade.query.get_or_404(id)
 
+    if not mensalidade.aluno:
+
+        flash(
+            'Não foi possível gerar o recibo, pois esta mensalidade não possui aluno vinculado.',
+            'danger'
+        )
+
+        return redirect('/mensalidades')
+
+    if mensalidade.valor is None:
+
+        flash(
+            'Não foi possível gerar o recibo, pois esta mensalidade não possui valor informado.',
+            'danger'
+        )
+
+        return redirect('/mensalidades')
+
     if not os.path.exists('recibos'):
 
         os.makedirs('recibos')
 
     nome_arquivo = f'recibos/recibo_{id}.pdf'
 
-    valor_formatado = f'{mensalidade.valor:.2f}'.replace('.', ',')
+    valor_formatado = f'{float(mensalidade.valor):.2f}'.replace('.', ',')
+
+    vencimento_formatado = formatar_data(
+        mensalidade.vencimento
+    )
+
+    data_emissao = datetime.now().strftime('%d/%m/%Y')
+    data_hora_emissao = datetime.now().strftime('%d/%m/%Y %H:%M')
 
     c = canvas.Canvas(nome_arquivo)
 
@@ -1438,7 +2136,7 @@ def recibo(id):
     c.drawString(
         360,
         675,
-        f"Data: {datetime.now().strftime('%d/%m/%Y')}"
+        f"Data: {data_emissao}"
     )
 
     # TEXTO PRINCIPAL COM QUEBRA AUTOMÁTICA
@@ -1505,7 +2203,7 @@ def recibo(id):
     c.drawString(
         95,
         435,
-        f"Vencimento: {mensalidade.vencimento}"
+        f"Vencimento: {vencimento_formatado}"
     )
 
     c.drawString(
@@ -1521,7 +2219,7 @@ def recibo(id):
     c.drawString(
         70,
         350,
-        f"Emitido em: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+        f"Emitido em: {data_hora_emissao}"
     )
 
     # OBSERVAÇÃO
@@ -1742,9 +2440,36 @@ def cadastrar_usuario():
 
     if request.method == 'POST':
 
-        usuario_form = request.form['usuario']
-        senha_form = request.form['senha']
+        usuario_form = request.form['usuario'].strip()
+        senha_form = request.form['senha'].strip()
         tipo_form = request.form['tipo']
+
+        if usuario_form == '':
+
+            flash(
+                'Informe um nome de usuário.',
+                'warning'
+            )
+
+            return redirect('/cadastrar_usuario')
+
+        if not validar_senha(senha_form):
+
+            flash(
+                'A senha deve ter pelo menos 4 caracteres.',
+                'warning'
+            )
+
+            return redirect('/cadastrar_usuario')
+
+        if not validar_tipo_usuario(tipo_form):
+
+            flash(
+                'Tipo de usuário inválido.',
+                'warning'
+            )
+
+            return redirect('/cadastrar_usuario')
 
         existe = Usuario.query.filter_by(
             usuario=usuario_form
@@ -1799,9 +2524,36 @@ def editar_usuario(id):
 
     if request.method == 'POST':
 
-        usuario_form = request.form['usuario']
+        usuario_form = request.form['usuario'].strip()
         tipo_form = request.form['tipo']
-        senha_form = request.form['senha']
+        senha_form = request.form['senha'].strip()
+
+        if usuario_form == '':
+
+            flash(
+                'Informe um nome de usuário.',
+                'warning'
+            )
+
+            return redirect(f'/editar_usuario/{id}')
+
+        if not validar_tipo_usuario(tipo_form):
+
+            flash(
+                'Tipo de usuário inválido.',
+                'warning'
+            )
+
+            return redirect(f'/editar_usuario/{id}')
+
+        if senha_form != '' and not validar_senha(senha_form):
+
+            flash(
+                'A nova senha deve ter pelo menos 4 caracteres.',
+                'warning'
+            )
+
+            return redirect(f'/editar_usuario/{id}')
 
         existe = Usuario.query.filter(
             Usuario.usuario == usuario_form,
@@ -1812,6 +2564,30 @@ def editar_usuario(id):
 
             flash(
                 'Já existe outro usuário com este nome.',
+                'danger'
+            )
+
+            return redirect(f'/editar_usuario/{id}')
+
+        if usuario.tipo == 'admin' and tipo_form != 'admin':
+
+            total_admins = Usuario.query.filter_by(
+                tipo='admin'
+            ).count()
+
+            if total_admins <= 1:
+
+                flash(
+                    'O sistema precisa ter pelo menos um administrador.',
+                    'danger'
+                )
+
+                return redirect(f'/editar_usuario/{id}')
+
+        if usuario.usuario == session['usuario'] and usuario.tipo == 'admin' and tipo_form != 'admin':
+
+            flash(
+                'Você não pode remover seu próprio acesso de administrador.',
                 'danger'
             )
 
