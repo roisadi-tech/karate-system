@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+    <div>
+        <h2 class="fw-bold">🎂 Aniversariantes</h2>
+        <p class="text-muted mb-0">
+            Alunos que fazem aniversário no mês atual
+        </p>
+    </div>
+
+    <a href="/" class="btn btn-dark">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+
+</div>
+
+
+<!-- CARDS -->
+<div class="row g-3 mb-4">
+
+    <div class="col-md-6">
+
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+                    <p class="text-muted mb-1">Aniversariantes do mês</p>
+                    <h2 class="fw-bold mb-0">{{ total_mes }}</h2>
+                </div>
+
+                <div class="fs-1">
+                    🎂
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-6">
+
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+                    <p class="text-muted mb-1">Aniversariantes de hoje</p>
+                    <h2 class="fw-bold mb-0">{{ total_hoje }}</h2>
+                </div>
+
+                <div class="fs-1">
+                    🎉
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ANIVERSARIANTES DE HOJE -->
+{% if aniversariantes_hoje %}
+
+<div class="alert alert-success rounded-4 shadow-sm mb-4">
+
+    <h5 class="fw-bold mb-3">
+        🎉 Aniversariante(s) de hoje
+    </h5>
+
+    {% for aluno in aniversariantes_hoje %}
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+
+            <div>
+                <strong>{{ aluno.nome }}</strong>
+                <br>
+                <small>
+                    Faz {{ aluno.idade_nova }} anos hoje
+                </small>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+
+                <a href="/aluno/{{ aluno.id }}" class="btn btn-dark btn-sm">
+                    <i class="bi bi-person-vcard-fill"></i> Perfil
+                </a>
+
+                {% if aluno.whatsapp %}
+                <a 
+                    href="https://wa.me/55{{ aluno.whatsapp }}?text=Parabéns, {{ aluno.nome }}! A Academia de Karatê deseja um feliz aniversário! 🎉🥋"
+                    target="_blank"
+                    class="btn btn-success btn-sm"
+                >
+                    <i class="bi bi-whatsapp"></i> Parabenizar
+                </a>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+{% endif %}
+
+
+<!-- TABELA -->
+<div class="card border-0 shadow-sm rounded-4">
+
+    <div class="card-header bg-white border-0 p-4">
+
+        <h5 class="fw-bold mb-0">
+            Lista do mês
+        </h5>
+
+    </div>
+
+    <div class="card-body p-0">
+
+        {% if aniversariantes_mes %}
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+                            <th>Dia</th>
+                            <th>Aluno</th>
+                            <th>Nascimento</th>
+                            <th>Idade atual</th>
+                            <th>Nova idade</th>
+                            <th>Faixa</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for aluno in aniversariantes_mes %}
+
+                        <tr>
+
+                            <td>
+                                <span class="badge bg-primary rounded-pill">
+                                    {{ aluno.dia }}
+                                </span>
+                            </td>
+
+                            <td class="fw-semibold">
+                                {{ aluno.nome }}
+                            </td>
+
+                            <td>
+                                {{ formatar_data(aluno.nascimento) }}
+                            </td>
+
+                            <td>
+                                {% if aluno.idade_atual is not none %}
+                                    {{ aluno.idade_atual }} anos
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ aluno.idade_nova }} anos
+                            </td>
+
+                            <td>
+                                <span class="badge bg-dark">
+                                    {{ aluno.faixa }}
+                                </span>
+                            </td>
+
+                            <td class="text-center">
+
+                                <div class="d-flex gap-2 justify-content-center flex-wrap">
+
+                                    <a href="/aluno/{{ aluno.id }}" class="btn btn-dark btn-sm rounded-3">
+                                        <i class="bi bi-person-vcard-fill"></i>
+                                    </a>
+
+                                    {% if aluno.whatsapp %}
+                                    <a 
+                                        href="https://wa.me/55{{ aluno.whatsapp }}?text=Parabéns, {{ aluno.nome }}! A Academia de Karatê deseja um feliz aniversário! 🎉🥋"
+                                        target="_blank"
+                                        class="btn btn-success btn-sm rounded-3"
+                                    >
+                                        <i class="bi bi-whatsapp"></i>
+                                    </a>
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="text-center p-5">
+
+                <div class="fs-1 mb-3">
+                    🎂
+                </div>
+
+                <h5 class="fw-bold">
+                    Nenhum aniversariante neste mês
+                </h5>
+
+                <p class="text-muted mb-0">
+                    Não há alunos cadastrados com aniversário no mês atual.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

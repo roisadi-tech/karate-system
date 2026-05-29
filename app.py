@@ -454,6 +454,44 @@ def validar_senha(senha):
 
 
 # =====================================
+# CALCULAR IDADE
+# =====================================
+
+def calcular_idade(data_nascimento):
+
+    if not data_nascimento:
+
+        return None
+
+    try:
+
+        nascimento = datetime.strptime(
+            data_nascimento,
+            '%Y-%m-%d'
+        ).date()
+
+        hoje = date.today()
+
+        idade = hoje.year - nascimento.year
+
+        if (
+            hoje.month,
+            hoje.day
+        ) < (
+            nascimento.month,
+            nascimento.day
+        ):
+
+            idade -= 1
+
+        return idade
+
+    except Exception:
+
+        return None
+
+
+# =====================================
 # APP
 # =====================================
 
@@ -1137,6 +1175,93 @@ def perfil_aluno(id):
         percentual=percentual,
         idade=idade,
         pendentes=pendentes
+    )
+
+
+# =====================================
+# ANIVERSARIANTES
+# =====================================
+
+@app.route('/aniversariantes')
+@login_obrigatorio
+def aniversariantes():
+
+    hoje = date.today()
+
+    alunos = Aluno.query.order_by(
+        Aluno.nome.asc()
+    ).all()
+
+    aniversariantes_mes = []
+    aniversariantes_hoje = []
+
+    for aluno in alunos:
+
+        if not aluno.nascimento:
+
+            continue
+
+        try:
+
+            nascimento = datetime.strptime(
+                aluno.nascimento,
+                '%Y-%m-%d'
+            ).date()
+
+            idade_atual = calcular_idade(
+                aluno.nascimento
+            )
+
+            idade_nova = hoje.year - nascimento.year
+
+            if nascimento.month == hoje.month:
+
+                dados_aluno = {
+
+                    'id': aluno.id,
+                    'nome': aluno.nome,
+                    'nascimento': aluno.nascimento,
+                    'dia': nascimento.day,
+                    'idade_atual': idade_atual,
+                    'idade_nova': idade_nova,
+                    'whatsapp': aluno.whatsapp,
+                    'faixa': aluno.faixa
+                }
+
+                aniversariantes_mes.append(
+                    dados_aluno
+                )
+
+                if nascimento.day == hoje.day:
+
+                    aniversariantes_hoje.append(
+                        dados_aluno
+                    )
+
+        except Exception:
+
+            continue
+
+    aniversariantes_mes = sorted(
+        aniversariantes_mes,
+        key=lambda aluno: aluno['dia']
+    )
+
+    total_mes = len(
+        aniversariantes_mes
+    )
+
+    total_hoje = len(
+        aniversariantes_hoje
+    )
+
+    return render_template(
+        'aniversariantes.html',
+        aniversariantes_mes=aniversariantes_mes,
+        aniversariantes_hoje=aniversariantes_hoje,
+        total_mes=total_mes,
+        total_hoje=total_hoje,
+        hoje=hoje
     )
 
 
@@ -1875,6 +2000,15 @@ def pagar_mensalidade(id):
 
         return redirect('/mensalidades')
 
+    if mensalidade.status != 'PENDENTE':
+
+        flash(
+            'Esta mensalidade possui um status inválido e não pode ser marcada como paga.',
+            'warning'
+        )
+
+        return redirect('/mensalidades')
+
     mensalidade.status = 'PAGO'
 
     db.session.commit()
@@ -2068,6 +2202,15 @@ def recibo(id):
     import textwrap
 
     mensalidade = Mensalidade.query.get_or_404(id)
+
+    if mensalidade.status != 'PAGO':
+
+        flash(
+            'Só é possível gerar recibo de mensalidades pagas.',
+            'warning'
+        )
+
+        return redirect('/mensalidades')
 
     if not mensalidade.aluno:
 
