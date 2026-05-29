@@ -91,6 +91,34 @@ def formatar_data(data):
     except Exception:
 
         return data
+    
+# =====================================
+# CONVERTER MENSALIDADE
+# =====================================
+
+    def converter_mensalidade(valor):
+
+    try:
+
+        valor = str(valor).strip()
+
+        if valor == '':
+
+            return 0
+
+        valor = valor.replace(',', '.')
+
+        valor_convertido = float(valor)
+
+        if valor_convertido < 0:
+
+            return None
+
+        return valor_convertido
+
+    except Exception:
+
+        return None
 
 
 # =====================================
@@ -355,6 +383,19 @@ def cadastrar_aluno():
         faixa = request.form['faixa']
         mensalidade = request.form['mensalidade']
 
+        mensalidade_convertida = converter_mensalidade(
+            mensalidade
+        )
+
+        if mensalidade_convertida is None:
+
+            flash(
+                'Informe uma mensalidade válida. Use valores como 80, 80.00 ou 80,00.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
         foto = request.files.get('foto')
 
         nome_arquivo = ''
@@ -404,7 +445,7 @@ def cadastrar_aluno():
             responsavel=responsavel,
             whatsapp=whatsapp,
             faixa=faixa,
-            mensalidade=float(mensalidade),
+            mensalidade=mensalidade_convertida,
             foto=nome_arquivo
         )
 
@@ -436,13 +477,26 @@ def editar_aluno(id):
 
     if request.method == 'POST':
 
+        mensalidade_convertida = converter_mensalidade(
+            request.form['mensalidade']
+        )
+
+        if mensalidade_convertida is None:
+
+            flash(
+                'Informe uma mensalidade válida. Use valores como 80, 80.00 ou 80,00.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
         aluno.nome = request.form['nome']
         aluno.nascimento = request.form['nascimento']
         aluno.sexo = request.form['sexo']
         aluno.responsavel = request.form['responsavel']
         aluno.whatsapp = request.form['whatsapp']
         aluno.faixa = request.form['faixa']
-        aluno.mensalidade = float(request.form['mensalidade'])
+        aluno.mensalidade = mensalidade_convertida
 
         foto = request.files.get('foto')
 
@@ -788,8 +842,26 @@ def editar_presenca(id):
 
     if request.method == 'POST':
 
-        presenca.aluno_id = request.form['aluno_id']
-        presenca.data = request.form['data']
+        aluno_id_form = request.form['aluno_id']
+        data_form = request.form['data']
+
+        presenca_existente = Presenca.query.filter(
+            Presenca.aluno_id == aluno_id_form,
+            Presenca.data == data_form,
+            Presenca.id != id
+        ).first()
+
+        if presenca_existente:
+
+            flash(
+                'Já existe outro registro de presença para este aluno nesta data.',
+                'warning'
+            )
+
+            return redirect(f'/editar_presenca/{id}')
+
+        presenca.aluno_id = aluno_id_form
+        presenca.data = data_form
         presenca.status = request.form['status']
 
         db.session.commit()
@@ -1030,11 +1102,38 @@ def editar_mensalidade(id):
 
     mensalidade = Mensalidade.query.get_or_404(id)
 
+    if mensalidade.status == 'PAGO':
+
+        flash(
+            'Mensalidade já paga não pode ser editada para preservar o histórico financeiro.',
+            'warning'
+        )
+
+        return redirect('/mensalidades')
+
     if request.method == 'POST':
 
-        mensalidade.aluno_id = request.form['aluno_id']
+        aluno_id_form = request.form['aluno_id']
+        vencimento_form = request.form['vencimento']
+
+        mensalidade_existente = Mensalidade.query.filter(
+            Mensalidade.aluno_id == aluno_id_form,
+            Mensalidade.vencimento == vencimento_form,
+            Mensalidade.id != id
+        ).first()
+
+        if mensalidade_existente:
+
+            flash(
+                'Já existe outra mensalidade para este aluno com este vencimento.',
+                'warning'
+            )
+
+            return redirect(f'/editar_mensalidade/{id}')
+
+        mensalidade.aluno_id = aluno_id_form
         mensalidade.valor = float(request.form['valor'])
-        mensalidade.vencimento = request.form['vencimento']
+        mensalidade.vencimento = vencimento_form
         mensalidade.status = request.form['status']
 
         db.session.commit()
