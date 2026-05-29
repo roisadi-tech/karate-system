@@ -21,6 +21,8 @@ from models import (
 import os
 import shutil
 
+from uuid import uuid4
+
 from datetime import datetime, date
 
 from functools import wraps
@@ -120,6 +122,21 @@ def converter_mensalidade(valor):
     except Exception:
 
         return None
+    
+    
+# =====================================
+# GERAR NOME FOTO
+# =====================================
+
+def gerar_nome_foto(nome_original):
+
+    nome_seguro = secure_filename(nome_original)
+
+    nome_base, extensao = os.path.splitext(nome_seguro)
+
+    codigo_unico = uuid4().hex[:12]
+
+    return f'{nome_base}_{codigo_unico}{extensao}'
 
 
 # =====================================
@@ -423,9 +440,7 @@ def cadastrar_aluno():
 
                 return redirect(request.url)
 
-            nome_arquivo = secure_filename(
-                foto.filename
-            )
+            nome_arquivo = gerar_nome_foto(foto.filename)
 
             if not os.path.exists('static/uploads'):
 
@@ -523,9 +538,7 @@ def editar_aluno(id):
 
                 return redirect(request.url)
 
-            nome_arquivo = secure_filename(
-                foto.filename
-            )
+            nome_arquivo = gerar_nome_foto(foto.filename)
 
             if not os.path.exists('static/uploads'):
 
