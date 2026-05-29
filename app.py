@@ -91,12 +91,13 @@ def formatar_data(data):
     except Exception:
 
         return data
-    
+
+
 # =====================================
 # CONVERTER MENSALIDADE
 # =====================================
 
-    def converter_mensalidade(valor):
+def converter_mensalidade(valor):
 
     try:
 
