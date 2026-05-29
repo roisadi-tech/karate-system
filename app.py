@@ -606,6 +606,30 @@ def excluir_aluno(id):
 
     aluno = Aluno.query.get_or_404(id)
 
+    total_presencas = Presenca.query.filter_by(
+        aluno_id=aluno.id
+    ).count()
+
+    total_mensalidades = Mensalidade.query.filter_by(
+        aluno_id=aluno.id
+    ).count()
+
+    total_exames = Exame.query.filter_by(
+        aluno_id=aluno.id
+    ).count()
+
+    if total_presencas > 0 or total_mensalidades > 0 or total_exames > 0:
+
+        flash(
+            f'Não é possível excluir este aluno, pois ele possui histórico no sistema: '
+            f'{total_presencas} presença(s), '
+            f'{total_mensalidades} mensalidade(s) e '
+            f'{total_exames} exame(s).',
+            'warning'
+        )
+
+        return redirect('/alunos')
+
     if aluno.foto:
 
         caminho = os.path.join(
