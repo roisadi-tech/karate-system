@@ -2004,14 +2004,18 @@ def cobrar():
     hoje = date.today()
     hoje_str = hoje.strftime('%Y-%m-%d')
 
-    dados = Mensalidade.query.filter_by(
-        status='PENDENTE'
+    dados = Mensalidade.query.join(
+        Aluno
+    ).filter(
+        Mensalidade.status == 'PENDENTE'
     ).order_by(
         Mensalidade.vencimento.asc()
     ).all()
 
     total_pendente = db.session.query(
         db.func.sum(Mensalidade.valor)
+    ).join(
+        Aluno
     ).filter(
         Mensalidade.status == 'PENDENTE'
     ).scalar()
@@ -2020,17 +2024,23 @@ def cobrar():
 
         total_pendente = 0
 
-    vencidas = Mensalidade.query.filter(
+    vencidas = Mensalidade.query.join(
+        Aluno
+    ).filter(
         Mensalidade.status == 'PENDENTE',
         Mensalidade.vencimento < hoje_str
     ).count()
 
-    vence_hoje = Mensalidade.query.filter(
+    vence_hoje = Mensalidade.query.join(
+        Aluno
+    ).filter(
         Mensalidade.status == 'PENDENTE',
         Mensalidade.vencimento == hoje_str
     ).count()
 
-    pendentes_futuras = Mensalidade.query.filter(
+    pendentes_futuras = Mensalidade.query.join(
+        Aluno
+    ).filter(
         Mensalidade.status == 'PENDENTE',
         Mensalidade.vencimento > hoje_str
     ).count()
