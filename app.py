@@ -1567,7 +1567,7 @@ def carteirinha_aluno(id):
     foto_altura = int(altura * 0.280)
  
     # QR CODE MAIS PARA CIMA E PARA A ESQUERDA
-    qr_x = int(largura * 0.790)
+    qr_x = int(largura * 0.795)
     qr_y = int(altura * 0.285)
     qr_tamanho = int(altura * 0.185)
 
