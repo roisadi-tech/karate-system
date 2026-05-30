@@ -1716,8 +1716,8 @@ def carteirinha_aluno(id):
 
     contato_x = int(largura * 0.555)
     endereco_y = int(altura * 0.750)
-    whatsapp_y_academia = int(altura * 0.760)
-    instagram_y = int(altura * 0.770)
+    whatsapp_y_academia = int(altura * 0.780)
+    instagram_y = int(altura * 0.800)
 
     draw.text(
         (contato_x, endereco_y),
