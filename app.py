@@ -1315,20 +1315,16 @@ def carteirinha_aluno(id):
         aluno.nascimento
     )
 
-    pendentes = Mensalidade.query.filter_by(
-        aluno_id=aluno.id,
-        status='PENDENTE'
-    ).count()
+    base_path = 'static/modelos/carteirinha_base.png'
 
-    if pendentes > 0:
+    if not os.path.exists(base_path):
 
-        status_financeiro = 'PENDENTE'
+        flash(
+            'Modelo da carteirinha não encontrado em static/modelos/carteirinha_base.png',
+            'danger'
+        )
 
-    else:
-
-        status_financeiro = 'REGULAR'
-
-    logo_path = 'static/img/logo_aakc.png'
+        return redirect(f'/aluno/{id}')
 
     if not os.path.exists('carteirinhas'):
 
@@ -1336,128 +1332,180 @@ def carteirinha_aluno(id):
 
     nome_arquivo = f'carteirinhas/carteirinha_{aluno.id}.pdf'
 
-    largura, altura = landscape(
-        (
-            86 * mm,
-            54 * mm
-        )
-    )
+    largura_pdf = 297 * mm
+    altura_pdf = 210 * mm
 
     c = canvas.Canvas(
         nome_arquivo,
-        pagesize=(largura, altura)
+        pagesize=(largura_pdf, altura_pdf)
     )
 
-    cor_fundo = colors.HexColor('#111111')
-    cor_fundo_2 = colors.HexColor('#1a1a1a')
-    cor_vermelha = colors.HexColor('#dc2323')
+    cor_vermelha = colors.HexColor('#e30613')
     cor_branca = colors.white
-    cor_cinza = colors.HexColor('#d9d9d9')
-    cor_cinza_escuro = colors.HexColor('#333333')
+    cor_preta = colors.black
 
     # =====================================
-    # FRENTE
+    # FUNDO COM O MOCKUP
     # =====================================
 
-    c.setFillColor(cor_fundo)
-    c.roundRect(
-        3 * mm,
-        3 * mm,
-        largura - 6 * mm,
-        altura - 6 * mm,
-        4 * mm,
-        fill=True,
-        stroke=False
+    c.drawImage(
+        base_path,
+        0,
+        0,
+        width=largura_pdf,
+        height=altura_pdf,
+        preserveAspectRatio=True,
+        mask='auto'
     )
 
-    c.setStrokeColor(cor_vermelha)
-    c.setLineWidth(1.2)
-    c.roundRect(
-        4 * mm,
-        4 * mm,
-        largura - 8 * mm,
-        altura - 8 * mm,
-        3 * mm,
-        fill=False,
-        stroke=True
-    )
+    # =====================================
+    # ESCALA DE CONVERSÃO
+    # imagem original: 1448 x 1086 px
+    # PDF: 297 x 210 mm
+    # =====================================
 
-    # faixa vermelha superior
-    c.setFillColor(cor_vermelha)
-    c.roundRect(
-        5 * mm,
-        altura - 14 * mm,
-        largura - 10 * mm,
-        8 * mm,
-        2 * mm,
-        fill=True,
-        stroke=False
-    )
+    escala_x = largura_pdf / 1448
+    escala_y = altura_pdf / 1086
 
-    # logo
-    if os.path.exists(logo_path):
+    def px_x(valor):
 
-        try:
+        return valor * escala_x
 
-            c.drawImage(
-                logo_path,
-                7 * mm,
-                altura - 22 * mm,
-                width=19 * mm,
-                height=19 * mm,
-                preserveAspectRatio=True,
-                mask='auto'
+    def px_y(valor):
+
+        return altura_pdf - (valor * escala_y)
+
+    def escrever(texto, x, y, tamanho=10, cor=cor_branca, negrito=False):
+
+        c.setFillColor(cor)
+
+        if negrito:
+
+            c.setFont(
+                'Helvetica-Bold',
+                tamanho
             )
 
-        except Exception:
+        else:
 
-            pass
+            c.setFont(
+                'Helvetica',
+                tamanho
+            )
 
-    c.setFillColor(cor_branca)
-    c.setFont('Helvetica-Bold', 13)
-    c.drawString(
-        28 * mm,
-        altura - 11 * mm,
-        'CARTEIRINHA DO ALUNO'
+        c.drawString(
+            px_x(x),
+            px_y(y),
+            str(texto)
+        )
+
+    def limitar_texto(texto, limite):
+
+        texto = str(texto or '')
+
+        if len(texto) > limite:
+
+            return texto[:limite] + '...'
+
+        return texto
+
+    # =====================================
+    # DADOS DA FRENTE
+    # =====================================
+
+    nome_aluno = limitar_texto(
+        aluno.nome or 'Não informado',
+        26
     )
 
-    c.setFont('Helvetica', 6.5)
-    c.drawString(
-        28 * mm,
-        altura - 14 * mm,
-        'AAKC KARATÊ - Academia de Artes Marciais'
+    faixa = limitar_texto(
+        aluno.faixa or 'Não informado',
+        22
     )
 
-    # foto
-    foto_x = 7 * mm
-    foto_y = 15 * mm
-    foto_l = 22 * mm
-    foto_a = 26 * mm
-
-    c.setFillColor(colors.HexColor('#f2f2f2'))
-    c.roundRect(
-        foto_x,
-        foto_y,
-        foto_l,
-        foto_a,
-        2 * mm,
-        fill=True,
-        stroke=False
+    responsavel = limitar_texto(
+        aluno.responsavel or 'Não informado',
+        24
     )
 
-    c.setStrokeColor(cor_vermelha)
-    c.setLineWidth(1)
-    c.roundRect(
-        foto_x,
-        foto_y,
-        foto_l,
-        foto_a,
-        2 * mm,
-        fill=False,
-        stroke=True
+    nascimento = formatar_data(
+        aluno.nascimento
     )
 
-    foto_ok = False
+    whatsapp = formatar_whatsapp(
+        aluno.whatsapp
+    )
+
+    matricula = f'AAKC-{aluno.id:06d}'
+
+    validade = '31/12/' + str(date.today().year)
+
+    # Nome
+    escrever(
+        nome_aluno,
+        198,
+        404,
+        tamanho=10.5,
+        cor=cor_branca
+    )
+
+    # Faixa
+    escrever(
+        faixa,
+        198,
+        499,
+        tamanho=10.5,
+        cor=cor_branca
+    )
+
+    # Responsável
+    escrever(
+        responsavel,
+        198,
+        594,
+        tamanho=10.5,
+        cor=cor_branca
+    )
+
+    # Nascimento
+    escrever(
+        nascimento,
+        198,
+        688,
+        tamanho=10.5,
+        cor=cor_branca
+    )
+
+    # WhatsApp
+    escrever(
+        whatsapp,
+        198,
+        783,
+        tamanho=10.5,
+        cor=cor_branca
+    )
+
+    # Matrícula
+    escrever(
+        matricula,
+        198,
+        877,
+        tamanho=10.5,
+        cor=cor_branca
+    )
+
+    # Validade
+    escrever(
+        validade,
+        198,
+        970,
+        tamanho=10.5,
+        cor=cor_branca
+    )
+
+    # =====================================
+    # FOTO DO ALUNO
+    # =====================================
 
     if aluno.foto:
 
@@ -1473,273 +1521,22 @@ def carteirinha_aluno(id):
 
                 c.drawImage(
                     caminho_foto,
-                    foto_x + 1 * mm,
-                    foto_y + 1 * mm,
-                    width=foto_l - 2 * mm,
-                    height=foto_a - 2 * mm,
+                    px_x(440),
+                    px_y(830),
+                    width=px_x(220),
+                    height=px_y(554) - px_y(830),
                     preserveAspectRatio=True,
                     mask='auto'
                 )
 
-                foto_ok = True
-
             except Exception:
 
-                foto_ok = False
-
-    if not foto_ok:
-
-        c.setFillColor(colors.black)
-        c.setFont('Helvetica-Bold', 7)
-        c.drawCentredString(
-            foto_x + foto_l / 2,
-            foto_y + foto_a / 2,
-            'SEM FOTO'
-        )
-
-    # ID na foto
-    c.setFillColor(cor_vermelha)
-    c.roundRect(
-        foto_x + 2 * mm,
-        foto_y - 5 * mm,
-        foto_l - 4 * mm,
-        4 * mm,
-        1.5 * mm,
-        fill=True,
-        stroke=False
-    )
-
-    c.setFillColor(cor_branca)
-    c.setFont('Helvetica-Bold', 6)
-    c.drawCentredString(
-        foto_x + foto_l / 2,
-        foto_y - 3.7 * mm,
-        f'ID #{aluno.id}'
-    )
-
-    # nome do aluno
-    c.setFillColor(cor_branca)
-    c.setFont('Helvetica-Bold', 10)
-
-    nome_aluno = aluno.nome or 'Não informado'
-
-    if len(nome_aluno) > 28:
-
-        nome_aluno = nome_aluno[:28] + '...'
-
-    c.drawString(
-        33 * mm,
-        39 * mm,
-        nome_aluno
-    )
-
-    c.setStrokeColor(cor_vermelha)
-    c.setLineWidth(0.8)
-    c.line(
-        33 * mm,
-        37.5 * mm,
-        78 * mm,
-        37.5 * mm
-    )
-
-    def campo_frente(label, valor, y):
-
-        c.setFillColor(cor_vermelha)
-        c.setFont('Helvetica-Bold', 5.8)
-        c.drawString(
-            33 * mm,
-            y,
-            label
-        )
-
-        c.setFillColor(cor_branca)
-        c.setFont('Helvetica', 6.8)
-
-        valor = str(valor)
-
-        if len(valor) > 28:
-
-            valor = valor[:28] + '...'
-
-        c.drawString(
-            50 * mm,
-            y,
-            valor
-        )
-
-    campo_frente(
-        'FAIXA:',
-        aluno.faixa or 'Não informado',
-        33 * mm
-    )
-
-    campo_frente(
-        'NASC.:',
-        formatar_data(aluno.nascimento),
-        29 * mm
-    )
-
-    campo_frente(
-        'IDADE:',
-        f'{idade} anos' if idade is not None else 'Não informado',
-        25 * mm
-    )
-
-    campo_frente(
-        'RESP.:',
-        aluno.responsavel or 'Não informado',
-        21 * mm
-    )
-
-    campo_frente(
-        'WHATSAPP:',
-        formatar_whatsapp(aluno.whatsapp),
-        17 * mm
-    )
-
-    campo_frente(
-        'STATUS:',
-        status_financeiro,
-        13 * mm
-    )
-
-    # rodapé frente
-    c.setFillColor(cor_vermelha)
-    c.roundRect(
-        5 * mm,
-        6 * mm,
-        largura - 10 * mm,
-        5 * mm,
-        1.5 * mm,
-        fill=True,
-        stroke=False
-    )
-
-    c.setFillColor(cor_branca)
-    c.setFont('Helvetica-Bold', 5.5)
-    c.drawCentredString(
-        largura / 2,
-        7.7 * mm,
-        'DISCIPLINA  •  RESPEITO  •  FOCO  •  SUPERAÇÃO'
-    )
-
-    c.showPage()
+                pass
 
     # =====================================
-    # VERSO
+    # QR CODE NO VERSO
     # =====================================
 
-    c.setFillColor(cor_fundo)
-    c.roundRect(
-        3 * mm,
-        3 * mm,
-        largura - 6 * mm,
-        altura - 6 * mm,
-        4 * mm,
-        fill=True,
-        stroke=False
-    )
-
-    c.setStrokeColor(cor_vermelha)
-    c.setLineWidth(1.2)
-    c.roundRect(
-        4 * mm,
-        4 * mm,
-        largura - 8 * mm,
-        altura - 8 * mm,
-        3 * mm,
-        fill=False,
-        stroke=True
-    )
-
-    # logo verso
-    if os.path.exists(logo_path):
-
-        try:
-
-            c.drawImage(
-                logo_path,
-                7 * mm,
-                altura - 22 * mm,
-                width=18 * mm,
-                height=18 * mm,
-                preserveAspectRatio=True,
-                mask='auto'
-            )
-
-        except Exception:
-
-            pass
-
-    c.setFillColor(cor_branca)
-    c.setFont('Helvetica-Bold', 9)
-    c.drawString(
-        28 * mm,
-        altura - 11 * mm,
-        'AAKC KARATÊ'
-    )
-
-    c.setFillColor(cor_vermelha)
-    c.setFont('Helvetica-Bold', 6.5)
-    c.drawString(
-        28 * mm,
-        altura - 15 * mm,
-        'TRADIÇÃO • DISCIPLINA • EVOLUÇÃO'
-    )
-
-    # informações
-    c.setFillColor(cor_vermelha)
-    c.setFont('Helvetica-Bold', 6.5)
-    c.drawString(
-        7 * mm,
-        34 * mm,
-        '/ INFORMAÇÕES'
-    )
-
-    c.setFillColor(cor_branca)
-    c.setFont('Helvetica', 5.8)
-
-    textos_info = [
-        'Esta carteirinha é pessoal e intransferível.',
-        'O uso é obrigatório durante aulas, eventos e exames.',
-        'Em caso de perda, comunique imediatamente à secretaria.'
-    ]
-
-    y = 30 * mm
-
-    for texto in textos_info:
-
-        c.drawString(
-            7 * mm,
-            y,
-            texto
-        )
-
-        y -= 3.5 * mm
-
-    # observações
-    c.setFillColor(cor_vermelha)
-    c.setFont('Helvetica-Bold', 6.5)
-    c.drawString(
-        7 * mm,
-        18 * mm,
-        '/ OBSERVAÇÕES'
-    )
-
-    c.setStrokeColor(cor_cinza_escuro)
-    c.setLineWidth(0.6)
-
-    c.roundRect(
-        7 * mm,
-        8 * mm,
-        42 * mm,
-        8 * mm,
-        1.5 * mm,
-        fill=False,
-        stroke=True
-    )
-
-    # QR Code
     qr_buffer = gerar_qrcode_aluno(
         aluno
     )
@@ -1748,94 +1545,40 @@ def carteirinha_aluno(id):
         qr_buffer
     )
 
-    c.setFillColor(cor_branca)
-    c.roundRect(
-        58 * mm,
-        22 * mm,
-        20 * mm,
-        20 * mm,
-        1.5 * mm,
-        fill=True,
-        stroke=False
-    )
-
     c.drawImage(
         qr_reader,
-        59 * mm,
-        23 * mm,
-        width=18 * mm,
-        height=18 * mm
+        px_x(1132),
+        px_y(505),
+        width=px_x(165),
+        height=px_x(165)
     )
 
-    c.setFillColor(cor_vermelha)
-    c.roundRect(
-        58 * mm,
-        16 * mm,
-        20 * mm,
-        5 * mm,
-        1 * mm,
-        fill=True,
-        stroke=False
+    # =====================================
+    # CONTATO / VALIDAÇÃO NO VERSO
+    # =====================================
+
+    escrever(
+        f'Aluno: {limitar_texto(aluno.nome, 28)}',
+        795,
+        930,
+        tamanho=7,
+        cor=cor_branca
     )
 
-    c.setFillColor(cor_branca)
-    c.setFont('Helvetica-Bold', 5.5)
-    c.drawCentredString(
-        68 * mm,
-        17.7 * mm,
-        'VALIDAÇÃO'
+    escrever(
+        f'ID: {aluno.id}',
+        795,
+        960,
+        tamanho=7,
+        cor=cor_branca
     )
 
-    c.setFillColor(cor_cinza)
-    c.setFont('Helvetica', 4.8)
-    c.drawCentredString(
-        68 * mm,
-        13.5 * mm,
-        'Escaneie para validar'
-    )
-
-    # contato
-    c.setFillColor(cor_vermelha)
-    c.setFont('Helvetica-Bold', 6.5)
-    c.drawString(
-        7 * mm,
-        44 * mm,
-        '/ CONTATO DA ACADEMIA'
-    )
-
-    c.setFillColor(cor_branca)
-    c.setFont('Helvetica', 5.5)
-
-    c.drawString(
-        7 * mm,
-        40.5 * mm,
-        'AAKC KARATÊ - Sistema de Gestão da Academia'
-    )
-
-    c.drawString(
-        7 * mm,
-        37.5 * mm,
-        'WhatsApp: informe o contato oficial da academia'
-    )
-
-    # rodapé verso
-    c.setFillColor(cor_vermelha)
-    c.roundRect(
-        5 * mm,
-        4.8 * mm,
-        largura - 10 * mm,
-        4.5 * mm,
-        1.5 * mm,
-        fill=True,
-        stroke=False
-    )
-
-    c.setFillColor(cor_branca)
-    c.setFont('Helvetica-Bold', 5)
-    c.drawCentredString(
-        largura / 2,
-        6.2 * mm,
-        'APRESENTAÇÃO OBRIGATÓRIA EM EVENTOS E EXAMES'
+    escrever(
+        f'Faixa: {aluno.faixa or "Não informado"}',
+        795,
+        990,
+        tamanho=7,
+        cor=cor_branca
     )
 
     c.save()
