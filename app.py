@@ -1311,10 +1311,6 @@ def carteirinha_aluno(id):
 
     aluno = Aluno.query.get_or_404(id)
 
-    idade = calcular_idade(
-        aluno.nascimento
-    )
-
     base_path = 'static/modelos/carteirinha_base.png'
 
     if not os.path.exists(base_path):
@@ -1343,6 +1339,8 @@ def carteirinha_aluno(id):
     cor_vermelha = colors.HexColor('#e30613')
     cor_branca = colors.white
     cor_preta = colors.black
+    cor_fundo = colors.HexColor('#111111')
+    cor_fundo_claro = colors.HexColor('#1b1b1b')
 
     # =====================================
     # FUNDO COM O MOCKUP
@@ -1354,14 +1352,12 @@ def carteirinha_aluno(id):
         0,
         width=largura_pdf,
         height=altura_pdf,
-        preserveAspectRatio=True,
         mask='auto'
     )
 
     # =====================================
-    # ESCALA DE CONVERSÃO
-    # imagem original: 1448 x 1086 px
-    # PDF: 297 x 210 mm
+    # CONVERSÃO DE PIXEL PARA PDF
+    # MOCKUP ORIGINAL: 1448 x 1086 px
     # =====================================
 
     escala_x = largura_pdf / 1448
@@ -1375,7 +1371,17 @@ def carteirinha_aluno(id):
 
         return altura_pdf - (valor * escala_y)
 
-    def escrever(texto, x, y, tamanho=10, cor=cor_branca, negrito=False):
+    def limitar_texto(texto, limite):
+
+        texto = str(texto or '')
+
+        if len(texto) > limite:
+
+            return texto[:limite] + '...'
+
+        return texto
+
+    def escrever(texto, x, y, tamanho=8.5, cor=cor_branca, negrito=False):
 
         c.setFillColor(cor)
 
@@ -1399,33 +1405,36 @@ def carteirinha_aluno(id):
             str(texto)
         )
 
-    def limitar_texto(texto, limite):
+    def cobrir_area(x, y, largura, altura, cor=cor_fundo):
 
-        texto = str(texto or '')
+        c.setFillColor(cor)
 
-        if len(texto) > limite:
-
-            return texto[:limite] + '...'
-
-        return texto
+        c.rect(
+            px_x(x),
+            px_y(y + altura),
+            px_x(largura),
+            altura * escala_y,
+            fill=True,
+            stroke=False
+        )
 
     # =====================================
-    # DADOS DA FRENTE
+    # DADOS DO ALUNO
     # =====================================
 
     nome_aluno = limitar_texto(
         aluno.nome or 'Não informado',
-        26
+        24
     )
 
     faixa = limitar_texto(
         aluno.faixa or 'Não informado',
-        22
+        20
     )
 
     responsavel = limitar_texto(
         aluno.responsavel or 'Não informado',
-        24
+        22
     )
 
     nascimento = formatar_data(
@@ -1440,66 +1449,75 @@ def carteirinha_aluno(id):
 
     validade = '31/12/' + str(date.today().year)
 
-    # Nome
+    # =====================================
+    # COBRIR TEXTOS ANTIGOS DA FRENTE
+    # =====================================
+
+    cobrir_area(145, 375, 260, 34)
+    cobrir_area(145, 470, 260, 34)
+    cobrir_area(145, 565, 260, 34)
+    cobrir_area(145, 660, 260, 34)
+    cobrir_area(145, 755, 260, 34)
+    cobrir_area(145, 850, 260, 34)
+    cobrir_area(145, 945, 260, 34)
+
+    # =====================================
+    # ESCREVER DADOS REAIS NA FRENTE
+    # =====================================
+
     escrever(
         nome_aluno,
-        198,
-        404,
-        tamanho=10.5,
+        148,
+        402,
+        tamanho=8.5,
         cor=cor_branca
     )
 
-    # Faixa
     escrever(
         faixa,
-        198,
-        499,
-        tamanho=10.5,
+        148,
+        497,
+        tamanho=8.5,
         cor=cor_branca
     )
 
-    # Responsável
     escrever(
         responsavel,
-        198,
-        594,
-        tamanho=10.5,
+        148,
+        592,
+        tamanho=8.5,
         cor=cor_branca
     )
 
-    # Nascimento
     escrever(
         nascimento,
-        198,
-        688,
-        tamanho=10.5,
+        148,
+        687,
+        tamanho=8.5,
         cor=cor_branca
     )
 
-    # WhatsApp
     escrever(
         whatsapp,
-        198,
-        783,
-        tamanho=10.5,
+        148,
+        782,
+        tamanho=8.5,
         cor=cor_branca
     )
 
-    # Matrícula
     escrever(
         matricula,
-        198,
+        148,
         877,
-        tamanho=10.5,
+        tamanho=8.5,
         cor=cor_branca
     )
 
-    # Validade
     escrever(
         validade,
-        198,
-        970,
-        tamanho=10.5,
+        148,
+        972,
+        tamanho=8.5,
         cor=cor_branca
     )
 
@@ -1521,10 +1539,10 @@ def carteirinha_aluno(id):
 
                 c.drawImage(
                     caminho_foto,
-                    px_x(440),
-                    px_y(830),
-                    width=px_x(220),
-                    height=px_y(554) - px_y(830),
+                    px_x(444),
+                    px_y(800),
+                    width=px_x(210),
+                    height=px_y(475) - px_y(800),
                     preserveAspectRatio=True,
                     mask='auto'
                 )
@@ -1545,41 +1563,32 @@ def carteirinha_aluno(id):
         qr_buffer
     )
 
+    # cobrir QR antigo
+    c.setFillColor(colors.white)
+
+    c.roundRect(
+        px_x(1120),
+        px_y(510),
+        px_x(170),
+        170 * escala_y,
+        3 * mm,
+        fill=True,
+        stroke=False
+    )
+
     c.drawImage(
         qr_reader,
-        px_x(1132),
-        px_y(505),
-        width=px_x(165),
-        height=px_x(165)
+        px_x(1130),
+        px_y(500),
+        width=px_x(150),
+        height=150 * escala_y
     )
 
     # =====================================
-    # CONTATO / VALIDAÇÃO NO VERSO
+    # REMOVER QUALQUER TEXTO EXTRA DO VERSO
     # =====================================
-
-    escrever(
-        f'Aluno: {limitar_texto(aluno.nome, 28)}',
-        795,
-        930,
-        tamanho=7,
-        cor=cor_branca
-    )
-
-    escrever(
-        f'ID: {aluno.id}',
-        795,
-        960,
-        tamanho=7,
-        cor=cor_branca
-    )
-
-    escrever(
-        f'Faixa: {aluno.faixa or "Não informado"}',
-        795,
-        990,
-        tamanho=7,
-        cor=cor_branca
-    )
+    # Não escrever aluno, ID ou faixa no verso,
+    # porque o mockup já tem layout próprio.
 
     c.save()
 
