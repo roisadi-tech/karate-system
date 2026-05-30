@@ -1714,8 +1714,8 @@ def carteirinha_aluno(id):
         negrito=False
     )
 
-    contato_x = int(largura * 0.565)
-    endereco_y = int(altura * 0.807)
+    contato_x = int(largura * 0.555)
+    endereco_y = int(altura * 0.830)
     whatsapp_y_academia = int(altura * 0.853)
     instagram_y = int(altura * 0.900)
 
