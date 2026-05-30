@@ -21,6 +21,12 @@ from models import (
 import os
 import shutil
 
+from io import BytesIO
+
+from openpyxl import Workbook
+
+from openpyxl.styles import Font, Alignment, PatternFill
+
 from uuid import uuid4
 
 from datetime import datetime, date
@@ -1831,12 +1837,18 @@ def mensalidades():
         if mensalidade.status == 'PAGO':
 
             total_pagos += 1
-            recebido += float(valor)
+
+            recebido += float(
+                valor
+            )
 
         elif mensalidade.status == 'PENDENTE':
 
             total_pendentes += 1
-            pendente += float(valor)
+
+            pendente += float(
+                valor
+            )
 
     total_geral = recebido + pendente
 
@@ -1888,6 +1900,8 @@ def mensalidades():
 
             nome_mes = nome
 
+    vencimento_padrao = f'{ano}-{mes}-10'
+
     return render_template(
         'mensalidades.html',
         alunos=alunos,
@@ -1906,7 +1920,229 @@ def mensalidades():
         ano=ano,
         meses=meses,
         anos=anos,
-        nome_mes=nome_mes
+        nome_mes=nome_mes,
+        vencimento_padrao=vencimento_padrao
+    )
+
+
+# =====================================
+# EXPORTAR MENSALIDADES EXCEL
+# =====================================
+
+@app.route('/exportar_mensalidades_excel')
+@login_obrigatorio
+def exportar_mensalidades_excel():
+
+    hoje = date.today()
+
+    mes = request.args.get('mes')
+    ano = request.args.get('ano')
+    filtro = request.args.get('filtro', 'todas')
+
+    if not mes:
+
+        mes = str(hoje.month).zfill(2)
+
+    if not ano:
+
+        ano = str(hoje.year)
+
+    prefixo_data = f'{ano}-{mes}'
+
+    hoje_str = hoje.strftime('%Y-%m-%d')
+
+    query = Mensalidade.query.filter(
+        Mensalidade.vencimento.like(f'{prefixo_data}%')
+    )
+
+    if filtro == 'pagas':
+
+        query = query.filter(
+            Mensalidade.status == 'PAGO'
+        )
+
+    elif filtro == 'pendentes':
+
+        query = query.filter(
+            Mensalidade.status == 'PENDENTE'
+        )
+
+    elif filtro == 'vencidas':
+
+        query = query.filter(
+            Mensalidade.status == 'PENDENTE',
+            Mensalidade.vencimento < hoje_str
+        )
+
+    elif filtro == 'hoje':
+
+        query = query.filter(
+            Mensalidade.status == 'PENDENTE',
+            Mensalidade.vencimento == hoje_str
+        )
+
+    mensalidades = query.order_by(
+        Mensalidade.vencimento.asc()
+    ).all()
+
+    meses = {
+        '01': 'Janeiro',
+        '02': 'Fevereiro',
+        '03': 'Março',
+        '04': 'Abril',
+        '05': 'Maio',
+        '06': 'Junho',
+        '07': 'Julho',
+        '08': 'Agosto',
+        '09': 'Setembro',
+        '10': 'Outubro',
+        '11': 'Novembro',
+        '12': 'Dezembro'
+    }
+
+    nome_mes = meses.get(
+        mes,
+        mes
+    )
+
+    wb = Workbook()
+
+    ws = wb.active
+
+    ws.title = 'Mensalidades'
+
+    ws.merge_cells('A1:E1')
+
+    ws['A1'] = f'Mensalidades - {nome_mes} / {ano}'
+
+    ws['A1'].font = Font(
+        bold=True,
+        size=16,
+        color='FFFFFF'
+    )
+
+    ws['A1'].alignment = Alignment(
+        horizontal='center'
+    )
+
+    ws['A1'].fill = PatternFill(
+        start_color='0F172A',
+        end_color='0F172A',
+        fill_type='solid'
+    )
+
+    cabecalhos = [
+        'Aluno',
+        'Valor',
+        'Vencimento',
+        'Status',
+        'WhatsApp'
+    ]
+
+    ws.append([])
+
+    ws.append(cabecalhos)
+
+    for celula in ws[3]:
+
+        celula.font = Font(
+            bold=True,
+            color='FFFFFF'
+        )
+
+        celula.fill = PatternFill(
+            start_color='DC3545',
+            end_color='DC3545',
+            fill_type='solid'
+        )
+
+        celula.alignment = Alignment(
+            horizontal='center'
+        )
+
+    total = 0
+    recebido = 0
+    pendente = 0
+
+    for mensalidade in mensalidades:
+
+        valor = mensalidade.valor or 0
+
+        total += float(valor)
+
+        if mensalidade.status == 'PAGO':
+
+            recebido += float(valor)
+
+        elif mensalidade.status == 'PENDENTE':
+
+            pendente += float(valor)
+
+        nome_aluno = 'Sem aluno'
+
+        whatsapp = ''
+
+        if mensalidade.aluno:
+
+            nome_aluno = mensalidade.aluno.nome
+            whatsapp = mensalidade.aluno.whatsapp or ''
+
+        ws.append([
+            nome_aluno,
+            float(valor),
+            formatar_data(mensalidade.vencimento),
+            mensalidade.status,
+            whatsapp
+        ])
+
+    linha_resumo = ws.max_row + 2
+
+    ws[f'A{linha_resumo}'] = 'Resumo'
+    ws[f'A{linha_resumo}'].font = Font(
+        bold=True,
+        size=13
+    )
+
+    ws[f'A{linha_resumo + 1}'] = 'Total'
+    ws[f'B{linha_resumo + 1}'] = total
+
+    ws[f'A{linha_resumo + 2}'] = 'Recebido'
+    ws[f'B{linha_resumo + 2}'] = recebido
+
+    ws[f'A{linha_resumo + 3}'] = 'Pendente'
+    ws[f'B{linha_resumo + 3}'] = pendente
+
+    for linha in range(4, ws.max_row + 1):
+
+        ws[f'B{linha}'].number_format = 'R$ #,##0.00'
+
+    ws.column_dimensions['A'].width = 35
+    ws.column_dimensions['B'].width = 15
+    ws.column_dimensions['C'].width = 18
+    ws.column_dimensions['D'].width = 15
+    ws.column_dimensions['E'].width = 18
+
+    for row in ws.iter_rows():
+
+        for cell in row:
+
+            cell.alignment = Alignment(
+                vertical='center'
+            )
+
+    arquivo = BytesIO()
+
+    wb.save(arquivo)
+
+    arquivo.seek(0)
+
+    nome_arquivo = f'mensalidades_{ano}_{mes}_{filtro}.xlsx'
+
+    return send_file(
+        arquivo,
+        as_attachment=True,
+        download_name=nome_arquivo,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
 
 
@@ -1977,7 +2213,12 @@ def gerar_mensalidades():
         'success'
     )
 
-    return redirect('/mensalidades')
+    mes = vencimento[5:7]
+    ano = vencimento[0:4]
+
+    return redirect(
+        f'/mensalidades?mes={mes}&ano={ano}&filtro=todas'
+    )
 
 
 # =====================================

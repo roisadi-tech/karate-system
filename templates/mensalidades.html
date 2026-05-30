@@ -20,18 +20,29 @@
 
     <div class="d-flex gap-2 flex-wrap">
 
-        <a
-            href="/cobrar"
-            class="btn btn-success btn-lg"
-        >
+    <a
+        href="/exportar_mensalidades_excel?mes={{ mes }}&ano={{ ano }}&filtro={{ filtro }}"
+        class="btn btn-primary btn-lg"
+    >
 
-            <i class="bi bi-whatsapp"></i>
+        <i class="bi bi-file-earmark-excel-fill"></i>
 
-            Cobranças
+        Exportar Excel
 
-        </a>
+    </a>
 
-    </div>
+    <a
+        href="/cobrar"
+        class="btn btn-success btn-lg"
+    >
+
+        <i class="bi bi-whatsapp"></i>
+
+        Cobranças
+
+    </a>
+
+</div>
 
 </div>
 
@@ -420,6 +431,7 @@
                     type="date"
                     name="vencimento"
                     class="form-control form-control-lg"
+                    value="{{ vencimento_padrao }}"
                     required
                 >
 
@@ -531,6 +543,7 @@
                     type="date"
                     name="vencimento"
                     class="form-control form-control-lg"
+                    value="{{ vencimento_padrao }}"
                     required
                 >
 
@@ -819,7 +832,7 @@
                             {% if session.tipo == 'admin' %}
 
                             <a
-                                href="/excluir_mensalidade/{{ mensalidade.id }}"
+                                href="/excluir_mensalidade/{{ mensalidade.id }}?mes={{ mes }}&ano={{ ano }}&filtro={{ filtro }}"
                                 class="btn btn-danger btn-sm"
                                 title="Excluir mensalidade"
                                 onclick="return confirm('Deseja excluir esta mensalidade?')"
