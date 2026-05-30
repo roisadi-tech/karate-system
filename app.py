@@ -1552,25 +1552,23 @@ def carteirinha_aluno(id):
     campo_largura = int(largura * 0.175)
     campo_altura = int(altura * 0.035)
 
-    nome_y = int(altura * 0.335)
-    faixa_y = int(altura * 0.421)
-    responsavel_y = int(altura * 0.512)
-    nascimento_y = int(altura * 0.605)
-    whatsapp_y = int(altura * 0.695)
-    matricula_y = int(altura * 0.785)
-    validade_y = int(altura * 0.875)
-
-    # FOTO DO ALUNO
+    # AJUSTES DE POSIÇÃO
+    nome_y = int(altura * 0.350)         # mais para baixo
+    faixa_y = int(altura * 0.438)        # mais para baixo
+    responsavel_y = int(altura * 0.512)  # mantém
+    nascimento_y = int(altura * 0.605)   # mantém
+    whatsapp_y = int(altura * 0.695)     # mantém
+    matricula_y = int(altura * 0.768)    # um pouco mais para cima
+    validade_y = int(altura * 0.850)     # um pouco mais para cima
 
     foto_x = int(largura * 0.315)
     foto_y = int(altura * 0.420)
     foto_largura = int(largura * 0.145)
     foto_altura = int(altura * 0.280)
-
-    # QR CODE NO VERSO
-
-    qr_x = int(largura * 0.800)
-    qr_y = int(altura * 0.293)
+ 
+    # QR CODE MAIS PARA CIMA E PARA A ESQUERDA
+    qr_x = int(largura * 0.775)
+    qr_y = int(altura * 0.270)
     qr_tamanho = int(altura * 0.185)
 
     # =====================================
