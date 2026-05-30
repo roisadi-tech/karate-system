@@ -1217,6 +1217,236 @@ def perfil_aluno(id):
 
 
 # =====================================
+# CARTEIRINHA DO ALUNO
+# =====================================
+
+@app.route('/carteirinha/<int:id>')
+@login_obrigatorio
+def carteirinha(id):
+
+    aluno = Aluno.query.get_or_404(id)
+
+    if not os.path.exists('carteirinhas'):
+
+        os.makedirs('carteirinhas')
+
+    nome_arquivo = f'carteirinhas/carteirinha_{aluno.id}.pdf'
+
+    c = canvas.Canvas(nome_arquivo)
+
+    largura, altura = 595, 842
+
+    # FUNDO
+
+    c.setFillColorRGB(0.06, 0.09, 0.16)
+    c.roundRect(
+        90,
+        520,
+        415,
+        230,
+        18,
+        fill=True,
+        stroke=False
+    )
+
+    # CABEÇALHO
+
+    c.setFillColorRGB(1, 1, 1)
+    c.setFont("Helvetica-Bold", 18)
+
+    c.drawCentredString(
+        largura / 2,
+        720,
+        "ACADEMIA DE KARATÊ"
+    )
+
+    c.setFont("Helvetica", 10)
+
+    c.drawCentredString(
+        largura / 2,
+        705,
+        "Carteirinha de Identificação do Aluno"
+    )
+
+    # LINHA
+
+    c.setStrokeColorRGB(0.86, 0.21, 0.27)
+    c.setLineWidth(2)
+
+    c.line(
+        120,
+        690,
+        475,
+        690
+    )
+
+    # FOTO
+
+    foto_desenhada = False
+
+    if aluno.foto:
+
+        caminho_foto = os.path.join(
+            'static',
+            'uploads',
+            aluno.foto
+        )
+
+        if os.path.exists(caminho_foto):
+
+            try:
+
+                c.drawImage(
+                    caminho_foto,
+                    120,
+                    585,
+                    width=90,
+                    height=90,
+                    preserveAspectRatio=True,
+                    mask='auto'
+                )
+
+                foto_desenhada = True
+
+            except Exception:
+
+                foto_desenhada = False
+
+    if not foto_desenhada:
+
+        c.setFillColorRGB(0.8, 0.8, 0.8)
+
+        c.roundRect(
+            120,
+            585,
+            90,
+            90,
+            10,
+            fill=True,
+            stroke=False
+        )
+
+        c.setFillColorRGB(0.2, 0.2, 0.2)
+        c.setFont("Helvetica-Bold", 9)
+
+        c.drawCentredString(
+            165,
+            625,
+            "SEM FOTO"
+        )
+
+    # DADOS DO ALUNO
+
+    c.setFillColorRGB(1, 1, 1)
+
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(
+        235,
+        660,
+        "Nome:"
+    )
+
+    c.setFont("Helvetica", 11)
+    c.drawString(
+        280,
+        660,
+        aluno.nome or "Não informado"
+    )
+
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(
+        235,
+        635,
+        "Faixa:"
+    )
+
+    c.setFont("Helvetica", 11)
+    c.drawString(
+        280,
+        635,
+        aluno.faixa or "Não informado"
+    )
+
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(
+        235,
+        610,
+        "Nascimento:"
+    )
+
+    c.setFont("Helvetica", 11)
+    c.drawString(
+        320,
+        610,
+        formatar_data(aluno.nascimento)
+    )
+
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(
+        235,
+        585,
+        "WhatsApp:"
+    )
+
+    c.setFont("Helvetica", 11)
+    c.drawString(
+        305,
+        585,
+        formatar_whatsapp(aluno.whatsapp)
+    )
+
+    # RODAPÉ DA CARTEIRINHA
+
+    c.setFillColorRGB(0.86, 0.21, 0.27)
+
+    c.roundRect(
+        90,
+        520,
+        415,
+        35,
+        12,
+        fill=True,
+        stroke=False
+    )
+
+    c.setFillColorRGB(1, 1, 1)
+    c.setFont("Helvetica-Bold", 10)
+
+    c.drawCentredString(
+        largura / 2,
+        533,
+        f"ID do Aluno: {aluno.id}"
+    )
+
+    # INFORMAÇÃO DE EMISSÃO
+
+    c.setFillColorRGB(0, 0, 0)
+
+    c.setFont("Helvetica", 9)
+
+    c.drawString(
+        90,
+        490,
+        f"Carteirinha gerada em: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+    )
+
+    c.setFont("Helvetica-Oblique", 8)
+
+    c.drawString(
+        90,
+        475,
+        "Documento gerado automaticamente pelo Karate System."
+    )
+
+    c.save()
+
+    return send_file(
+        nome_arquivo,
+        as_attachment=True
+    )
+
+
+# =====================================
 # ANIVERSARIANTES
 # =====================================
 
