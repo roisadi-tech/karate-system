@@ -1557,7 +1557,7 @@ def carteirinha_aluno(id):
     faixa_y = int(altura * 0.438)        # mais para baixo
     responsavel_y = int(altura * 0.512)  # mantém
     nascimento_y = int(altura * 0.605)   # mantém
-    whatsapp_y = int(altura * 0.695)     # mantém
+    whatsapp_y = int(altura * 0.690)     # mantém
     matricula_y = int(altura * 0.768)    # um pouco mais para cima
     validade_y = int(altura * 0.850)     # um pouco mais para cima
 
@@ -1684,15 +1684,7 @@ def carteirinha_aluno(id):
     # QR CODE
     # =====================================
 
-    dados_qr = (
-        f'AAKC KARATÊ\n'
-        f'Aluno: {nome_aluno}\n'
-        f'Matrícula: {matricula}\n'
-        f'Faixa: {faixa}\n'
-        f'Nascimento: {nascimento}\n'
-        f'WhatsApp: {whatsapp}\n'
-        f'Validade: {validade}'
-    )
+    dados_qr = request.url_root.rstrip('/') + f'/validar_carteirinha/{aluno.id}'
 
     qr_img = criar_qr_code(
         dados_qr,
@@ -1717,7 +1709,7 @@ def carteirinha_aluno(id):
     contato_x = int(largura * 0.555)
     endereco_y = int(altura * 0.750)
     whatsapp_y_academia = int(altura * 0.780)
-    instagram_y = int(altura * 0.800)
+    instagram_y = int(altura * 0.810)
 
     draw.text(
         (contato_x, endereco_y),
@@ -1817,6 +1809,32 @@ def carteirinha_aluno(id):
         mimetype='application/pdf',
         as_attachment=False,
         download_name=f'carteirinha_{aluno.id}.pdf'
+    )
+
+
+# =====================================
+# VALIDAR CARTEIRINHA DO ALUNO
+# =====================================
+
+@app.route('/validar_carteirinha/<int:id>')
+def validar_carteirinha(id):
+
+    aluno = Aluno.query.get_or_404(id)
+
+    idade = calcular_idade(
+        aluno.nascimento
+    )
+
+    matricula = f'AAKC-{aluno.id:06d}'
+
+    validade = f'31/12/{date.today().year}'
+
+    return render_template(
+        'validar_carteirinha.html',
+        aluno=aluno,
+        idade=idade,
+        matricula=matricula,
+        validade=validade
     )
 
 

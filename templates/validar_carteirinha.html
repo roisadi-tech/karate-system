@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Validar Carteirinha{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-6">
+
+            <div class="card shadow border-0">
+
+                <div class="card-header bg-success text-white text-center">
+
+                    <h4 class="mb-0">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Carteirinha Válida
+                    </h4>
+
+                </div>
+
+                <div class="card-body text-center">
+
+                    {% if aluno.foto %}
+
+                        <img
+                            src="{{ url_for('static', filename='uploads/' ~ aluno.foto) }}"
+                            class="rounded-circle mb-3"
+                            style="width: 130px; height: 130px; object-fit: cover;"
+                        >
+
+                    {% else %}
+
+                        <div
+                            class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto mb-3"
+                            style="width: 130px; height: 130px;"
+                        >
+                            <i class="bi bi-person-fill" style="font-size: 70px;"></i>
+                        </div>
+
+                    {% endif %}
+
+                    <h3 class="fw-bold mb-1">
+                        {{ aluno.nome }}
+                    </h3>
+
+                    <p class="text-muted mb-4">
+                        Aluno AAKC Karatê
+                    </p>
+
+                    <div class="text-start">
+
+                        <p>
+                            <strong>Matrícula:</strong>
+                            {{ matricula }}
+                        </p>
+
+                        <p>
+                            <strong>Faixa:</strong>
+                            {{ aluno.faixa or 'Não informado' }}
+                        </p>
+
+                        <p>
+                            <strong>Nascimento:</strong>
+                            {{ formatar_data(aluno.nascimento) }}
+                        </p>
+
+                        <p>
+                            <strong>Idade:</strong>
+                            {% if idade %}
+                                {{ idade }} anos
+                            {% else %}
+                                Não informado
+                            {% endif %}
+                        </p>
+
+                        <p>
+                            <strong>Validade:</strong>
+                            {{ validade }}
+                        </p>
+
+                    </div>
+
+                    <div class="alert alert-success mt-4 mb-0">
+                        Esta carteirinha foi validada pelo sistema da AAKC Karatê.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
