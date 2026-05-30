@@ -1803,6 +1803,135 @@ def mensalidades():
 
 
 # =====================================
+# FINANCEIRO MENSAL
+# =====================================
+
+@app.route('/financeiro_mensal')
+@login_obrigatorio
+def financeiro_mensal():
+
+    hoje = date.today()
+
+    mes = request.args.get('mes')
+    ano = request.args.get('ano')
+
+    if not mes:
+
+        mes = str(hoje.month).zfill(2)
+
+    if not ano:
+
+        ano = str(hoje.year)
+
+    prefixo_data = f'{ano}-{mes}'
+
+    mensalidades = Mensalidade.query.filter(
+        Mensalidade.vencimento.like(f'{prefixo_data}%')
+    ).order_by(
+        Mensalidade.vencimento.asc()
+    ).all()
+
+    recebido = db.session.query(
+        db.func.sum(Mensalidade.valor)
+    ).filter(
+        Mensalidade.status == 'PAGO',
+        Mensalidade.vencimento.like(f'{prefixo_data}%')
+    ).scalar()
+
+    if recebido is None:
+
+        recebido = 0
+
+    recebido = float(recebido)
+
+    pendente = db.session.query(
+        db.func.sum(Mensalidade.valor)
+    ).filter(
+        Mensalidade.status == 'PENDENTE',
+        Mensalidade.vencimento.like(f'{prefixo_data}%')
+    ).scalar()
+
+    if pendente is None:
+
+        pendente = 0
+
+    pendente = float(pendente)
+
+    total_geral = recebido + pendente
+
+    pagas = Mensalidade.query.filter(
+        Mensalidade.status == 'PAGO',
+        Mensalidade.vencimento.like(f'{prefixo_data}%')
+    ).count()
+
+    pendentes = Mensalidade.query.filter(
+        Mensalidade.status == 'PENDENTE',
+        Mensalidade.vencimento.like(f'{prefixo_data}%')
+    ).count()
+
+    total_registros = len(
+        mensalidades
+    )
+
+    percentual_recebido = 0
+    percentual_pendente = 0
+
+    if total_geral > 0:
+
+        percentual_recebido = round(
+            (recebido / total_geral) * 100,
+            1
+        )
+
+        percentual_pendente = round(
+            (pendente / total_geral) * 100,
+            1
+        )
+
+    meses = [
+        ('01', 'Janeiro'),
+        ('02', 'Fevereiro'),
+        ('03', 'Março'),
+        ('04', 'Abril'),
+        ('05', 'Maio'),
+        ('06', 'Junho'),
+        ('07', 'Julho'),
+        ('08', 'Agosto'),
+        ('09', 'Setembro'),
+        ('10', 'Outubro'),
+        ('11', 'Novembro'),
+        ('12', 'Dezembro')
+    ]
+
+    anos = []
+
+    ano_atual = hoje.year
+
+    for item in range(ano_atual - 3, ano_atual + 2):
+
+        anos.append(
+            str(item)
+        )
+
+    return render_template(
+        'financeiro_mensal.html',
+        mensalidades=mensalidades,
+        recebido=recebido,
+        pendente=pendente,
+        total_geral=total_geral,
+        pagas=pagas,
+        pendentes=pendentes,
+        total_registros=total_registros,
+        percentual_recebido=percentual_recebido,
+        percentual_pendente=percentual_pendente,
+        mes=mes,
+        ano=ano,
+        meses=meses,
+        anos=anos
+    )
+
+
+# =====================================
 # GERAR MENSALIDADES AUTOMÁTICAS
 # =====================================
 
