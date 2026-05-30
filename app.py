@@ -57,44 +57,209 @@ from reportlab.pdfgen import canvas
 
 
 # =====================================
-# GERAR QR CODE DO ALUNO
+# FONTE DA CARTEIRINHA
 # =====================================
 
-def gerar_qrcode_aluno(aluno):
+def carregar_fonte(tamanho, negrito=False):
 
-    qr_texto = (
-        f'AAKC KARATÊ\n'
-        f'Aluno: {aluno.nome}\n'
-        f'ID: {aluno.id}\n'
-        f'Faixa: {aluno.faixa}\n'
-        f'WhatsApp: {aluno.whatsapp}\n'
-        f'Responsável: {aluno.responsavel}'
+    caminhos = []
+
+    if negrito:
+
+        caminhos = [
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+            '/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf',
+            'C:/Windows/Fonts/arialbd.ttf'
+        ]
+
+    else:
+
+        caminhos = [
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+            '/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf',
+            'C:/Windows/Fonts/arial.ttf'
+        ]
+
+    for caminho in caminhos:
+
+        if os.path.exists(caminho):
+
+            return ImageFont.truetype(
+                caminho,
+                tamanho
+            )
+
+    return ImageFont.load_default()
+
+
+# =====================================
+# AJUSTAR FONTE PELO TAMANHO DO TEXTO
+# =====================================
+
+def ajustar_fonte(
+    draw,
+    texto,
+    largura_max,
+    tamanho_inicial=28,
+    tamanho_min=12,
+    negrito=False
+):
+
+    tamanho = tamanho_inicial
+
+    while tamanho >= tamanho_min:
+
+        fonte = carregar_fonte(
+            tamanho,
+            negrito=negrito
+        )
+
+        largura_texto = draw.textbbox(
+            (0, 0),
+            str(texto),
+            font=fonte
+        )[2]
+
+        if largura_texto <= largura_max:
+
+            return fonte
+
+        tamanho -= 1
+
+    return carregar_fonte(
+        tamanho_min,
+        negrito=negrito
     )
+
+
+# =====================================
+# CRIAR QR CODE
+# =====================================
+
+def criar_qr_code(conteudo, tamanho=220):
 
     qr = qrcode.QRCode(
         version=1,
-        box_size=8,
+        box_size=10,
         border=2
     )
 
-    qr.add_data(qr_texto)
+    qr.add_data(conteudo)
     qr.make(fit=True)
 
-    qr_img = qr.make_image(
+    img_qr = qr.make_image(
         fill_color='black',
         back_color='white'
     ).convert('RGB')
 
-    buffer = BytesIO()
-
-    qr_img.save(
-        buffer,
-        format='PNG'
+    img_qr = img_qr.resize(
+        (tamanho, tamanho),
+        Image.Resampling.LANCZOS
     )
 
-    buffer.seek(0)
+    return img_qr
 
-    return buffer
+
+# =====================================
+# PREPARAR FOTO DO ALUNO
+# =====================================
+
+def preparar_foto_aluno(caminho_foto, largura, altura):
+
+    if caminho_foto and os.path.exists(caminho_foto):
+
+        foto = Image.open(caminho_foto).convert('RGB')
+
+    else:
+
+        foto = Image.new(
+            'RGB',
+            (largura, altura),
+            (60, 60, 60)
+        )
+
+        draw_foto = ImageDraw.Draw(foto)
+
+        fonte = carregar_fonte(
+            28,
+            negrito=True
+        )
+
+        texto = 'SEM FOTO'
+
+        bbox = draw_foto.textbbox(
+            (0, 0),
+            texto,
+            font=fonte
+        )
+
+        texto_largura = bbox[2] - bbox[0]
+        texto_altura = bbox[3] - bbox[1]
+
+        draw_foto.text(
+            (
+                (largura - texto_largura) / 2,
+                (altura - texto_altura) / 2
+            ),
+            texto,
+            font=fonte,
+            fill=(220, 220, 220)
+        )
+
+    foto = ImageOps.fit(
+        foto,
+        (largura, altura),
+        Image.Resampling.LANCZOS
+    )
+
+    return foto
+
+
+# =====================================
+# DESENHAR CAMPO DE TEXTO
+# =====================================
+
+def desenhar_campo(
+    draw,
+    x,
+    y,
+    largura,
+    altura,
+    texto,
+    fonte,
+    cor_fundo=(8, 12, 18),
+    cor_texto=(255, 255, 255),
+    cor_borda=(180, 25, 25)
+):
+
+    draw.rounded_rectangle(
+        [
+            (x, y),
+            (x + largura, y + altura)
+        ],
+        radius=8,
+        fill=cor_fundo,
+        outline=cor_borda,
+        width=2
+    )
+
+    bbox = draw.textbbox(
+        (0, 0),
+        str(texto),
+        font=fonte
+    )
+
+    texto_altura = bbox[3] - bbox[1]
+
+    draw.text(
+        (
+            x + 12,
+            y + (altura - texto_altura) / 2 - 2
+        ),
+        str(texto),
+        font=fonte,
+        fill=cor_texto
+    )
 
 
 # =====================================
@@ -1302,7 +1467,7 @@ def perfil_aluno(id):
 
 
 # =====================================
-# CARTEIRINHA DO ALUNO PDF
+# CARTEIRINHA DO ALUNO
 # =====================================
 
 @app.route('/carteirinha/<int:id>')
@@ -1311,290 +1476,333 @@ def carteirinha_aluno(id):
 
     aluno = Aluno.query.get_or_404(id)
 
-    base_path = 'static/modelos/carteirinha_base.png'
+    base_path = os.path.join(
+        app.root_path,
+        'static',
+        'modelos',
+        'carteirinha_base.png'
+    )
 
     if not os.path.exists(base_path):
 
         flash(
-            'Modelo da carteirinha não encontrado em static/modelos/carteirinha_base.png',
+            f'Modelo da carteirinha não encontrado em {base_path}',
             'danger'
         )
 
         return redirect(f'/aluno/{id}')
 
-    if not os.path.exists('carteirinhas'):
+    # ABRE MOCKUP BASE
+    base = Image.open(base_path).convert('RGBA')
 
-        os.makedirs('carteirinhas')
+    largura, altura = base.size
 
-    nome_arquivo = f'carteirinhas/carteirinha_{aluno.id}.pdf'
-
-    largura_pdf = 297 * mm
-    altura_pdf = 210 * mm
-
-    c = canvas.Canvas(
-        nome_arquivo,
-        pagesize=(largura_pdf, altura_pdf)
+    # CAMADA PARA DESENHO
+    camada = Image.new(
+        'RGBA',
+        base.size,
+        (0, 0, 0, 0)
     )
 
-    cor_vermelha = colors.HexColor('#e30613')
-    cor_branca = colors.white
-    cor_preta = colors.black
-    cor_fundo = colors.HexColor('#111111')
-    cor_fundo_claro = colors.HexColor('#1b1b1b')
+    draw = ImageDraw.Draw(camada)
 
-    # =====================================
-    # FUNDO COM O MOCKUP
-    # =====================================
+    # CORES
+    branco = (255, 255, 255)
+    vermelho = (230, 25, 25)
+    preto_campo = (8, 12, 18)
 
-    c.drawImage(
-        base_path,
-        0,
-        0,
-        width=largura_pdf,
-        height=altura_pdf,
-        mask='auto'
-    )
-
-    # =====================================
-    # CONVERSÃO DE PIXEL PARA PDF
-    # MOCKUP ORIGINAL: 1448 x 1086 px
-    # =====================================
-
-    escala_x = largura_pdf / 1448
-    escala_y = altura_pdf / 1086
-
-    def px_x(valor):
-
-        return valor * escala_x
-
-    def px_y(valor):
-
-        return altura_pdf - (valor * escala_y)
-
-    def limitar_texto(texto, limite):
-
-        texto = str(texto or '')
-
-        if len(texto) > limite:
-
-            return texto[:limite] + '...'
-
-        return texto
-
-    def escrever(texto, x, y, tamanho=8.5, cor=cor_branca, negrito=False):
-
-        c.setFillColor(cor)
-
-        if negrito:
-
-            c.setFont(
-                'Helvetica-Bold',
-                tamanho
-            )
-
-        else:
-
-            c.setFont(
-                'Helvetica',
-                tamanho
-            )
-
-        c.drawString(
-            px_x(x),
-            px_y(y),
-            str(texto)
-        )
-
-    def cobrir_area(x, y, largura, altura, cor=cor_fundo):
-
-        c.setFillColor(cor)
-
-        c.rect(
-            px_x(x),
-            px_y(y + altura),
-            px_x(largura),
-            altura * escala_y,
-            fill=True,
-            stroke=False
-        )
-
-    # =====================================
-    # DADOS DO ALUNO
-    # =====================================
-
-    nome_aluno = limitar_texto(
-        aluno.nome or 'Não informado',
-        24
-    )
-
-    faixa = limitar_texto(
-        aluno.faixa or 'Não informado',
-        20
-    )
-
-    responsavel = limitar_texto(
-        aluno.responsavel or 'Não informado',
-        22
-    )
-
-    nascimento = formatar_data(
-        aluno.nascimento
-    )
-
-    whatsapp = formatar_whatsapp(
-        aluno.whatsapp
-    )
-
+    # DADOS FORMATADOS
+    nome_aluno = aluno.nome or 'Não informado'
+    faixa = aluno.faixa or 'Não informado'
+    responsavel = aluno.responsavel or 'Não informado'
+    nascimento = formatar_data(aluno.nascimento)
+    whatsapp = formatar_whatsapp(aluno.whatsapp)
     matricula = f'AAKC-{aluno.id:06d}'
+    validade = f'31/12/{date.today().year}'
 
-    validade = '31/12/' + str(date.today().year)
-
-    # =====================================
-    # COBRIR TEXTOS ANTIGOS DA FRENTE
-    # =====================================
-
-    cobrir_area(145, 375, 260, 34)
-    cobrir_area(145, 470, 260, 34)
-    cobrir_area(145, 565, 260, 34)
-    cobrir_area(145, 660, 260, 34)
-    cobrir_area(145, 755, 260, 34)
-    cobrir_area(145, 850, 260, 34)
-    cobrir_area(145, 945, 260, 34)
-
-    # =====================================
-    # ESCREVER DADOS REAIS NA FRENTE
-    # =====================================
-
-    escrever(
+    # FONTES
+    fonte_nome = ajustar_fonte(
+        draw,
         nome_aluno,
-        148,
-        402,
-        tamanho=8.5,
-        cor=cor_branca
+        int(largura * 0.18),
+        tamanho_inicial=24,
+        tamanho_min=14,
+        negrito=True
     )
 
-    escrever(
-        faixa,
-        148,
-        497,
-        tamanho=8.5,
-        cor=cor_branca
+    fonte_valor = carregar_fonte(
+        18,
+        negrito=False
     )
 
-    escrever(
-        responsavel,
-        148,
-        592,
-        tamanho=8.5,
-        cor=cor_branca
+    fonte_pequena = carregar_fonte(
+        14,
+        negrito=False
     )
 
-    escrever(
-        nascimento,
-        148,
-        687,
-        tamanho=8.5,
-        cor=cor_branca
-    )
-
-    escrever(
-        whatsapp,
-        148,
-        782,
-        tamanho=8.5,
-        cor=cor_branca
-    )
-
-    escrever(
+    fonte_matricula = ajustar_fonte(
+        draw,
         matricula,
-        148,
-        877,
-        tamanho=8.5,
-        cor=cor_branca
+        int(largura * 0.18),
+        tamanho_inicial=20,
+        tamanho_min=14,
+        negrito=False
     )
 
-    escrever(
+    # =====================================
+    # COORDENADAS DA FRENTE
+    # Ajustadas para o mockup novo
+    # =====================================
+
+    campo_x = int(largura * 0.082)
+    campo_largura = int(largura * 0.205)
+    campo_altura = int(altura * 0.05)
+
+    nome_y = int(altura * 0.328)
+    faixa_y = int(altura * 0.414)
+    responsavel_y = int(altura * 0.507)
+    nascimento_y = int(altura * 0.602)
+    whatsapp_y = int(altura * 0.693)
+    matricula_y = int(altura * 0.782)
+    validade_y = int(altura * 0.873)
+
+    # FOTO
+    foto_x = int(largura * 0.322)
+    foto_y = int(altura * 0.397)
+    foto_largura = int(largura * 0.132)
+    foto_altura = int(altura * 0.318)
+
+    # QR CODE NO VERSO
+    qr_x = int(largura * 0.784)
+    qr_y = int(altura * 0.274)
+    qr_tamanho = int(altura * 0.205)
+
+    # TEXTO PEQUENO NO VERSO
+    verso_info_x = int(largura * 0.595)
+    verso_info_y = int(altura * 0.845)
+
+    # DESENHAR CAMPOS DA FRENTE
+    desenhar_campo(
+        draw,
+        campo_x,
+        nome_y,
+        campo_largura,
+        campo_altura,
+        nome_aluno,
+        fonte_nome,
+        cor_fundo=preto_campo,
+        cor_texto=branco
+    )
+
+    desenhar_campo(
+        draw,
+        campo_x,
+        faixa_y,
+        campo_largura,
+        campo_altura,
+        faixa,
+        fonte_valor,
+        cor_fundo=preto_campo,
+        cor_texto=branco
+    )
+
+    desenhar_campo(
+        draw,
+        campo_x,
+        responsavel_y,
+        campo_largura,
+        campo_altura,
+        responsavel,
+        fonte_valor,
+        cor_fundo=preto_campo,
+        cor_texto=branco
+    )
+
+    desenhar_campo(
+        draw,
+        campo_x,
+        nascimento_y,
+        campo_largura,
+        campo_altura,
+        nascimento,
+        fonte_valor,
+        cor_fundo=preto_campo,
+        cor_texto=branco
+    )
+
+    desenhar_campo(
+        draw,
+        campo_x,
+        whatsapp_y,
+        campo_largura,
+        campo_altura,
+        whatsapp,
+        fonte_valor,
+        cor_fundo=preto_campo,
+        cor_texto=branco
+    )
+
+    desenhar_campo(
+        draw,
+        campo_x,
+        matricula_y,
+        campo_largura,
+        campo_altura,
+        matricula,
+        fonte_matricula,
+        cor_fundo=preto_campo,
+        cor_texto=branco
+    )
+
+    desenhar_campo(
+        draw,
+        campo_x,
+        validade_y,
+        campo_largura,
+        campo_altura,
         validade,
-        148,
-        972,
-        tamanho=8.5,
-        cor=cor_branca
+        fonte_valor,
+        cor_fundo=preto_campo,
+        cor_texto=branco
     )
 
-    # =====================================
     # FOTO DO ALUNO
-    # =====================================
+    caminho_foto = None
 
     if aluno.foto:
 
         caminho_foto = os.path.join(
+            app.root_path,
             'static',
             'uploads',
             aluno.foto
         )
 
-        if os.path.exists(caminho_foto):
+    foto = preparar_foto_aluno(
+        caminho_foto,
+        foto_largura,
+        foto_altura
+    )
 
-            try:
+    base.paste(
+        foto,
+        (foto_x, foto_y)
+    )
 
-                c.drawImage(
-                    caminho_foto,
-                    px_x(444),
-                    px_y(800),
-                    width=px_x(210),
-                    height=px_y(475) - px_y(800),
-                    preserveAspectRatio=True,
-                    mask='auto'
-                )
+    # QR CODE
+    dados_qr = (
+        f'AAKC KARATE\n'
+        f'Aluno: {nome_aluno}\n'
+        f'Matrícula: {matricula}\n'
+        f'Faixa: {faixa}\n'
+        f'Validade: {validade}'
+    )
 
-            except Exception:
+    qr_img = criar_qr_code(
+        dados_qr,
+        tamanho=qr_tamanho
+    )
 
-                pass
+    base.paste(
+        qr_img,
+        (qr_x, qr_y)
+    )
+
+    # DADOS PEQUENOS NO VERSO
+    texto_verso_1 = f'Aluno: {nome_aluno}'
+    texto_verso_2 = f'ID: {aluno.id}'
+    texto_verso_3 = f'Faixa: {faixa}'
+
+    draw.text(
+        (verso_info_x, verso_info_y),
+        texto_verso_1,
+        font=fonte_pequena,
+        fill=branco
+    )
+
+    draw.text(
+        (verso_info_x, verso_info_y + 18),
+        texto_verso_2,
+        font=fonte_pequena,
+        fill=branco
+    )
+
+    draw.text(
+        (verso_info_x, verso_info_y + 36),
+        texto_verso_3,
+        font=fonte_pequena,
+        fill=branco
+    )
+
+    # JUNTA A CAMADA COM A BASE
+    arte_final = Image.alpha_composite(
+        base,
+        camada
+    ).convert('RGB')
 
     # =====================================
-    # QR CODE NO VERSO
+    # GERAR PDF PARA IMPRESSÃO
     # =====================================
 
-    qr_buffer = gerar_qrcode_aluno(
-        aluno
+    img_buffer = BytesIO()
+    arte_final.save(
+        img_buffer,
+        format='PNG'
+    )
+    img_buffer.seek(0)
+
+    pdf_buffer = BytesIO()
+
+    pagina = landscape(
+        (210 * mm, 297 * mm)
     )
 
-    qr_reader = ImageReader(
-        qr_buffer
+    c = canvas.Canvas(
+        pdf_buffer,
+        pagesize=pagina
     )
 
-    # cobrir QR antigo
-    c.setFillColor(colors.white)
+    pagina_largura, pagina_altura = pagina
 
-    c.roundRect(
-        px_x(1120),
-        px_y(510),
-        px_x(170),
-        170 * escala_y,
-        3 * mm,
-        fill=True,
-        stroke=False
-    )
+    margem = 10 * mm
+    area_largura = pagina_largura - (margem * 2)
+    area_altura = pagina_altura - (margem * 2)
+
+    proporcao_img = arte_final.width / arte_final.height
+    proporcao_area = area_largura / area_altura
+
+    if proporcao_img > proporcao_area:
+
+        draw_w = area_largura
+        draw_h = draw_w / proporcao_img
+
+    else:
+
+        draw_h = area_altura
+        draw_w = draw_h * proporcao_img
+
+    pos_x = (pagina_largura - draw_w) / 2
+    pos_y = (pagina_altura - draw_h) / 2
 
     c.drawImage(
-        qr_reader,
-        px_x(1130),
-        px_y(500),
-        width=px_x(150),
-        height=150 * escala_y
+        ImageReader(img_buffer),
+        pos_x,
+        pos_y,
+        width=draw_w,
+        height=draw_h,
+        mask='auto'
     )
 
-    # =====================================
-    # REMOVER QUALQUER TEXTO EXTRA DO VERSO
-    # =====================================
-    # Não escrever aluno, ID ou faixa no verso,
-    # porque o mockup já tem layout próprio.
-
+    c.showPage()
     c.save()
 
+    pdf_buffer.seek(0)
+
     return send_file(
-        nome_arquivo,
-        as_attachment=True
+        pdf_buffer,
+        mimetype='application/pdf',
+        as_attachment=False,
+        download_name=f'carteirinha_{aluno.id}.pdf'
     )
 
 
