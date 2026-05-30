@@ -1,100 +1,234 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="pt-br">
 
-{% block title %}Validar Carteirinha{% endblock %}
+<head>
 
-{% block content %}
+    <meta charset="UTF-8">
 
-<div class="container py-4">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <div class="row justify-content-center">
+    <title>Validação de Carteirinha - AAKC Karatê</title>
 
-        <div class="col-lg-6">
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
 
-            <div class="card shadow border-0">
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+        rel="stylesheet"
+    >
 
-                <div class="card-header bg-success text-white text-center">
+    <style>
 
-                    <h4 class="mb-0">
-                        <i class="bi bi-check-circle-fill"></i>
-                        Carteirinha Válida
-                    </h4>
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #050505, #1a1a1a, #7f0000);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
 
+        .validation-card {
+            max-width: 480px;
+            width: 100%;
+            border-radius: 24px;
+            overflow: hidden;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+        }
+
+        .top-area {
+            background: #111827;
+            color: white;
+            padding: 28px 20px;
+            text-align: center;
+        }
+
+        .status-icon {
+            width: 76px;
+            height: 76px;
+            background: #198754;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px auto;
+            font-size: 42px;
+        }
+
+        .student-photo {
+            width: 135px;
+            height: 135px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 5px solid #dc3545;
+            margin-top: -55px;
+            background: #333;
+        }
+
+        .photo-placeholder {
+            width: 135px;
+            height: 135px;
+            border-radius: 50%;
+            border: 5px solid #dc3545;
+            margin: -55px auto 15px auto;
+            background: #343a40;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 68px;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border-left: 5px solid #dc3545;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            color: #111827;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .footer-validation {
+            background: #198754;
+            color: white;
+            text-align: center;
+            padding: 14px;
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="card validation-card">
+
+        <div class="top-area">
+
+            <div class="status-icon">
+                <i class="bi bi-check-lg"></i>
+            </div>
+
+            <h3 class="mb-1">
+                Carteirinha Válida
+            </h3>
+
+            <p class="mb-0 text-white-50">
+                AAKC Karatê
+            </p>
+
+        </div>
+
+        <div class="card-body text-center p-4">
+
+            {% if aluno.foto %}
+
+                <img
+                    src="{{ url_for('static', filename='uploads/' ~ aluno.foto) }}"
+                    class="student-photo mb-3"
+                    alt="Foto do aluno"
+                >
+
+            {% else %}
+
+                <div class="photo-placeholder">
+                    <i class="bi bi-person-fill"></i>
                 </div>
 
-                <div class="card-body text-center">
+            {% endif %}
 
-                    {% if aluno.foto %}
+            <h3 class="fw-bold mb-1">
+                {{ aluno.nome }}
+            </h3>
 
-                        <img
-                            src="{{ url_for('static', filename='uploads/' ~ aluno.foto) }}"
-                            class="rounded-circle mb-3"
-                            style="width: 130px; height: 130px; object-fit: cover;"
-                        >
+            <p class="text-muted mb-4">
+                Aluno cadastrado no sistema AAKC Karatê
+            </p>
 
-                    {% else %}
+            <div class="text-start">
 
-                        <div
-                            class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto mb-3"
-                            style="width: 130px; height: 130px;"
-                        >
-                            <i class="bi bi-person-fill" style="font-size: 70px;"></i>
-                        </div>
-
-                    {% endif %}
-
-                    <h3 class="fw-bold mb-1">
-                        {{ aluno.nome }}
-                    </h3>
-
-                    <p class="text-muted mb-4">
-                        Aluno AAKC Karatê
+                <div class="info-box">
+                    <div class="info-label">
+                        Matrícula
+                    </div>
+                    <p class="info-value">
+                        {{ matricula }}
                     </p>
+                </div>
 
-                    <div class="text-start">
-
-                        <p>
-                            <strong>Matrícula:</strong>
-                            {{ matricula }}
-                        </p>
-
-                        <p>
-                            <strong>Faixa:</strong>
-                            {{ aluno.faixa or 'Não informado' }}
-                        </p>
-
-                        <p>
-                            <strong>Nascimento:</strong>
-                            {{ formatar_data(aluno.nascimento) }}
-                        </p>
-
-                        <p>
-                            <strong>Idade:</strong>
-                            {% if idade %}
-                                {{ idade }} anos
-                            {% else %}
-                                Não informado
-                            {% endif %}
-                        </p>
-
-                        <p>
-                            <strong>Validade:</strong>
-                            {{ validade }}
-                        </p>
-
+                <div class="info-box">
+                    <div class="info-label">
+                        Faixa
                     </div>
+                    <p class="info-value">
+                        {{ aluno.faixa or 'Não informado' }}
+                    </p>
+                </div>
 
-                    <div class="alert alert-success mt-4 mb-0">
-                        Esta carteirinha foi validada pelo sistema da AAKC Karatê.
+                <div class="info-box">
+                    <div class="info-label">
+                        Data de nascimento
                     </div>
+                    <p class="info-value">
+                        {{ formatar_data(aluno.nascimento) }}
+                    </p>
+                </div>
 
+                <div class="info-box">
+                    <div class="info-label">
+                        Idade
+                    </div>
+                    <p class="info-value">
+                        {% if idade %}
+                            {{ idade }} anos
+                        {% else %}
+                            Não informado
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-label">
+                        Validade da carteirinha
+                    </div>
+                    <p class="info-value">
+                        {{ validade }}
+                    </p>
                 </div>
 
             </div>
 
         </div>
 
+        <div class="footer-validation">
+            <i class="bi bi-shield-check"></i>
+            Validação oficial do sistema AAKC Karatê
+        </div>
+
     </div>
 
-</div>
+</body>
 
-{% endblock %}
+</html>
