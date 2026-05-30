@@ -13,23 +13,12 @@
         </h2>
 
         <p class="text-muted mb-0">
-            Controle financeiro da academia
+            Controle financeiro mensal da academia
         </p>
 
     </div>
 
     <div class="d-flex gap-2 flex-wrap">
-
-        <a
-            href="/financeiro_mensal"
-            class="btn btn-dark btn-lg"
-        >
-
-            <i class="bi bi-calendar3"></i>
-
-            Financeiro Mensal
-
-        </a>
 
         <a
             href="/cobrar"
@@ -46,13 +35,146 @@
 
 </div>
 
-<!-- RESUMO -->
+<!-- FILTRO MENSAL -->
+
+<div class="card border-0 shadow-sm p-4 mb-4 rounded-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+
+        <div>
+
+            <h4 class="fw-bold mb-1">
+
+                Período Financeiro
+
+            </h4>
+
+            <small class="text-muted">
+
+                A tela abre automaticamente no mês atual
+
+            </small>
+
+        </div>
+
+        <span class="badge bg-dark p-2">
+
+            {{ nome_mes }} / {{ ano }}
+
+        </span>
+
+    </div>
+
+    <form method="GET">
+
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-4">
+
+                <label class="form-label fw-semibold">
+                    Mês
+                </label>
+
+                <select
+                    name="mes"
+                    class="form-select form-select-lg"
+                >
+
+                    {% for numero, nome in meses %}
+
+                        <option value="{{ numero }}" {% if mes == numero %}selected{% endif %}>
+                            {{ nome }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div class="col-md-3">
+
+                <label class="form-label fw-semibold">
+                    Ano
+                </label>
+
+                <select
+                    name="ano"
+                    class="form-select form-select-lg"
+                >
+
+                    {% for item in anos %}
+
+                        <option value="{{ item }}" {% if ano == item %}selected{% endif %}>
+                            {{ item }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div class="col-md-3">
+
+                <label class="form-label fw-semibold">
+                    Status
+                </label>
+
+                <select
+                    name="filtro"
+                    class="form-select form-select-lg"
+                >
+
+                    <option value="todas" {% if filtro == 'todas' %}selected{% endif %}>
+                        Todas
+                    </option>
+
+                    <option value="pagas" {% if filtro == 'pagas' %}selected{% endif %}>
+                        Pagas
+                    </option>
+
+                    <option value="pendentes" {% if filtro == 'pendentes' %}selected{% endif %}>
+                        Pendentes
+                    </option>
+
+                    <option value="vencidas" {% if filtro == 'vencidas' %}selected{% endif %}>
+                        Vencidas
+                    </option>
+
+                    <option value="hoje" {% if filtro == 'hoje' %}selected{% endif %}>
+                        Vence Hoje
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="col-md-2 d-grid">
+
+                <button class="btn btn-danger btn-lg">
+
+                    <i class="bi bi-search"></i>
+
+                    Filtrar
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+<!-- RESUMO FINANCEIRO DO MÊS -->
 
 <div class="row g-4 mb-4">
 
-    <!-- TOTAL -->
+    <!-- TOTAL DO MÊS -->
 
-    <div class="col-md-4">
+    <div class="col-md-3">
 
         <div class="card p-4 h-100">
 
@@ -61,14 +183,18 @@
                 <div>
 
                     <small class="text-muted">
-                        Total de Registros
+                        Total do mês
                     </small>
 
-                    <h2 class="fw-bold mt-2">
+                    <h3 class="fw-bold mt-2">
 
-                        {{ total_registros }}
+                        {{ formatar_moeda(total_geral) }}
 
-                    </h2>
+                    </h3>
+
+                    <small class="text-muted">
+                        {{ total_registros }} registro(s)
+                    </small>
 
                 </div>
 
@@ -84,9 +210,9 @@
 
     </div>
 
-    <!-- PAGOS -->
+    <!-- RECEBIDO -->
 
-    <div class="col-md-4">
+    <div class="col-md-3">
 
         <div class="card p-4 h-100">
 
@@ -95,14 +221,18 @@
                 <div>
 
                     <small class="text-muted">
-                        Pagamentos Confirmados
+                        Recebido
                     </small>
 
-                    <h2 class="fw-bold mt-2 text-success">
+                    <h3 class="fw-bold mt-2 text-success">
 
-                        {{ total_pagos }}
+                        {{ formatar_moeda(recebido) }}
 
-                    </h2>
+                    </h3>
+
+                    <small class="text-muted">
+                        {{ total_pagos }} paga(s)
+                    </small>
 
                 </div>
 
@@ -118,9 +248,9 @@
 
     </div>
 
-    <!-- PENDENTES -->
+    <!-- PENDENTE -->
 
-    <div class="col-md-4">
+    <div class="col-md-3">
 
         <div class="card p-4 h-100">
 
@@ -129,14 +259,18 @@
                 <div>
 
                     <small class="text-muted">
-                        Pendentes
+                        Pendente
                     </small>
 
-                    <h2 class="fw-bold mt-2 text-danger">
+                    <h3 class="fw-bold mt-2 text-danger">
 
-                        {{ total_pendentes }}
+                        {{ formatar_moeda(pendente) }}
 
-                    </h2>
+                    </h3>
+
+                    <small class="text-muted">
+                        {{ total_pendentes }} pendente(s)
+                    </small>
 
                 </div>
 
@@ -152,6 +286,87 @@
 
     </div>
 
+    <!-- PERCENTUAL -->
+
+    <div class="col-md-3">
+
+        <div class="card p-4 h-100">
+
+            <small class="text-muted">
+                Percentual recebido
+            </small>
+
+            <h3 class="fw-bold mt-2 text-primary">
+                {{ percentual_recebido }}%
+            </h3>
+
+            <div class="progress mt-2" style="height: 8px;">
+
+                <div
+                    class="progress-bar bg-primary"
+                    style="width: {{ percentual_recebido }}%;"
+                ></div>
+
+            </div>
+
+            <small class="text-muted mt-2 d-block">
+                {{ percentual_pendente }}% pendente
+            </small>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- PROGRESSO FINANCEIRO -->
+
+<div class="card border-0 shadow-sm p-4 mb-4 rounded-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+
+        <div>
+
+            <h4 class="fw-bold mb-1">
+
+                Situação de {{ nome_mes }} / {{ ano }}
+
+            </h4>
+
+            <small class="text-muted">
+
+                Comparativo entre valores recebidos e pendentes
+
+            </small>
+
+        </div>
+
+        <span class="badge bg-dark p-2">
+
+            {{ percentual_recebido }}% recebido
+
+        </span>
+
+    </div>
+
+    <div class="progress" style="height: 20px;">
+
+        <div
+            class="progress-bar bg-success"
+            style="width: {{ percentual_recebido }}%;"
+        >
+            Recebido
+        </div>
+
+        <div
+            class="progress-bar bg-danger"
+            style="width: {{ percentual_pendente }}%;"
+        >
+            Pendente
+        </div>
+
+    </div>
+
 </div>
 
 <!-- GERAR MENSALIDADES AUTOMÁTICAS -->
@@ -160,7 +375,7 @@
 
 <div class="card border-0 shadow-sm p-4 mb-4 rounded-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
 
         <div>
 
@@ -232,95 +447,6 @@
 </div>
 
 {% endif %}
-
-<!-- FILTROS -->
-
-<div class="card border-0 shadow-sm p-4 mb-4 rounded-4">
-
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-
-        <div>
-
-            <h4 class="fw-bold mb-1">
-
-                Filtros Financeiros
-
-            </h4>
-
-            <small class="text-muted">
-
-                Filtre as mensalidades por situação
-
-            </small>
-
-        </div>
-
-        <span class="badge bg-dark p-2">
-
-            {{ mensalidades|length }} encontrados
-
-        </span>
-
-    </div>
-
-    <div class="d-flex gap-2 flex-wrap">
-
-        <a
-            href="/mensalidades?filtro=todas"
-            class="btn {% if filtro == 'todas' %}btn-dark{% else %}btn-outline-dark{% endif %}"
-        >
-
-            Todas
-
-        </a>
-
-        <a
-            href="/mensalidades?filtro=pagas"
-            class="btn {% if filtro == 'pagas' %}btn-success{% else %}btn-outline-success{% endif %}"
-        >
-
-            <i class="bi bi-check-circle-fill"></i>
-
-            Pagas
-
-        </a>
-
-        <a
-            href="/mensalidades?filtro=pendentes"
-            class="btn {% if filtro == 'pendentes' %}btn-secondary{% else %}btn-outline-secondary{% endif %}"
-        >
-
-            <i class="bi bi-hourglass-split"></i>
-
-            Pendentes
-
-        </a>
-
-        <a
-            href="/mensalidades?filtro=vencidas"
-            class="btn {% if filtro == 'vencidas' %}btn-danger{% else %}btn-outline-danger{% endif %}"
-        >
-
-            <i class="bi bi-exclamation-triangle-fill"></i>
-
-            Vencidas
-
-        </a>
-
-        <a
-            href="/mensalidades?filtro=hoje"
-            class="btn {% if filtro == 'hoje' %}btn-warning{% else %}btn-outline-warning{% endif %}"
-        >
-
-            <i class="bi bi-clock-fill"></i>
-
-            Vence Hoje
-
-        </a>
-
-    </div>
-
-</div>
 
 <!-- FORMULÁRIO -->
 
@@ -462,21 +588,33 @@
 
 <div class="card p-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
 
-        <h4 class="fw-bold">
+        <div>
 
-            Histórico Financeiro
+            <h4 class="fw-bold mb-1">
 
-        </h4>
+                Histórico Financeiro de {{ nome_mes }} / {{ ano }}
+
+            </h4>
+
+            <small class="text-muted">
+
+                Exibindo mensalidades conforme o filtro selecionado
+
+            </small>
+
+        </div>
 
         <span class="badge bg-dark p-2">
 
-            {{ mensalidades|length }} registros
+            {{ mensalidades|length }} registro(s)
 
         </span>
 
     </div>
+
+    {% if mensalidades %}
 
     <div class="table-responsive">
 
@@ -510,11 +648,19 @@
 
                     <td>
 
-                        <strong>
+                        {% if mensalidade.aluno %}
 
-                            {{ mensalidade.aluno.nome }}
+                            <strong>
+                                {{ mensalidade.aluno.nome }}
+                            </strong>
 
-                        </strong>
+                        {% else %}
+
+                            <span class="text-muted">
+                                Sem aluno vinculado
+                            </span>
+
+                        {% endif %}
 
                     </td>
 
@@ -540,146 +686,154 @@
 
                     <!-- STATUS -->
 
-<td>
+                    <td>
 
-    {% if mensalidade.status == 'PAGO' %}
+                        {% if mensalidade.status == 'PAGO' %}
 
-        <span class="badge bg-success p-2">
+                            <span class="badge bg-success p-2">
 
-            <i class="bi bi-check-circle-fill"></i>
+                                <i class="bi bi-check-circle-fill"></i>
 
-            PAGO
+                                PAGO
 
-        </span>
+                            </span>
 
-    {% else %}
+                        {% else %}
 
-        {% set vencimento = mensalidade.vencimento|string %}
+                            {% set vencimento = mensalidade.vencimento|string %}
 
-        {% if vencimento < hoje|string %}
+                            {% if vencimento < hoje|string %}
 
-            <span class="badge bg-danger p-2">
+                                <span class="badge bg-danger p-2">
 
-                <i class="bi bi-exclamation-triangle-fill"></i>
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
 
-                VENCIDA
+                                    VENCIDA
 
-            </span>
+                                </span>
 
-        {% elif vencimento == hoje|string %}
+                            {% elif vencimento == hoje|string %}
 
-            <span class="badge bg-warning text-dark p-2">
+                                <span class="badge bg-warning text-dark p-2">
 
-                <i class="bi bi-clock-fill"></i>
+                                    <i class="bi bi-clock-fill"></i>
 
-                VENCE HOJE
+                                    VENCE HOJE
 
-            </span>
+                                </span>
 
-        {% else %}
+                            {% else %}
 
-            <span class="badge bg-secondary p-2">
+                                <span class="badge bg-secondary p-2">
 
-                <i class="bi bi-hourglass-split"></i>
+                                    <i class="bi bi-hourglass-split"></i>
 
-                PENDENTE
+                                    PENDENTE
 
-            </span>
+                                </span>
 
-        {% endif %}
+                            {% endif %}
 
-    {% endif %}
+                        {% endif %}
 
-</td>
+                    </td>
 
                     <!-- AÇÕES -->
 
-<td>
+                    <td>
 
-    <div class="d-flex gap-2 flex-wrap">
+                        <div class="d-flex gap-2 flex-wrap">
 
-        <!-- RECIBO -->
+                            <!-- RECIBO -->
 
-        <a
-            href="/recibo/{{ mensalidade.id }}"
-            class="btn btn-primary btn-sm"
-            title="Gerar recibo"
-        >
+                            {% if mensalidade.status == 'PAGO' %}
 
-            <i class="bi bi-file-earmark-pdf-fill"></i>
+                            <a
+                                href="/recibo/{{ mensalidade.id }}"
+                                class="btn btn-primary btn-sm"
+                                title="Gerar recibo"
+                            >
 
-        </a>
+                                <i class="bi bi-file-earmark-pdf-fill"></i>
 
-        <!-- WHATSAPP -->
+                            </a>
 
-        {% set mensagem =
-            "Olá " ~ mensalidade.aluno.nome ~
-            ", sua mensalidade da academia está pendente.\n\n" ~
-            "Valor: " ~ formatar_moeda(mensalidade.valor) ~ "\n" ~
-            "Vencimento: " ~ formatar_data(mensalidade.vencimento) ~ "\n\n" ~
-            "Qualquer dúvida estamos à disposição. 🥋"
-        %}
+                            {% endif %}
 
-        <a
-            href="https://wa.me/55{{ mensalidade.aluno.whatsapp }}?text={{ mensagem | urlencode }}"
-            target="_blank"
-            class="btn btn-success btn-sm"
-            title="Enviar cobrança no WhatsApp"
-        >
+                            <!-- WHATSAPP -->
 
-            <i class="bi bi-whatsapp"></i>
+                            {% if mensalidade.aluno and mensalidade.aluno.whatsapp and mensalidade.status == 'PENDENTE' %}
 
-        </a>
+                                {% set mensagem =
+                                    "Olá " ~ mensalidade.aluno.nome ~
+                                    ", sua mensalidade da academia está pendente.\n\n" ~
+                                    "Valor: " ~ formatar_moeda(mensalidade.valor) ~ "\n" ~
+                                    "Vencimento: " ~ formatar_data(mensalidade.vencimento) ~ "\n\n" ~
+                                    "Qualquer dúvida estamos à disposição. 🥋"
+                                %}
 
-        <!-- MARCAR COMO PAGO -->
+                                <a
+                                    href="https://wa.me/55{{ mensalidade.aluno.whatsapp }}?text={{ mensagem | urlencode }}"
+                                    target="_blank"
+                                    class="btn btn-success btn-sm"
+                                    title="Enviar cobrança no WhatsApp"
+                                >
 
-        {% if mensalidade.status == 'PENDENTE' %}
+                                    <i class="bi bi-whatsapp"></i>
 
-        <a
-            href="/pagar_mensalidade/{{ mensalidade.id }}"
-            class="btn btn-warning btn-sm"
-            title="Marcar como pago"
-            onclick="return confirm('Confirmar pagamento?')"
-        >
+                                </a>
 
-            <i class="bi bi-check-circle-fill"></i>
+                            {% endif %}
 
-        </a>
+                            <!-- MARCAR COMO PAGO -->
 
-        {% endif %}
+                            {% if mensalidade.status == 'PENDENTE' %}
 
-        <!-- EDITAR -->
+                            <a
+                                href="/pagar_mensalidade/{{ mensalidade.id }}"
+                                class="btn btn-warning btn-sm"
+                                title="Marcar como pago"
+                                onclick="return confirm('Confirmar pagamento?')"
+                            >
 
-        <a
-            href="/editar_mensalidade/{{ mensalidade.id }}"
-            class="btn btn-dark btn-sm"
-            title="Editar mensalidade"
-        >
+                                <i class="bi bi-check-circle-fill"></i>
 
-            <i class="bi bi-pencil-fill"></i>
+                            </a>
 
-        </a>
+                            {% endif %}
 
-        <!-- EXCLUIR -->
+                            <!-- EDITAR -->
 
-        {% if session.tipo == 'admin' %}
+                            <a
+                                href="/editar_mensalidade/{{ mensalidade.id }}"
+                                class="btn btn-dark btn-sm"
+                                title="Editar mensalidade"
+                            >
 
-        <a
-            href="/excluir_mensalidade/{{ mensalidade.id }}"
-            class="btn btn-danger btn-sm"
-            title="Excluir mensalidade"
-            onclick="return confirm('Deseja excluir esta mensalidade?')"
-        >
+                                <i class="bi bi-pencil-fill"></i>
 
-            <i class="bi bi-trash-fill"></i>
+                            </a>
 
-        </a>
+                            <!-- EXCLUIR -->
 
-        {% endif %}
+                            {% if session.tipo == 'admin' %}
 
-    </div>
+                            <a
+                                href="/excluir_mensalidade/{{ mensalidade.id }}"
+                                class="btn btn-danger btn-sm"
+                                title="Excluir mensalidade"
+                                onclick="return confirm('Deseja excluir esta mensalidade?')"
+                            >
 
-</td>
+                                <i class="bi bi-trash-fill"></i>
+
+                            </a>
+
+                            {% endif %}
+
+                        </div>
+
+                    </td>
 
                 </tr>
 
@@ -690,6 +844,28 @@
         </table>
 
     </div>
+
+    {% else %}
+
+    <div class="text-center py-5">
+
+        <i class="bi bi-calendar-x fs-1 text-muted"></i>
+
+        <h5 class="fw-bold mt-3">
+
+            Nenhuma mensalidade encontrada
+
+        </h5>
+
+        <p class="text-muted mb-0">
+
+            Não existem mensalidades cadastradas para {{ nome_mes }} / {{ ano }} com o filtro selecionado.
+
+        </p>
+
+    </div>
+
+    {% endif %}
 
 </div>
 

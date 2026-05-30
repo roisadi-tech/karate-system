@@ -1652,6 +1652,26 @@ def frequencia():
 @login_obrigatorio
 def mensalidades():
 
+    hoje = date.today()
+
+    mes = request.args.get('mes')
+    ano = request.args.get('ano')
+
+    if not mes:
+
+        mes = str(hoje.month).zfill(2)
+
+    if not ano:
+
+        ano = str(hoje.year)
+
+    filtro = request.args.get(
+        'filtro',
+        'todas'
+    )
+
+    prefixo_data = f'{ano}-{mes}'
+
     if request.method == 'POST':
 
         aluno = buscar_aluno_valido(
@@ -1665,7 +1685,9 @@ def mensalidades():
                 'warning'
             )
 
-            return redirect('/mensalidades')
+            return redirect(
+                f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
+            )
 
         valor_form = converter_mensalidade(
             request.form['valor']
@@ -1678,7 +1700,9 @@ def mensalidades():
                 'warning'
             )
 
-            return redirect('/mensalidades')
+            return redirect(
+                f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
+            )
 
         vencimento_form = request.form['vencimento']
 
@@ -1689,7 +1713,9 @@ def mensalidades():
                 'warning'
             )
 
-            return redirect('/mensalidades')
+            return redirect(
+                f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
+            )
 
         status_form = request.form['status']
 
@@ -1700,7 +1726,9 @@ def mensalidades():
                 'warning'
             )
 
-            return redirect('/mensalidades')
+            return redirect(
+                f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
+            )
 
         mensalidade_existente = Mensalidade.query.filter_by(
             aluno_id=aluno.id,
@@ -1714,7 +1742,9 @@ def mensalidades():
                 'warning'
             )
 
-            return redirect('/mensalidades')
+            return redirect(
+                f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
+            )
 
         nova_mensalidade = Mensalidade(
 
@@ -1733,22 +1763,22 @@ def mensalidades():
             'success'
         )
 
-        return redirect('/mensalidades')
+        mes_novo = vencimento_form[5:7]
+        ano_novo = vencimento_form[0:4]
+
+        return redirect(
+            f'/mensalidades?mes={mes_novo}&ano={ano_novo}&filtro=todas'
+        )
 
     alunos = Aluno.query.order_by(
         Aluno.nome.asc()
     ).all()
 
-    filtro = request.args.get(
-        'filtro',
-        'todas'
-    )
-
-    hoje = date.today()
-
     hoje_str = hoje.strftime('%Y-%m-%d')
 
-    query = Mensalidade.query
+    query = Mensalidade.query.filter(
+        Mensalidade.vencimento.like(f'{prefixo_data}%')
+    )
 
     if filtro == 'pagas':
 
@@ -1777,101 +1807,38 @@ def mensalidades():
         )
 
     lista = query.order_by(
-        Mensalidade.vencimento.desc()
-    ).all()
-
-    total_registros = Mensalidade.query.count()
-
-    total_pagos = Mensalidade.query.filter_by(
-        status='PAGO'
-    ).count()
-
-    total_pendentes = Mensalidade.query.filter_by(
-        status='PENDENTE'
-    ).count()
-
-    return render_template(
-        'mensalidades.html',
-        alunos=alunos,
-        mensalidades=lista,
-        hoje=hoje,
-        filtro=filtro,
-        total_registros=total_registros,
-        total_pagos=total_pagos,
-        total_pendentes=total_pendentes
-    )
-
-
-# =====================================
-# FINANCEIRO MENSAL
-# =====================================
-
-@app.route('/financeiro_mensal')
-@login_obrigatorio
-def financeiro_mensal():
-
-    hoje = date.today()
-
-    mes = request.args.get('mes')
-    ano = request.args.get('ano')
-
-    if not mes:
-
-        mes = str(hoje.month).zfill(2)
-
-    if not ano:
-
-        ano = str(hoje.year)
-
-    prefixo_data = f'{ano}-{mes}'
-
-    mensalidades = Mensalidade.query.filter(
-        Mensalidade.vencimento.like(f'{prefixo_data}%')
-    ).order_by(
         Mensalidade.vencimento.asc()
     ).all()
 
-    recebido = db.session.query(
-        db.func.sum(Mensalidade.valor)
-    ).filter(
-        Mensalidade.status == 'PAGO',
+    todas_do_mes = Mensalidade.query.filter(
         Mensalidade.vencimento.like(f'{prefixo_data}%')
-    ).scalar()
-
-    if recebido is None:
-
-        recebido = 0
-
-    recebido = float(recebido)
-
-    pendente = db.session.query(
-        db.func.sum(Mensalidade.valor)
-    ).filter(
-        Mensalidade.status == 'PENDENTE',
-        Mensalidade.vencimento.like(f'{prefixo_data}%')
-    ).scalar()
-
-    if pendente is None:
-
-        pendente = 0
-
-    pendente = float(pendente)
-
-    total_geral = recebido + pendente
-
-    pagas = Mensalidade.query.filter(
-        Mensalidade.status == 'PAGO',
-        Mensalidade.vencimento.like(f'{prefixo_data}%')
-    ).count()
-
-    pendentes = Mensalidade.query.filter(
-        Mensalidade.status == 'PENDENTE',
-        Mensalidade.vencimento.like(f'{prefixo_data}%')
-    ).count()
+    ).all()
 
     total_registros = len(
-        mensalidades
+        todas_do_mes
     )
+
+    total_pagos = 0
+    total_pendentes = 0
+
+    recebido = 0
+    pendente = 0
+
+    for mensalidade in todas_do_mes:
+
+        valor = mensalidade.valor or 0
+
+        if mensalidade.status == 'PAGO':
+
+            total_pagos += 1
+            recebido += float(valor)
+
+        elif mensalidade.status == 'PENDENTE':
+
+            total_pendentes += 1
+            pendente += float(valor)
+
+    total_geral = recebido + pendente
 
     percentual_recebido = 0
     percentual_pendente = 0
@@ -1913,21 +1880,33 @@ def financeiro_mensal():
             str(item)
         )
 
+    nome_mes = ''
+
+    for numero_mes, nome in meses:
+
+        if numero_mes == mes:
+
+            nome_mes = nome
+
     return render_template(
-        'financeiro_mensal.html',
-        mensalidades=mensalidades,
+        'mensalidades.html',
+        alunos=alunos,
+        mensalidades=lista,
+        hoje=hoje,
+        filtro=filtro,
+        total_registros=total_registros,
+        total_pagos=total_pagos,
+        total_pendentes=total_pendentes,
         recebido=recebido,
         pendente=pendente,
         total_geral=total_geral,
-        pagas=pagas,
-        pendentes=pendentes,
-        total_registros=total_registros,
         percentual_recebido=percentual_recebido,
         percentual_pendente=percentual_pendente,
         mes=mes,
         ano=ano,
         meses=meses,
-        anos=anos
+        anos=anos,
+        nome_mes=nome_mes
     )
 
 
