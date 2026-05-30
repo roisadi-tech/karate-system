@@ -1704,6 +1704,43 @@ def carteirinha_aluno(id):
         (qr_x, qr_y)
     )
 
+
+    # =====================================
+    # CONTATO DA ACADEMIA NO VERSO
+    # =====================================
+
+    fonte_contato = carregar_fonte(
+        17,
+        negrito=False
+    )
+
+    contato_x = int(largura * 0.565)
+    endereco_y = int(altura * 0.807)
+    whatsapp_y_academia = int(altura * 0.853)
+    instagram_y = int(altura * 0.900)
+
+    draw.text(
+        (contato_x, endereco_y),
+        'Av. Des. Armando de Souza Louzada',
+        font=fonte_contato,
+        fill=branco
+    )
+
+    draw.text(
+        (contato_x, whatsapp_y_academia),
+        'WhatsApp: (88) 98880-5107',
+        font=fonte_contato,
+        fill=branco
+    )
+
+    draw.text(
+        (contato_x, instagram_y),
+        'Instagram: @aakc_acarau_',
+        font=fonte_contato,
+        fill=branco
+    )
+
+
     # =====================================
     # JUNTA A CAMADA COM A BASE
     # =====================================
