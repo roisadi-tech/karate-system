@@ -216,7 +216,7 @@ def preparar_foto_aluno(caminho_foto, largura, altura):
 
 
 # =====================================
-# DESENHAR CAMPO DE TEXTO
+# DESENHAR CAMPO DE TEXTO SEM CAIXA
 # =====================================
 
 def desenhar_campo(
@@ -227,21 +227,10 @@ def desenhar_campo(
     altura,
     texto,
     fonte,
-    cor_fundo=(8, 12, 18),
+    cor_fundo=None,
     cor_texto=(255, 255, 255),
-    cor_borda=(180, 25, 25)
+    cor_borda=None
 ):
-
-    draw.rounded_rectangle(
-        [
-            (x, y),
-            (x + largura, y + altura)
-        ],
-        radius=8,
-        fill=cor_fundo,
-        outline=cor_borda,
-        width=2
-    )
 
     bbox = draw.textbbox(
         (0, 0),
@@ -253,7 +242,7 @@ def desenhar_campo(
 
     draw.text(
         (
-            x + 12,
+            x,
             y + (altura - texto_altura) / 2 - 2
         ),
         str(texto),
@@ -1554,32 +1543,28 @@ def carteirinha_aluno(id):
     # Ajustadas para o mockup novo
     # =====================================
 
-    campo_x = int(largura * 0.082)
-    campo_largura = int(largura * 0.205)
-    campo_altura = int(altura * 0.05)
+    campo_x = int(largura * 0.115)
+    campo_largura = int(largura * 0.175)
+    campo_altura = int(altura * 0.035)
 
-    nome_y = int(altura * 0.328)
-    faixa_y = int(altura * 0.414)
-    responsavel_y = int(altura * 0.507)
-    nascimento_y = int(altura * 0.602)
-    whatsapp_y = int(altura * 0.693)
-    matricula_y = int(altura * 0.782)
-    validade_y = int(altura * 0.873)
+    nome_y = int(altura * 0.335)
+    faixa_y = int(altura * 0.421)
+    responsavel_y = int(altura * 0.512)
+    nascimento_y = int(altura * 0.605)
+    whatsapp_y = int(altura * 0.695)
+    matricula_y = int(altura * 0.785)
+    validade_y = int(altura * 0.875)
 
     # FOTO
-    foto_x = int(largura * 0.322)
-    foto_y = int(altura * 0.397)
-    foto_largura = int(largura * 0.132)
-    foto_altura = int(altura * 0.318)
+    foto_x = int(largura * 0.305)
+    foto_y = int(altura * 0.395)
+    foto_largura = int(largura * 0.160)
+    foto_altura = int(altura * 0.330)
 
     # QR CODE NO VERSO
-    qr_x = int(largura * 0.784)
-    qr_y = int(altura * 0.274)
-    qr_tamanho = int(altura * 0.205)
-
-    # TEXTO PEQUENO NO VERSO
-    verso_info_x = int(largura * 0.595)
-    verso_info_y = int(altura * 0.845)
+    qr_x = int(largura * 0.800)
+    qr_y = int(altura * 0.293)
+    qr_tamanho = int(altura * 0.185)
 
     # DESENHAR CAMPOS DA FRENTE
     desenhar_campo(
@@ -1708,32 +1693,6 @@ def carteirinha_aluno(id):
         (qr_x, qr_y)
     )
 
-    # DADOS PEQUENOS NO VERSO
-    texto_verso_1 = f'Aluno: {nome_aluno}'
-    texto_verso_2 = f'ID: {aluno.id}'
-    texto_verso_3 = f'Faixa: {faixa}'
-
-    draw.text(
-        (verso_info_x, verso_info_y),
-        texto_verso_1,
-        font=fonte_pequena,
-        fill=branco
-    )
-
-    draw.text(
-        (verso_info_x, verso_info_y + 18),
-        texto_verso_2,
-        font=fonte_pequena,
-        fill=branco
-    )
-
-    draw.text(
-        (verso_info_x, verso_info_y + 36),
-        texto_verso_3,
-        font=fonte_pequena,
-        fill=branco
-    )
-
     # JUNTA A CAMADA COM A BASE
     arte_final = Image.alpha_composite(
         base,
@@ -1764,7 +1723,7 @@ def carteirinha_aluno(id):
 
     pagina_largura, pagina_altura = pagina
 
-    margem = 10 * mm
+    margem = 5 * mm
     area_largura = pagina_largura - (margem * 2)
     area_altura = pagina_altura - (margem * 2)
 
