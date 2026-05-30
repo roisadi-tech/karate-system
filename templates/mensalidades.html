@@ -790,7 +790,7 @@
                             {% if mensalidade.status == 'PENDENTE' %}
 
                             <a
-                                href="/pagar_mensalidade/{{ mensalidade.id }}"
+                                href="/pagar_mensalidade/{{ mensalidade.id }}?mes={{ mes }}&ano={{ ano }}&filtro={{ filtro }}"
                                 class="btn btn-warning btn-sm"
                                 title="Marcar como pago"
                                 onclick="return confirm('Confirmar pagamento?')"
@@ -805,7 +805,7 @@
                             <!-- EDITAR -->
 
                             <a
-                                href="/editar_mensalidade/{{ mensalidade.id }}"
+                                href="/editar_mensalidade/{{ mensalidade.id }}?mes={{ mes }}&ano={{ ano }}&filtro={{ filtro }}"
                                 class="btn btn-dark btn-sm"
                                 title="Editar mensalidade"
                             >

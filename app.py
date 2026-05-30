@@ -1988,6 +1988,18 @@ def gerar_mensalidades():
 @login_obrigatorio
 def editar_mensalidade(id):
 
+    mes = request.args.get('mes')
+    ano = request.args.get('ano')
+    filtro = request.args.get('filtro', 'todas')
+
+    if mes and ano:
+
+        retorno = f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
+
+    else:
+
+        retorno = '/mensalidades'
+
     mensalidade = Mensalidade.query.get_or_404(id)
 
     if mensalidade.status == 'PAGO':
@@ -1997,7 +2009,7 @@ def editar_mensalidade(id):
             'warning'
         )
 
-        return redirect('/mensalidades')
+        return redirect(retorno)
 
     if request.method == 'POST':
 
@@ -2062,7 +2074,7 @@ def editar_mensalidade(id):
                 'warning'
             )
 
-            return redirect(f'/editar_mensalidade/{id}')
+            return redirect(request.url)
 
         mensalidade.aluno_id = aluno.id
         mensalidade.valor = valor_form
@@ -2076,7 +2088,12 @@ def editar_mensalidade(id):
             'success'
         )
 
-        return redirect('/mensalidades')
+        mes_novo = vencimento_form[5:7]
+        ano_novo = vencimento_form[0:4]
+
+        return redirect(
+            f'/mensalidades?mes={mes_novo}&ano={ano_novo}&filtro=todas'
+        )
 
     alunos = Aluno.query.order_by(
         Aluno.nome.asc()
@@ -2085,7 +2102,10 @@ def editar_mensalidade(id):
     return render_template(
         'editar_mensalidade.html',
         mensalidade=mensalidade,
-        alunos=alunos
+        alunos=alunos,
+        mes=mes,
+        ano=ano,
+        filtro=filtro
     )
 
 
@@ -2098,6 +2118,18 @@ def editar_mensalidade(id):
 @admin_obrigatorio
 def excluir_mensalidade(id):
 
+    mes = request.args.get('mes')
+    ano = request.args.get('ano')
+    filtro = request.args.get('filtro', 'todas')
+
+    if mes and ano:
+
+        retorno = f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
+
+    else:
+
+        retorno = '/mensalidades'
+
     mensalidade = Mensalidade.query.get_or_404(id)
 
     if mensalidade.status == 'PAGO':
@@ -2107,7 +2139,7 @@ def excluir_mensalidade(id):
             'warning'
         )
 
-        return redirect('/mensalidades')
+        return redirect(retorno)
 
     db.session.delete(mensalidade)
 
@@ -2118,7 +2150,7 @@ def excluir_mensalidade(id):
         'success'
     )
 
-    return redirect('/mensalidades')
+    return redirect(retorno)
 
 
 # =====================================
@@ -2129,6 +2161,18 @@ def excluir_mensalidade(id):
 @login_obrigatorio
 def pagar_mensalidade(id):
 
+    mes = request.args.get('mes')
+    ano = request.args.get('ano')
+    filtro = request.args.get('filtro', 'todas')
+
+    if mes and ano:
+
+        retorno = f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
+
+    else:
+
+        retorno = '/mensalidades'
+
     mensalidade = Mensalidade.query.get_or_404(id)
 
     if mensalidade.status == 'PAGO':
@@ -2138,7 +2182,7 @@ def pagar_mensalidade(id):
             'warning'
         )
 
-        return redirect('/mensalidades')
+        return redirect(retorno)
 
     if mensalidade.status != 'PENDENTE':
 
@@ -2147,7 +2191,7 @@ def pagar_mensalidade(id):
             'warning'
         )
 
-        return redirect('/mensalidades')
+        return redirect(retorno)
 
     mensalidade.status = 'PAGO'
 
@@ -2158,7 +2202,7 @@ def pagar_mensalidade(id):
         'success'
     )
 
-    return redirect('/mensalidades')
+    return redirect(retorno)
 
 
 # =====================================

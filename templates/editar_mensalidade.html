@@ -18,16 +18,25 @@
 
     </div>
 
-    <a
-        href="/mensalidades"
-        class="btn btn-dark"
-    >
+    {% if mes and ano %}
 
-        <i class="bi bi-arrow-left"></i>
+<a
+    href="/mensalidades?mes={{ mes }}&ano={{ ano }}&filtro={{ filtro }}"
+    class="btn btn-dark"
+>
+    Voltar
+</a>
 
-        Voltar
+{% else %}
 
-    </a>
+<a
+    href="/mensalidades"
+    class="btn btn-dark"
+>
+    Voltar
+</a>
+
+{% endif %}
 
 </div>
 
