@@ -1482,11 +1482,13 @@ def carteirinha_aluno(id):
         return redirect(f'/aluno/{id}')
 
     # ABRE MOCKUP BASE
+
     base = Image.open(base_path).convert('RGBA')
 
     largura, altura = base.size
 
     # CAMADA PARA DESENHO
+
     camada = Image.new(
         'RGBA',
         base.size,
@@ -1496,20 +1498,29 @@ def carteirinha_aluno(id):
     draw = ImageDraw.Draw(camada)
 
     # CORES
+
     branco = (255, 255, 255)
-    vermelho = (230, 25, 25)
-    preto_campo = (8, 12, 18)
 
     # DADOS FORMATADOS
+
     nome_aluno = aluno.nome or 'Não informado'
     faixa = aluno.faixa or 'Não informado'
     responsavel = aluno.responsavel or 'Não informado'
-    nascimento = formatar_data(aluno.nascimento)
-    whatsapp = formatar_whatsapp(aluno.whatsapp)
+
+    nascimento = formatar_data(
+        aluno.nascimento
+    )
+
+    whatsapp = formatar_whatsapp(
+        aluno.whatsapp
+    )
+
     matricula = f'AAKC-{aluno.id:06d}'
+
     validade = f'31/12/{date.today().year}'
 
     # FONTES
+
     fonte_nome = ajustar_fonte(
         draw,
         nome_aluno,
@@ -1524,11 +1535,6 @@ def carteirinha_aluno(id):
         negrito=False
     )
 
-    fonte_pequena = carregar_fonte(
-        14,
-        negrito=False
-    )
-
     fonte_matricula = ajustar_fonte(
         draw,
         matricula,
@@ -1540,7 +1546,6 @@ def carteirinha_aluno(id):
 
     # =====================================
     # COORDENADAS DA FRENTE
-    # Ajustadas para o mockup novo
     # =====================================
 
     campo_x = int(largura * 0.115)
@@ -1555,18 +1560,23 @@ def carteirinha_aluno(id):
     matricula_y = int(altura * 0.785)
     validade_y = int(altura * 0.875)
 
-    # FOTO
-    foto_x = int(largura * 0.305)
-    foto_y = int(altura * 0.395)
-    foto_largura = int(largura * 0.160)
-    foto_altura = int(altura * 0.330)
+    # FOTO DO ALUNO
+
+    foto_x = int(largura * 0.315)
+    foto_y = int(altura * 0.420)
+    foto_largura = int(largura * 0.145)
+    foto_altura = int(altura * 0.280)
 
     # QR CODE NO VERSO
+
     qr_x = int(largura * 0.800)
     qr_y = int(altura * 0.293)
     qr_tamanho = int(altura * 0.185)
 
-    # DESENHAR CAMPOS DA FRENTE
+    # =====================================
+    # DESENHAR DADOS DA FRENTE
+    # =====================================
+
     desenhar_campo(
         draw,
         campo_x,
@@ -1575,7 +1585,6 @@ def carteirinha_aluno(id):
         campo_altura,
         nome_aluno,
         fonte_nome,
-        cor_fundo=preto_campo,
         cor_texto=branco
     )
 
@@ -1587,7 +1596,6 @@ def carteirinha_aluno(id):
         campo_altura,
         faixa,
         fonte_valor,
-        cor_fundo=preto_campo,
         cor_texto=branco
     )
 
@@ -1599,7 +1607,6 @@ def carteirinha_aluno(id):
         campo_altura,
         responsavel,
         fonte_valor,
-        cor_fundo=preto_campo,
         cor_texto=branco
     )
 
@@ -1611,7 +1618,6 @@ def carteirinha_aluno(id):
         campo_altura,
         nascimento,
         fonte_valor,
-        cor_fundo=preto_campo,
         cor_texto=branco
     )
 
@@ -1623,7 +1629,6 @@ def carteirinha_aluno(id):
         campo_altura,
         whatsapp,
         fonte_valor,
-        cor_fundo=preto_campo,
         cor_texto=branco
     )
 
@@ -1635,7 +1640,6 @@ def carteirinha_aluno(id):
         campo_altura,
         matricula,
         fonte_matricula,
-        cor_fundo=preto_campo,
         cor_texto=branco
     )
 
@@ -1647,11 +1651,13 @@ def carteirinha_aluno(id):
         campo_altura,
         validade,
         fonte_valor,
-        cor_fundo=preto_campo,
         cor_texto=branco
     )
 
+    # =====================================
     # FOTO DO ALUNO
+    # =====================================
+
     caminho_foto = None
 
     if aluno.foto:
@@ -1663,23 +1669,30 @@ def carteirinha_aluno(id):
             aluno.foto
         )
 
-    foto = preparar_foto_aluno(
-        caminho_foto,
-        foto_largura,
-        foto_altura
-    )
+    if caminho_foto and os.path.exists(caminho_foto):
 
-    base.paste(
-        foto,
-        (foto_x, foto_y)
-    )
+        foto = preparar_foto_aluno(
+            caminho_foto,
+            foto_largura,
+            foto_altura
+        )
 
+        base.paste(
+            foto,
+            (foto_x, foto_y)
+        )
+
+    # =====================================
     # QR CODE
+    # =====================================
+
     dados_qr = (
-        f'AAKC KARATE\n'
+        f'AAKC KARATÊ\n'
         f'Aluno: {nome_aluno}\n'
         f'Matrícula: {matricula}\n'
         f'Faixa: {faixa}\n'
+        f'Nascimento: {nascimento}\n'
+        f'WhatsApp: {whatsapp}\n'
         f'Validade: {validade}'
     )
 
@@ -1693,7 +1706,10 @@ def carteirinha_aluno(id):
         (qr_x, qr_y)
     )
 
+    # =====================================
     # JUNTA A CAMADA COM A BASE
+    # =====================================
+
     arte_final = Image.alpha_composite(
         base,
         camada
@@ -1704,10 +1720,12 @@ def carteirinha_aluno(id):
     # =====================================
 
     img_buffer = BytesIO()
+
     arte_final.save(
         img_buffer,
         format='PNG'
     )
+
     img_buffer.seek(0)
 
     pdf_buffer = BytesIO()
@@ -1724,6 +1742,7 @@ def carteirinha_aluno(id):
     pagina_largura, pagina_altura = pagina
 
     margem = 5 * mm
+
     area_largura = pagina_largura - (margem * 2)
     area_altura = pagina_altura - (margem * 2)
 
@@ -1753,6 +1772,7 @@ def carteirinha_aluno(id):
     )
 
     c.showPage()
+
     c.save()
 
     pdf_buffer.seek(0)
