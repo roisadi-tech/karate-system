@@ -23,8 +23,16 @@ import shutil
 
 from io import BytesIO
 
-from openpyxl import Workbook
+import qrcode
 
+from PIL import (
+    Image,
+    ImageDraw,
+    ImageFont,
+    ImageOps
+)
+
+from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill
 
 from uuid import uuid4
@@ -40,8 +48,85 @@ from werkzeug.security import (
     generate_password_hash
 )
 
+from reportlab.lib.pagesizes import landscape
+from reportlab.lib.units import mm
+from reportlab.lib import colors
+from reportlab.lib.utils import ImageReader
+
 from reportlab.pdfgen import canvas
 
+
+# =====================================
+# GERAR QR CODE DO ALUNO
+# =====================================
+
+def gerar_qrcode_aluno(aluno):
+
+    qr_texto = (
+        f'AAKC KARATÊ\n'
+        f'Aluno: {aluno.nome}\n'
+        f'ID: {aluno.id}\n'
+        f'Faixa: {aluno.faixa}\n'
+        f'WhatsApp: {aluno.whatsapp}\n'
+        f'Responsável: {aluno.responsavel}'
+    )
+
+    qr = qrcode.QRCode(
+        version=1,
+        box_size=8,
+        border=2
+    )
+
+    qr.add_data(qr_texto)
+    qr.make(fit=True)
+
+    qr_img = qr.make_image(
+        fill_color='black',
+        back_color='white'
+    ).convert('RGB')
+
+    buffer = BytesIO()
+
+    qr_img.save(
+        buffer,
+        format='PNG'
+    )
+
+    buffer.seek(0)
+
+    return buffer
+
+
+# =====================================
+# DESENHAR TEXTO CENTRALIZADO
+# =====================================
+
+def desenhar_texto_centralizado(
+    draw,
+    texto,
+    fonte,
+    cor,
+    x_centro,
+    y
+):
+
+    bbox = draw.textbbox(
+        (0, 0),
+        texto,
+        font=fonte
+    )
+
+    largura_texto = bbox[2] - bbox[0]
+
+    x = x_centro - (largura_texto / 2)
+
+    draw.text(
+        (x, y),
+        texto,
+        font=fonte,
+        fill=cor
+    )
+    
 
 # =====================================
 # FORMATAR WHATSAPP
@@ -472,7 +557,7 @@ def calcular_idade(data_nascimento):
     try:
 
         nascimento = datetime.strptime(
-            data_nascimento,
+            str(data_nascimento),
             '%Y-%m-%d'
         ).date()
 
@@ -1217,14 +1302,33 @@ def perfil_aluno(id):
 
 
 # =====================================
-# CARTEIRINHA DO ALUNO
+# CARTEIRINHA DO ALUNO PDF
 # =====================================
 
 @app.route('/carteirinha/<int:id>')
 @login_obrigatorio
-def carteirinha(id):
+def carteirinha_aluno(id):
 
     aluno = Aluno.query.get_or_404(id)
+
+    idade = calcular_idade(
+        aluno.nascimento
+    )
+
+    pendentes = Mensalidade.query.filter_by(
+        aluno_id=aluno.id,
+        status='PENDENTE'
+    ).count()
+
+    if pendentes > 0:
+
+        status_financeiro = 'PENDENTE'
+
+    else:
+
+        status_financeiro = 'REGULAR'
+
+    logo_path = 'static/img/logo_aakc.png'
 
     if not os.path.exists('carteirinhas'):
 
@@ -1232,57 +1336,128 @@ def carteirinha(id):
 
     nome_arquivo = f'carteirinhas/carteirinha_{aluno.id}.pdf'
 
-    c = canvas.Canvas(nome_arquivo)
+    largura, altura = landscape(
+        (
+            86 * mm,
+            54 * mm
+        )
+    )
 
-    largura, altura = 595, 842
+    c = canvas.Canvas(
+        nome_arquivo,
+        pagesize=(largura, altura)
+    )
 
-    # FUNDO
+    cor_fundo = colors.HexColor('#111111')
+    cor_fundo_2 = colors.HexColor('#1a1a1a')
+    cor_vermelha = colors.HexColor('#dc2323')
+    cor_branca = colors.white
+    cor_cinza = colors.HexColor('#d9d9d9')
+    cor_cinza_escuro = colors.HexColor('#333333')
 
-    c.setFillColorRGB(0.06, 0.09, 0.16)
+    # =====================================
+    # FRENTE
+    # =====================================
+
+    c.setFillColor(cor_fundo)
     c.roundRect(
-        90,
-        520,
-        415,
-        230,
-        18,
+        3 * mm,
+        3 * mm,
+        largura - 6 * mm,
+        altura - 6 * mm,
+        4 * mm,
         fill=True,
         stroke=False
     )
 
-    # CABEÇALHO
-
-    c.setFillColorRGB(1, 1, 1)
-    c.setFont("Helvetica-Bold", 18)
-
-    c.drawCentredString(
-        largura / 2,
-        720,
-        "ACADEMIA DE KARATÊ"
+    c.setStrokeColor(cor_vermelha)
+    c.setLineWidth(1.2)
+    c.roundRect(
+        4 * mm,
+        4 * mm,
+        largura - 8 * mm,
+        altura - 8 * mm,
+        3 * mm,
+        fill=False,
+        stroke=True
     )
 
-    c.setFont("Helvetica", 10)
-
-    c.drawCentredString(
-        largura / 2,
-        705,
-        "Carteirinha de Identificação do Aluno"
+    # faixa vermelha superior
+    c.setFillColor(cor_vermelha)
+    c.roundRect(
+        5 * mm,
+        altura - 14 * mm,
+        largura - 10 * mm,
+        8 * mm,
+        2 * mm,
+        fill=True,
+        stroke=False
     )
 
-    # LINHA
+    # logo
+    if os.path.exists(logo_path):
 
-    c.setStrokeColorRGB(0.86, 0.21, 0.27)
-    c.setLineWidth(2)
+        try:
 
-    c.line(
-        120,
-        690,
-        475,
-        690
+            c.drawImage(
+                logo_path,
+                7 * mm,
+                altura - 22 * mm,
+                width=19 * mm,
+                height=19 * mm,
+                preserveAspectRatio=True,
+                mask='auto'
+            )
+
+        except Exception:
+
+            pass
+
+    c.setFillColor(cor_branca)
+    c.setFont('Helvetica-Bold', 13)
+    c.drawString(
+        28 * mm,
+        altura - 11 * mm,
+        'CARTEIRINHA DO ALUNO'
     )
 
-    # FOTO
+    c.setFont('Helvetica', 6.5)
+    c.drawString(
+        28 * mm,
+        altura - 14 * mm,
+        'AAKC KARATÊ - Academia de Artes Marciais'
+    )
 
-    foto_desenhada = False
+    # foto
+    foto_x = 7 * mm
+    foto_y = 15 * mm
+    foto_l = 22 * mm
+    foto_a = 26 * mm
+
+    c.setFillColor(colors.HexColor('#f2f2f2'))
+    c.roundRect(
+        foto_x,
+        foto_y,
+        foto_l,
+        foto_a,
+        2 * mm,
+        fill=True,
+        stroke=False
+    )
+
+    c.setStrokeColor(cor_vermelha)
+    c.setLineWidth(1)
+    c.roundRect(
+        foto_x,
+        foto_y,
+        foto_l,
+        foto_a,
+        2 * mm,
+        fill=False,
+        stroke=True
+    )
+
+    foto_ok = False
 
     if aluno.foto:
 
@@ -1298,144 +1473,369 @@ def carteirinha(id):
 
                 c.drawImage(
                     caminho_foto,
-                    120,
-                    585,
-                    width=90,
-                    height=90,
+                    foto_x + 1 * mm,
+                    foto_y + 1 * mm,
+                    width=foto_l - 2 * mm,
+                    height=foto_a - 2 * mm,
                     preserveAspectRatio=True,
                     mask='auto'
                 )
 
-                foto_desenhada = True
+                foto_ok = True
 
             except Exception:
 
-                foto_desenhada = False
+                foto_ok = False
 
-    if not foto_desenhada:
+    if not foto_ok:
 
-        c.setFillColorRGB(0.8, 0.8, 0.8)
-
-        c.roundRect(
-            120,
-            585,
-            90,
-            90,
-            10,
-            fill=True,
-            stroke=False
-        )
-
-        c.setFillColorRGB(0.2, 0.2, 0.2)
-        c.setFont("Helvetica-Bold", 9)
-
+        c.setFillColor(colors.black)
+        c.setFont('Helvetica-Bold', 7)
         c.drawCentredString(
-            165,
-            625,
-            "SEM FOTO"
+            foto_x + foto_l / 2,
+            foto_y + foto_a / 2,
+            'SEM FOTO'
         )
 
-    # DADOS DO ALUNO
-
-    c.setFillColorRGB(1, 1, 1)
-
-    c.setFont("Helvetica-Bold", 11)
-    c.drawString(
-        235,
-        660,
-        "Nome:"
-    )
-
-    c.setFont("Helvetica", 11)
-    c.drawString(
-        280,
-        660,
-        aluno.nome or "Não informado"
-    )
-
-    c.setFont("Helvetica-Bold", 11)
-    c.drawString(
-        235,
-        635,
-        "Faixa:"
-    )
-
-    c.setFont("Helvetica", 11)
-    c.drawString(
-        280,
-        635,
-        aluno.faixa or "Não informado"
-    )
-
-    c.setFont("Helvetica-Bold", 11)
-    c.drawString(
-        235,
-        610,
-        "Nascimento:"
-    )
-
-    c.setFont("Helvetica", 11)
-    c.drawString(
-        320,
-        610,
-        formatar_data(aluno.nascimento)
-    )
-
-    c.setFont("Helvetica-Bold", 11)
-    c.drawString(
-        235,
-        585,
-        "WhatsApp:"
-    )
-
-    c.setFont("Helvetica", 11)
-    c.drawString(
-        305,
-        585,
-        formatar_whatsapp(aluno.whatsapp)
-    )
-
-    # RODAPÉ DA CARTEIRINHA
-
-    c.setFillColorRGB(0.86, 0.21, 0.27)
-
+    # ID na foto
+    c.setFillColor(cor_vermelha)
     c.roundRect(
-        90,
-        520,
-        415,
-        35,
-        12,
+        foto_x + 2 * mm,
+        foto_y - 5 * mm,
+        foto_l - 4 * mm,
+        4 * mm,
+        1.5 * mm,
         fill=True,
         stroke=False
     )
 
-    c.setFillColorRGB(1, 1, 1)
-    c.setFont("Helvetica-Bold", 10)
+    c.setFillColor(cor_branca)
+    c.setFont('Helvetica-Bold', 6)
+    c.drawCentredString(
+        foto_x + foto_l / 2,
+        foto_y - 3.7 * mm,
+        f'ID #{aluno.id}'
+    )
 
+    # nome do aluno
+    c.setFillColor(cor_branca)
+    c.setFont('Helvetica-Bold', 10)
+
+    nome_aluno = aluno.nome or 'Não informado'
+
+    if len(nome_aluno) > 28:
+
+        nome_aluno = nome_aluno[:28] + '...'
+
+    c.drawString(
+        33 * mm,
+        39 * mm,
+        nome_aluno
+    )
+
+    c.setStrokeColor(cor_vermelha)
+    c.setLineWidth(0.8)
+    c.line(
+        33 * mm,
+        37.5 * mm,
+        78 * mm,
+        37.5 * mm
+    )
+
+    def campo_frente(label, valor, y):
+
+        c.setFillColor(cor_vermelha)
+        c.setFont('Helvetica-Bold', 5.8)
+        c.drawString(
+            33 * mm,
+            y,
+            label
+        )
+
+        c.setFillColor(cor_branca)
+        c.setFont('Helvetica', 6.8)
+
+        valor = str(valor)
+
+        if len(valor) > 28:
+
+            valor = valor[:28] + '...'
+
+        c.drawString(
+            50 * mm,
+            y,
+            valor
+        )
+
+    campo_frente(
+        'FAIXA:',
+        aluno.faixa or 'Não informado',
+        33 * mm
+    )
+
+    campo_frente(
+        'NASC.:',
+        formatar_data(aluno.nascimento),
+        29 * mm
+    )
+
+    campo_frente(
+        'IDADE:',
+        f'{idade} anos' if idade is not None else 'Não informado',
+        25 * mm
+    )
+
+    campo_frente(
+        'RESP.:',
+        aluno.responsavel or 'Não informado',
+        21 * mm
+    )
+
+    campo_frente(
+        'WHATSAPP:',
+        formatar_whatsapp(aluno.whatsapp),
+        17 * mm
+    )
+
+    campo_frente(
+        'STATUS:',
+        status_financeiro,
+        13 * mm
+    )
+
+    # rodapé frente
+    c.setFillColor(cor_vermelha)
+    c.roundRect(
+        5 * mm,
+        6 * mm,
+        largura - 10 * mm,
+        5 * mm,
+        1.5 * mm,
+        fill=True,
+        stroke=False
+    )
+
+    c.setFillColor(cor_branca)
+    c.setFont('Helvetica-Bold', 5.5)
     c.drawCentredString(
         largura / 2,
-        533,
-        f"ID do Aluno: {aluno.id}"
+        7.7 * mm,
+        'DISCIPLINA  •  RESPEITO  •  FOCO  •  SUPERAÇÃO'
     )
 
-    # INFORMAÇÃO DE EMISSÃO
+    c.showPage()
 
-    c.setFillColorRGB(0, 0, 0)
+    # =====================================
+    # VERSO
+    # =====================================
 
-    c.setFont("Helvetica", 9)
-
-    c.drawString(
-        90,
-        490,
-        f"Carteirinha gerada em: {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+    c.setFillColor(cor_fundo)
+    c.roundRect(
+        3 * mm,
+        3 * mm,
+        largura - 6 * mm,
+        altura - 6 * mm,
+        4 * mm,
+        fill=True,
+        stroke=False
     )
 
-    c.setFont("Helvetica-Oblique", 8)
+    c.setStrokeColor(cor_vermelha)
+    c.setLineWidth(1.2)
+    c.roundRect(
+        4 * mm,
+        4 * mm,
+        largura - 8 * mm,
+        altura - 8 * mm,
+        3 * mm,
+        fill=False,
+        stroke=True
+    )
+
+    # logo verso
+    if os.path.exists(logo_path):
+
+        try:
+
+            c.drawImage(
+                logo_path,
+                7 * mm,
+                altura - 22 * mm,
+                width=18 * mm,
+                height=18 * mm,
+                preserveAspectRatio=True,
+                mask='auto'
+            )
+
+        except Exception:
+
+            pass
+
+    c.setFillColor(cor_branca)
+    c.setFont('Helvetica-Bold', 9)
+    c.drawString(
+        28 * mm,
+        altura - 11 * mm,
+        'AAKC KARATÊ'
+    )
+
+    c.setFillColor(cor_vermelha)
+    c.setFont('Helvetica-Bold', 6.5)
+    c.drawString(
+        28 * mm,
+        altura - 15 * mm,
+        'TRADIÇÃO • DISCIPLINA • EVOLUÇÃO'
+    )
+
+    # informações
+    c.setFillColor(cor_vermelha)
+    c.setFont('Helvetica-Bold', 6.5)
+    c.drawString(
+        7 * mm,
+        34 * mm,
+        '/ INFORMAÇÕES'
+    )
+
+    c.setFillColor(cor_branca)
+    c.setFont('Helvetica', 5.8)
+
+    textos_info = [
+        'Esta carteirinha é pessoal e intransferível.',
+        'O uso é obrigatório durante aulas, eventos e exames.',
+        'Em caso de perda, comunique imediatamente à secretaria.'
+    ]
+
+    y = 30 * mm
+
+    for texto in textos_info:
+
+        c.drawString(
+            7 * mm,
+            y,
+            texto
+        )
+
+        y -= 3.5 * mm
+
+    # observações
+    c.setFillColor(cor_vermelha)
+    c.setFont('Helvetica-Bold', 6.5)
+    c.drawString(
+        7 * mm,
+        18 * mm,
+        '/ OBSERVAÇÕES'
+    )
+
+    c.setStrokeColor(cor_cinza_escuro)
+    c.setLineWidth(0.6)
+
+    c.roundRect(
+        7 * mm,
+        8 * mm,
+        42 * mm,
+        8 * mm,
+        1.5 * mm,
+        fill=False,
+        stroke=True
+    )
+
+    # QR Code
+    qr_buffer = gerar_qrcode_aluno(
+        aluno
+    )
+
+    qr_reader = ImageReader(
+        qr_buffer
+    )
+
+    c.setFillColor(cor_branca)
+    c.roundRect(
+        58 * mm,
+        22 * mm,
+        20 * mm,
+        20 * mm,
+        1.5 * mm,
+        fill=True,
+        stroke=False
+    )
+
+    c.drawImage(
+        qr_reader,
+        59 * mm,
+        23 * mm,
+        width=18 * mm,
+        height=18 * mm
+    )
+
+    c.setFillColor(cor_vermelha)
+    c.roundRect(
+        58 * mm,
+        16 * mm,
+        20 * mm,
+        5 * mm,
+        1 * mm,
+        fill=True,
+        stroke=False
+    )
+
+    c.setFillColor(cor_branca)
+    c.setFont('Helvetica-Bold', 5.5)
+    c.drawCentredString(
+        68 * mm,
+        17.7 * mm,
+        'VALIDAÇÃO'
+    )
+
+    c.setFillColor(cor_cinza)
+    c.setFont('Helvetica', 4.8)
+    c.drawCentredString(
+        68 * mm,
+        13.5 * mm,
+        'Escaneie para validar'
+    )
+
+    # contato
+    c.setFillColor(cor_vermelha)
+    c.setFont('Helvetica-Bold', 6.5)
+    c.drawString(
+        7 * mm,
+        44 * mm,
+        '/ CONTATO DA ACADEMIA'
+    )
+
+    c.setFillColor(cor_branca)
+    c.setFont('Helvetica', 5.5)
 
     c.drawString(
-        90,
-        475,
-        "Documento gerado automaticamente pelo Karate System."
+        7 * mm,
+        40.5 * mm,
+        'AAKC KARATÊ - Sistema de Gestão da Academia'
+    )
+
+    c.drawString(
+        7 * mm,
+        37.5 * mm,
+        'WhatsApp: informe o contato oficial da academia'
+    )
+
+    # rodapé verso
+    c.setFillColor(cor_vermelha)
+    c.roundRect(
+        5 * mm,
+        4.8 * mm,
+        largura - 10 * mm,
+        4.5 * mm,
+        1.5 * mm,
+        fill=True,
+        stroke=False
+    )
+
+    c.setFillColor(cor_branca)
+    c.setFont('Helvetica-Bold', 5)
+    c.drawCentredString(
+        largura / 2,
+        6.2 * mm,
+        'APRESENTAÇÃO OBRIGATÓRIA EM EVENTOS E EXAMES'
     )
 
     c.save()
