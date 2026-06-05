@@ -4787,6 +4787,289 @@ def excluir_professor(id):
 
 
 # =====================================
+# TURMAS
+# =====================================
+
+@app.route('/turmas')
+@login_obrigatorio
+def turmas():
+
+    lista_turmas = Turma.query.order_by(
+        Turma.nome.asc()
+    ).all()
+
+    return render_template(
+        'turmas.html',
+        turmas=lista_turmas
+    )
+
+
+# =====================================
+# CADASTRAR TURMA
+# =====================================
+
+@app.route('/cadastrar_turma', methods=['GET', 'POST'])
+@login_obrigatorio
+@admin_obrigatorio
+def cadastrar_turma():
+
+    professores = Professor.query.order_by(
+        Professor.nome.asc()
+    ).all()
+
+    if request.method == 'POST':
+
+        nome = request.form.get(
+            'nome',
+            ''
+        ).strip()
+
+        dias = request.form.get(
+            'dias',
+            ''
+        ).strip()
+
+        horario = request.form.get(
+            'horario',
+            ''
+        ).strip()
+
+        observacao = request.form.get(
+            'observacao',
+            ''
+        ).strip()
+
+        professor_id = request.form.get(
+            'professor_id',
+            ''
+        )
+
+        if not nome:
+
+            flash(
+                'Informe o nome da turma.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        turma_existente = Turma.query.filter(
+            Turma.nome == nome
+        ).first()
+
+        if turma_existente:
+
+            flash(
+                'Já existe uma turma cadastrada com este nome.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        professor = None
+
+        if professor_id:
+
+            professor = Professor.query.get(
+                professor_id
+            )
+
+            if not professor:
+
+                flash(
+                    'Selecione um professor válido.',
+                    'warning'
+                )
+
+                return redirect(request.url)
+
+        nova_turma = Turma(
+            nome=nome,
+            dias=dias,
+            horario=horario,
+            observacao=observacao,
+            professor_id=professor.id if professor else None
+        )
+
+        db.session.add(nova_turma)
+        db.session.commit()
+
+        flash(
+            'Turma cadastrada com sucesso.',
+            'success'
+        )
+
+        return redirect('/turmas')
+
+    return render_template(
+        'cadastrar_turma.html',
+        professores=professores
+    )
+
+
+# =====================================
+# EDITAR TURMA
+# =====================================
+
+@app.route('/editar_turma/<int:id>', methods=['GET', 'POST'])
+@login_obrigatorio
+@admin_obrigatorio
+def editar_turma(id):
+
+    turma = Turma.query.get_or_404(id)
+
+    professores = Professor.query.order_by(
+        Professor.nome.asc()
+    ).all()
+
+    if request.method == 'POST':
+
+        nome = request.form.get(
+            'nome',
+            ''
+        ).strip()
+
+        dias = request.form.get(
+            'dias',
+            ''
+        ).strip()
+
+        horario = request.form.get(
+            'horario',
+            ''
+        ).strip()
+
+        observacao = request.form.get(
+            'observacao',
+            ''
+        ).strip()
+
+        professor_id = request.form.get(
+            'professor_id',
+            ''
+        )
+
+        if not nome:
+
+            flash(
+                'Informe o nome da turma.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        turma_existente = Turma.query.filter(
+            Turma.nome == nome,
+            Turma.id != id
+        ).first()
+
+        if turma_existente:
+
+            flash(
+                'Já existe outra turma cadastrada com este nome.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        professor = None
+
+        if professor_id:
+
+            professor = Professor.query.get(
+                professor_id
+            )
+
+            if not professor:
+
+                flash(
+                    'Selecione um professor válido.',
+                    'warning'
+                )
+
+                return redirect(request.url)
+
+        turma.nome = nome
+        turma.dias = dias
+        turma.horario = horario
+        turma.observacao = observacao
+        turma.professor_id = professor.id if professor else None
+
+        db.session.commit()
+
+        flash(
+            'Turma atualizada com sucesso.',
+            'success'
+        )
+
+        return redirect('/turmas')
+
+    return render_template(
+        'editar_turma.html',
+        turma=turma,
+        professores=professores
+    )
+
+
+# =====================================
+# EXCLUIR TURMA
+# =====================================
+
+@app.route('/excluir_turma/<int:id>')
+@login_obrigatorio
+@admin_obrigatorio
+def excluir_turma(id):
+
+    turma = Turma.query.get_or_404(id)
+
+    alunos_vinculados = Aluno.query.filter_by(
+        turma_id=turma.id
+    ).count()
+
+    if alunos_vinculados > 0:
+
+        flash(
+            'Não é possível excluir esta turma, pois existem alunos vinculados a ela.',
+            'danger'
+        )
+
+        return redirect('/turmas')
+
+    db.session.delete(turma)
+    db.session.commit()
+
+    flash(
+        'Turma excluída com sucesso.',
+        'success'
+    )
+
+    return redirect('/turmas')
+
+
+# =====================================
+# PERFIL DA TURMA
+# =====================================
+
+@app.route('/turma/<int:id>')
+@login_obrigatorio
+def perfil_turma(id):
+
+    turma = Turma.query.get_or_404(id)
+
+    alunos = Aluno.query.filter_by(
+        turma_id=turma.id
+    ).order_by(
+        Aluno.nome.asc()
+    ).all()
+
+    return render_template(
+        'perfil_turma.html',
+        turma=turma,
+        alunos=alunos
+    )
+
+
+# =====================================
 # ATUALIZAR BANCO - TURMAS E PROFESSORES
 # =====================================
 

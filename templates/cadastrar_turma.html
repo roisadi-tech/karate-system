@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h2 class="fw-bold">
+            🥋 Cadastrar Turma
+        </h2>
+
+        <p class="text-muted mb-0">
+            Crie uma nova turma e vincule a um professor
+        </p>
+
+    </div>
+
+</div>
+
+<div class="card border-0 shadow-sm p-4 rounded-4">
+
+    <form method="POST">
+
+        <div class="row g-3">
+
+            <div class="col-md-12">
+
+                <label class="form-label fw-semibold">
+                    Nome da Turma
+                </label>
+
+                <input
+                    type="text"
+                    name="nome"
+                    class="form-control form-control-lg"
+                    placeholder="Ex: Infantil 18h"
+                    required
+                >
+
+            </div>
+
+            <div class="col-md-6">
+
+                <label class="form-label fw-semibold">
+                    Professor Responsável
+                </label>
+
+                <select
+                    name="professor_id"
+                    class="form-select form-select-lg"
+                >
+
+                    <option value="">
+                        Selecione
+                    </option>
+
+                    {% for professor in professores %}
+
+                        <option value="{{ professor.id }}">
+                            {{ professor.nome }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+                {% if professores|length == 0 %}
+
+                    <small class="text-danger">
+                        Cadastre um professor antes de criar a turma.
+                    </small>
+
+                {% endif %}
+
+            </div>
+
+            <div class="col-md-6">
+
+                <label class="form-label fw-semibold">
+                    Horário
+                </label>
+
+                <input
+                    type="text"
+                    name="horario"
+                    class="form-control form-control-lg"
+                    placeholder="Ex: 18h às 19h"
+                >
+
+            </div>
+
+            <div class="col-md-12">
+
+                <label class="form-label fw-semibold">
+                    Dias da Semana
+                </label>
+
+                <input
+                    type="text"
+                    name="dias"
+                    class="form-control form-control-lg"
+                    placeholder="Ex: Segunda, Quarta e Sexta"
+                >
+
+            </div>
+
+            <div class="col-md-12">
+
+                <label class="form-label fw-semibold">
+                    Observação
+                </label>
+
+                <textarea
+                    name="observacao"
+                    class="form-control"
+                    rows="4"
+                    placeholder="Ex: Turma infantil iniciante"
+                ></textarea>
+
+            </div>
+
+        </div>
+
+        <div class="mt-5 d-flex gap-3">
+
+            <button class="btn btn-danger btn-lg px-4">
+
+                <i class="bi bi-plus-circle-fill"></i>
+                Cadastrar Turma
+
+            </button>
+
+            <a
+                href="/turmas"
+                class="btn btn-secondary btn-lg px-4"
+            >
+                Voltar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

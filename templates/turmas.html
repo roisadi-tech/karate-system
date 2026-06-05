@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h2 class="fw-bold">
+            🥋 Turmas
+        </h2>
+
+        <p class="text-muted mb-0">
+            Gerencie as turmas da academia
+        </p>
+
+    </div>
+
+    {% if session.tipo == 'admin' %}
+
+        <a
+            href="/cadastrar_turma"
+            class="btn btn-danger btn-lg"
+        >
+            <i class="bi bi-plus-circle-fill"></i>
+            Nova Turma
+        </a>
+
+    {% endif %}
+
+</div>
+
+<div class="row g-4 mb-4">
+
+    <div class="col-md-4">
+
+        <div class="card p-4 border-0 shadow-sm h-100 rounded-4">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <small class="text-muted">
+                        Total de Turmas
+                    </small>
+
+                    <h2 class="fw-bold mt-2">
+                        {{ turmas|length }}
+                    </h2>
+
+                </div>
+
+                <div class="bg-primary text-white p-3 rounded-4">
+                    <i class="bi bi-diagram-3-fill fs-2"></i>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="card border-0 shadow-sm p-4 rounded-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h5 class="fw-bold mb-0">
+            Lista de Turmas
+        </h5>
+
+        <span class="badge bg-dark p-2 px-3 rounded-3">
+            {{ turmas|length }} registros
+        </span>
+
+    </div>
+
+    <div class="table-responsive">
+
+        <table class="table align-middle table-hover">
+
+            <thead class="table-light">
+
+                <tr>
+                    <th>Turma</th>
+                    <th>Professor</th>
+                    <th>Dias</th>
+                    <th>Horário</th>
+                    <th>Alunos</th>
+                    <th class="text-center">Ações</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for turma in turmas %}
+
+                    <tr>
+
+                        <td>
+
+                            <div class="fw-bold">
+                                {{ turma.nome }}
+                            </div>
+
+                            <small class="text-muted">
+                                ID #{{ turma.id }}
+                            </small>
+
+                        </td>
+
+                        <td>
+
+                            {% if turma.professor %}
+
+                                <span class="badge bg-dark p-2 px-3 rounded-3">
+                                    {{ turma.professor.nome }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    Não informado
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if turma.dias %}
+
+                                {{ turma.dias }}
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    Não informado
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if turma.horario %}
+
+                                {{ turma.horario }}
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    Não informado
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <span class="badge bg-primary p-2 px-3 rounded-3">
+                                {{ turma.alunos|length }}
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            <div class="d-flex justify-content-center gap-2 flex-wrap">
+
+                                <a
+                                    href="/turma/{{ turma.id }}"
+                                    class="btn btn-dark btn-sm rounded-3"
+                                    title="Ver Turma"
+                                >
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+
+                                {% if session.tipo == 'admin' %}
+
+                                    <a
+                                        href="/editar_turma/{{ turma.id }}"
+                                        class="btn btn-primary btn-sm rounded-3"
+                                        title="Editar"
+                                    >
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+
+                                    <a
+                                        href="/excluir_turma/{{ turma.id }}"
+                                        class="btn btn-danger btn-sm rounded-3"
+                                        title="Excluir"
+                                        onclick="return confirm('Deseja excluir esta turma?')"
+                                    >
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                {% if turmas|length == 0 %}
+
+                    <tr>
+
+                        <td
+                            colspan="6"
+                            class="text-center py-5"
+                        >
+
+                            <div class="text-muted">
+
+                                <i class="bi bi-diagram-3 fs-1"></i>
+
+                                <h5 class="mt-3">
+                                    Nenhuma turma cadastrada
+                                </h5>
+
+                                <p>
+                                    Cadastre a primeira turma da academia
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endif %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}
