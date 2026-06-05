@@ -1171,6 +1171,16 @@ def cadastrar_aluno():
 
             return redirect(request.url)
 
+        turma = request.form.get(
+            'turma',
+            ''
+        ).strip()
+
+        professor = request.form.get(
+            'professor',
+            ''
+        ).strip()
+
         foto = request.files.get('foto')
 
         nome_arquivo = ''
@@ -1221,7 +1231,9 @@ def cadastrar_aluno():
             whatsapp=whatsapp,
             faixa=faixa,
             mensalidade=mensalidade_convertida,
-            foto=nome_arquivo
+            foto=nome_arquivo,
+            turma=turma,
+            professor=professor
         )
 
         db.session.add(novo_aluno)
@@ -1330,15 +1342,29 @@ def editar_aluno(id):
 
             return redirect(request.url)
 
+        turma_form = request.form.get(
+            'turma',
+            ''
+        ).strip()
+
+        professor_form = request.form.get(
+            'professor',
+            ''
+        ).strip()
+
         aluno.nome = nome_form
         aluno.nascimento = nascimento_form
         aluno.sexo = sexo_form
+
         aluno.responsavel = formatar_nome(
             request.form['responsavel']
         )
+
         aluno.whatsapp = whatsapp_form
         aluno.faixa = faixa_form
         aluno.mensalidade = mensalidade_convertida
+        aluno.turma = turma_form
+        aluno.professor = professor_form
 
         foto = request.files.get('foto')
 
