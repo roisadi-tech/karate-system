@@ -133,7 +133,7 @@
 
             {% endif %}
 
-                {{ aluno.faixa }}
+                {{ aluno.faixa or 'Não informado' }}
 
             </span>
 
@@ -177,6 +177,44 @@
                 </p>
 
                 <p>
+                    <strong>Turma:</strong>
+
+                    {% if aluno.turma %}
+
+                        <span class="badge bg-info text-dark">
+                            {{ aluno.turma }}
+                        </span>
+
+                    {% else %}
+
+                        <span class="text-muted">
+                            Não informado
+                        </span>
+
+                    {% endif %}
+
+                </p>
+
+                <p>
+                    <strong>Professor:</strong>
+
+                    {% if aluno.professor %}
+
+                        <span class="badge bg-dark">
+                            {{ aluno.professor }}
+                        </span>
+
+                    {% else %}
+
+                        <span class="text-muted">
+                            Não informado
+                        </span>
+
+                    {% endif %}
+
+                </p>
+
+                <p>
                     <strong>Mensalidade:</strong>
                     {{ formatar_moeda(aluno.mensalidade) }}
                 </p>
@@ -216,17 +254,21 @@
 
             <!-- BOTÃO WHATSAPP -->
 
-            <a
-                href="https://wa.me/55{{ aluno.whatsapp }}"
-                target="_blank"
-                class="btn btn-success w-100 mt-3"
-            >
+            {% if aluno.whatsapp %}
 
-                <i class="bi bi-whatsapp"></i>
+                <a
+                    href="https://wa.me/55{{ aluno.whatsapp }}"
+                    target="_blank"
+                    class="btn btn-success w-100 mt-3"
+                >
 
-                Conversar no WhatsApp
+                    <i class="bi bi-whatsapp"></i>
 
-            </a>
+                    Conversar no WhatsApp
+
+                </a>
+
+            {% endif %}
 
             <!-- BOTÃO EDITAR -->
 
@@ -241,7 +283,7 @@
 
             </a>
 
-            <!-- BOTÃO CARTEIRINHA -->
+            <!-- BOTÃO CARTEIRINHA PDF -->
 
             <a
                 href="/carteirinha/{{ aluno.id }}"
@@ -252,10 +294,12 @@
                 Abrir Carteirinha PDF
             </a>
 
+            <!-- BOTÃO CARTEIRINHA PNG -->
+
             <a
                 href="/carteirinha_png/{{ aluno.id }}"
                 class="btn btn-success w-100 mt-2"
->
+            >
                 <i class="bi bi-image-fill"></i>
                 Baixar Carteirinha PNG
             </a>
@@ -438,52 +482,52 @@
 
                         {% for presenca in presencas %}
 
-                        <tr>
+                            <tr>
 
-                            <td>
-                                {{ formatar_data(presenca.data) }}
-                            </td>
+                                <td>
+                                    {{ formatar_data(presenca.data) }}
+                                </td>
 
-                            <td>
+                                <td>
 
-                                {% if presenca.status == 'PRESENTE' %}
+                                    {% if presenca.status == 'PRESENTE' %}
 
-                                    <span class="badge bg-success p-2">
+                                        <span class="badge bg-success p-2">
 
-                                        PRESENTE
+                                            PRESENTE
 
-                                    </span>
+                                        </span>
 
-                                {% else %}
+                                    {% else %}
 
-                                    <span class="badge bg-danger p-2">
+                                        <span class="badge bg-danger p-2">
 
-                                        FALTOU
+                                            FALTOU
 
-                                    </span>
+                                        </span>
 
-                                {% endif %}
+                                    {% endif %}
 
-                            </td>
+                                </td>
 
-                        </tr>
+                            </tr>
 
                         {% endfor %}
 
                         {% if presencas|length == 0 %}
 
-                        <tr>
+                            <tr>
 
-                            <td
-                                colspan="2"
-                                class="text-center text-muted py-4"
-                            >
+                                <td
+                                    colspan="2"
+                                    class="text-center text-muted py-4"
+                                >
 
-                                Nenhuma presença registrada.
+                                    Nenhuma presença registrada.
 
-                            </td>
+                                </td>
 
-                        </tr>
+                            </tr>
 
                         {% endif %}
 
@@ -535,58 +579,58 @@
 
                         {% for mensalidade in mensalidades %}
 
-                        <tr>
+                            <tr>
 
-                            <td>
-                                <strong class="text-success">
-                                    {{ formatar_moeda(mensalidade.valor) }}
-                                </strong>
-                            </td>
+                                <td>
+                                    <strong class="text-success">
+                                        {{ formatar_moeda(mensalidade.valor) }}
+                                    </strong>
+                                </td>
 
-                            <td>
-                                {{ formatar_data(mensalidade.vencimento) }}
-                            </td>
+                                <td>
+                                    {{ formatar_data(mensalidade.vencimento) }}
+                                </td>
 
-                            <td>
+                                <td>
 
-                                {% if mensalidade.status == 'PAGO' %}
+                                    {% if mensalidade.status == 'PAGO' %}
 
-                                    <span class="badge bg-success p-2">
+                                        <span class="badge bg-success p-2">
 
-                                        PAGO
+                                            PAGO
 
-                                    </span>
+                                        </span>
 
-                                {% else %}
+                                    {% else %}
 
-                                    <span class="badge bg-danger p-2">
+                                        <span class="badge bg-danger p-2">
 
-                                        PENDENTE
+                                            PENDENTE
 
-                                    </span>
+                                        </span>
 
-                                {% endif %}
+                                    {% endif %}
 
-                            </td>
+                                </td>
 
-                        </tr>
+                            </tr>
 
                         {% endfor %}
 
                         {% if mensalidades|length == 0 %}
 
-                        <tr>
+                            <tr>
 
-                            <td
-                                colspan="3"
-                                class="text-center text-muted py-4"
-                            >
+                                <td
+                                    colspan="3"
+                                    class="text-center text-muted py-4"
+                                >
 
-                                Nenhuma mensalidade registrada.
+                                    Nenhuma mensalidade registrada.
 
-                            </td>
+                                </td>
 
-                        </tr>
+                            </tr>
 
                         {% endif %}
 
@@ -639,60 +683,60 @@
 
                         {% for exame in exames %}
 
-                        <tr>
+                            <tr>
 
-                            <td>
-                                {{ formatar_data(exame.data_exame) }}
-                            </td>
+                                <td>
+                                    {{ formatar_data(exame.data_exame) }}
+                                </td>
 
-                            <td>
-                                {{ exame.faixa_atual }}
-                            </td>
+                                <td>
+                                    {{ exame.faixa_atual }}
+                                </td>
 
-                            <td>
-                                {{ exame.nova_faixa }}
-                            </td>
+                                <td>
+                                    {{ exame.nova_faixa }}
+                                </td>
 
-                            <td>
+                                <td>
 
-                                {% if exame.resultado == 'APROVADO' %}
+                                    {% if exame.resultado == 'APROVADO' %}
 
-                                    <span class="badge bg-success p-2">
+                                        <span class="badge bg-success p-2">
 
-                                        APROVADO
+                                            APROVADO
 
-                                    </span>
+                                        </span>
 
-                                {% else %}
+                                    {% else %}
 
-                                    <span class="badge bg-danger p-2">
+                                        <span class="badge bg-danger p-2">
 
-                                        REPROVADO
+                                            REPROVADO
 
-                                    </span>
+                                        </span>
 
-                                {% endif %}
+                                    {% endif %}
 
-                            </td>
+                                </td>
 
-                        </tr>
+                            </tr>
 
                         {% endfor %}
 
                         {% if exames|length == 0 %}
 
-                        <tr>
+                            <tr>
 
-                            <td
-                                colspan="4"
-                                class="text-center text-muted py-4"
-                            >
+                                <td
+                                    colspan="4"
+                                    class="text-center text-muted py-4"
+                                >
 
-                                Nenhum exame registrado.
+                                    Nenhum exame registrado.
 
-                            </td>
+                                </td>
 
-                        </tr>
+                            </tr>
 
                         {% endif %}
 
