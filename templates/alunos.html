@@ -149,7 +149,7 @@
 
             <!-- BUSCA -->
 
-            <div class="col-md-5">
+            <div class="col-md-7">
 
                 <label class="form-label fw-semibold">
                     Buscar aluno
@@ -179,7 +179,7 @@
 
             </div>
 
-            <!-- TURMA -->
+            <!-- TURMA CADASTRADA -->
 
             <div class="col-md-3">
 
@@ -188,7 +188,7 @@
                 </label>
 
                 <select
-                    name="turma"
+                    name="turma_id"
                     class="form-select form-select-lg rounded-4"
                 >
 
@@ -199,46 +199,16 @@
                     {% for turma in lista_turmas %}
 
                         <option
-                            value="{{ turma }}"
-                            {% if turma_filtro == turma %}
+                            value="{{ turma.id }}"
+                            {% if turma_filtro|string == turma.id|string %}
                                 selected
                             {% endif %}
                         >
-                            {{ turma }}
-                        </option>
+                            {{ turma.nome }}
 
-                    {% endfor %}
-
-                </select>
-
-            </div>
-
-            <!-- PROFESSOR -->
-
-            <div class="col-md-2">
-
-                <label class="form-label fw-semibold">
-                    Professor
-                </label>
-
-                <select
-                    name="professor"
-                    class="form-select form-select-lg rounded-4"
-                >
-
-                    <option value="">
-                        Todos
-                    </option>
-
-                    {% for professor in lista_professores %}
-
-                        <option
-                            value="{{ professor }}"
-                            {% if professor_filtro == professor %}
-                                selected
+                            {% if turma.professor %}
+                                — Prof. {{ turma.professor.nome }}
                             {% endif %}
-                        >
-                            {{ professor }}
                         </option>
 
                     {% endfor %}
@@ -262,7 +232,7 @@
 
         </div>
 
-        {% if busca or turma_filtro or professor_filtro %}
+        {% if busca or turma_filtro %}
 
             <div class="mt-3">
 
@@ -489,16 +459,19 @@
 
                         <td>
 
-                            {% if aluno.turma %}
+                            {% if aluno.turma_relacao %}
 
-                                <span class="badge bg-info text-dark p-2 px-3 rounded-3">
-                                    {{ aluno.turma }}
-                                </span>
+                                <a
+                                    href="/turma/{{ aluno.turma_relacao.id }}"
+                                    class="badge bg-info text-dark p-2 px-3 rounded-3 text-decoration-none"
+                                >
+                                    {{ aluno.turma_relacao.nome }}
+                                </a>
 
                             {% else %}
 
                                 <span class="text-muted">
-                                    Não informado
+                                    Sem turma
                                 </span>
 
                             {% endif %}
@@ -509,10 +482,10 @@
 
                         <td>
 
-                            {% if aluno.professor %}
+                            {% if aluno.turma_relacao and aluno.turma_relacao.professor %}
 
                                 <span class="badge bg-dark p-2 px-3 rounded-3">
-                                    {{ aluno.professor }}
+                                    {{ aluno.turma_relacao.professor.nome }}
                                 </span>
 
                             {% else %}

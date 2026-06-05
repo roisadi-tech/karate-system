@@ -1041,8 +1041,7 @@ def logout():
 def alunos():
 
     busca = request.args.get('busca', '').strip()
-    turma_filtro = request.args.get('turma', '').strip()
-    professor_filtro = request.args.get('professor', '').strip()
+    turma_filtro = request.args.get('turma_id', '').strip()
 
     query = Aluno.query
 
@@ -1055,52 +1054,16 @@ def alunos():
     if turma_filtro:
 
         query = query.filter(
-            Aluno.turma == turma_filtro
-        )
-
-    if professor_filtro:
-
-        query = query.filter(
-            Aluno.professor == professor_filtro
+            Aluno.turma_id == turma_filtro
         )
 
     lista_alunos = query.order_by(
         Aluno.nome.asc()
     ).all()
 
-    turmas = db.session.query(
-        Aluno.turma
-    ).filter(
-        Aluno.turma.isnot(None),
-        Aluno.turma != ''
-    ).distinct().order_by(
-        Aluno.turma.asc()
+    lista_turmas = Turma.query.order_by(
+        Turma.nome.asc()
     ).all()
-
-    lista_turmas = []
-
-    for item in turmas:
-
-        lista_turmas.append(
-            item[0]
-        )
-
-    professores = db.session.query(
-        Aluno.professor
-    ).filter(
-        Aluno.professor.isnot(None),
-        Aluno.professor != ''
-    ).distinct().order_by(
-        Aluno.professor.asc()
-    ).all()
-
-    lista_professores = []
-
-    for item in professores:
-
-        lista_professores.append(
-            item[0]
-        )
 
     dados_aptidao = {}
 
@@ -1124,10 +1087,8 @@ def alunos():
         dados_aptidao=dados_aptidao,
         aptos_exame=aptos_exame,
         lista_turmas=lista_turmas,
-        lista_professores=lista_professores,
         busca=busca,
-        turma_filtro=turma_filtro,
-        professor_filtro=professor_filtro
+        turma_filtro=turma_filtro
     )
 
 
