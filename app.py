@@ -4503,6 +4503,60 @@ def excluir_usuario(id):
 
 
 # =====================================
+# ATUALIZAR BANCO - TURMA E PROFESSOR
+# =====================================
+
+@app.route('/atualizar_banco_turma_professor')
+@login_obrigatorio
+@admin_obrigatorio
+def atualizar_banco_turma_professor():
+
+    try:
+
+        with db.engine.connect() as conexao:
+
+            try:
+
+                conexao.execute(
+                    db.text(
+                        'ALTER TABLE alunos ADD COLUMN turma VARCHAR(100)'
+                    )
+                )
+
+            except Exception:
+
+                pass
+
+            try:
+
+                conexao.execute(
+                    db.text(
+                        'ALTER TABLE alunos ADD COLUMN professor VARCHAR(100)'
+                    )
+                )
+
+            except Exception:
+
+                pass
+
+            conexao.commit()
+
+        flash(
+            'Banco atualizado com os campos turma e professor.',
+            'success'
+        )
+
+    except Exception as erro:
+
+        flash(
+            f'Erro ao atualizar banco: {erro}',
+            'danger'
+        )
+
+    return redirect('/alunos')
+
+
+# =====================================
 # CRIAR TABELAS
 # =====================================
 

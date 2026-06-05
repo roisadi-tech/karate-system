@@ -2,46 +2,20 @@ from database import db
 
 
 class Aluno(db.Model):
-
+    
     __tablename__ = 'alunos'
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True
-    )
-
-    nome = db.Column(
-        db.String(200),
-        nullable=False
-    )
-
-    nascimento = db.Column(
-        db.String(30)
-    )
-
-    sexo = db.Column(
-        db.String(30)
-    )
-
-    responsavel = db.Column(
-        db.String(200)
-    )
-
-    whatsapp = db.Column(
-        db.String(30)
-    )
-
-    faixa = db.Column(
-        db.String(50)
-    )
-
-    mensalidade = db.Column(
-        db.Float
-    )
-
-    foto = db.Column(
-        db.String(300)
-    )
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(200), nullable=False)
+    nascimento = db.Column(db.String(30))
+    sexo = db.Column(db.String(30))
+    responsavel = db.Column(db.String(200))
+    whatsapp = db.Column(db.String(30))
+    faixa = db.Column(db.String(50))
+    mensalidade = db.Column(db.Float)
+    foto = db.Column(db.String(300))
+    turma = db.Column(db.String(100))
+    professor = db.Column(db.String(100))
 
 
 class Presenca(db.Model):
