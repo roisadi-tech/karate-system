@@ -3396,199 +3396,657 @@ def recibo(id):
     )
 
     data_emissao = datetime.now().strftime('%d/%m/%Y')
-    data_hora_emissao = datetime.now().strftime('%d/%m/%Y %H:%M')
+    data_hora_emissao = datetime.now().strftime('%d/%m/%Y às %H:%M')
 
-    c = canvas.Canvas(nome_arquivo)
+    aluno = mensalidade.aluno
+
+    recibo_numero = f'REC-{mensalidade.id:06d}'
+
+    # =====================================
+    # CONFIGURAÇÕES DO PDF
+    # =====================================
 
     largura, altura = 595, 842
 
-    # BORDA PRINCIPAL
-
-    c.setLineWidth(2)
-
-    c.rect(
-        40,
-        40,
-        largura - 80,
-        altura - 80
+    c = canvas.Canvas(
+        nome_arquivo,
+        pagesize=(largura, altura)
     )
 
-    # CABEÇALHO
+    vermelho = colors.HexColor('#DC3545')
+    vermelho_escuro = colors.HexColor('#8B0000')
+    preto = colors.HexColor('#111827')
+    cinza = colors.HexColor('#6B7280')
+    cinza_claro = colors.HexColor('#F3F4F6')
+    verde = colors.HexColor('#198754')
+    branco = colors.white
 
-    c.setFont("Helvetica-Bold", 20)
+    margem_x = 45
 
-    c.drawCentredString(
-        largura / 2,
-        775,
-        "RECIBO DE PAGAMENTO"
-    )
+    # =====================================
+    # FUNÇÃO AUXILIAR PARA TEXTO
+    # =====================================
 
-    c.setFont("Helvetica-Bold", 15)
+    def escrever_texto_quebrado(texto, x, y, largura_linha, tamanho=11, espacamento=16):
 
-    c.drawCentredString(
-        largura / 2,
-        742,
-        "Academia de Karatê"
-    )
-
-    c.setFont("Helvetica", 10)
-
-    c.drawCentredString(
-        largura / 2,
-        724,
-        "Sistema de Gestão da Academia"
-    )
-
-    # LINHA
-
-    c.line(
-        70,
-        705,
-        largura - 70,
-        705
-    )
-
-    # DADOS DO RECIBO
-
-    c.setFont("Helvetica-Bold", 11)
-
-    c.drawString(
-        70,
-        675,
-        f"Recibo Nº: {mensalidade.id}"
-    )
-
-    c.drawString(
-        360,
-        675,
-        f"Data: {data_emissao}"
-    )
-
-    # TEXTO PRINCIPAL COM QUEBRA AUTOMÁTICA
-
-    texto = (
-        f"Recebemos de {mensalidade.aluno.nome}, "
-        f"a importância de R$ {valor_formatado}, "
-        f"referente ao pagamento de mensalidade da academia."
-    )
-
-    linhas = textwrap.wrap(
-        texto,
-        width=82
-    )
-
-    y = 625
-
-    c.setFont("Helvetica", 11)
-
-    for linha in linhas:
-
-        c.drawString(
-            70,
-            y,
-            linha
+        c.setFont(
+            'Helvetica',
+            tamanho
         )
 
-        y -= 18
+        linhas = textwrap.wrap(
+            texto,
+            width=largura_linha
+        )
 
-    # CAIXA DOS DADOS
+        for linha in linhas:
 
-    c.setLineWidth(1)
+            c.drawString(
+                x,
+                y,
+                linha
+            )
 
-    c.roundRect(
-        70,
-        390,
-        largura - 140,
-        155,
+            y -= espacamento
+
+        return y
+
+    # =====================================
+    # FUNDO
+    # =====================================
+
+    c.setFillColor(
+        colors.white
+    )
+
+    c.rect(
+        0,
+        0,
+        largura,
+        altura,
+        fill=True,
+        stroke=False
+    )
+
+    # FAIXA SUPERIOR
+
+    c.setFillColor(
+        preto
+    )
+
+    c.rect(
+        0,
+        755,
+        largura,
+        87,
+        fill=True,
+        stroke=False
+    )
+
+    c.setFillColor(
+        vermelho
+    )
+
+    c.rect(
+        0,
+        745,
+        largura,
+        10,
+        fill=True,
+        stroke=False
+    )
+
+    # =====================================
+    # LOGO
+    # =====================================
+
+    caminhos_logo = [
+        os.path.join(app.root_path, 'static', 'modelos', 'logo.png'),
+        os.path.join(app.root_path, 'static', 'modelos', 'Logo.png'),
+        os.path.join(app.root_path, 'static', 'Logo.png'),
+        os.path.join(app.root_path, 'static', 'logo.png')
+    ]
+
+    logo_path = None
+
+    for caminho in caminhos_logo:
+
+        if os.path.exists(caminho):
+
+            logo_path = caminho
+            break
+
+    if logo_path:
+
+        try:
+
+            c.drawImage(
+                logo_path,
+                55,
+                765,
+                width=60,
+                height=60,
+                preserveAspectRatio=True,
+                mask='auto'
+            )
+
+        except Exception:
+
+            logo_path = None
+
+    if not logo_path:
+
+        c.setFillColor(
+            vermelho
+        )
+
+        c.circle(
+            85,
+            795,
+            28,
+            fill=True,
+            stroke=False
+        )
+
+        c.setFillColor(
+            branco
+        )
+
+        c.setFont(
+            'Helvetica-Bold',
+            16
+        )
+
+        c.drawCentredString(
+            85,
+            789,
+            'AAKC'
+        )
+
+    # =====================================
+    # CABEÇALHO
+    # =====================================
+
+    c.setFillColor(
+        branco
+    )
+
+    c.setFont(
+        'Helvetica-Bold',
+        22
+    )
+
+    c.drawString(
+        130,
+        805,
+        'AAKC KARATÊ'
+    )
+
+    c.setFont(
+        'Helvetica',
         10
     )
 
-    c.setFont("Helvetica-Bold", 13)
-
     c.drawString(
-        90,
-        515,
-        "Dados do Pagamento"
+        132,
+        787,
+        'Academia de Artes Marciais'
     )
 
-    c.setFont("Helvetica", 11)
+    c.drawString(
+        132,
+        771,
+        'Av. Des. Armando de Souza Louzada | WhatsApp: (88) 98880-5107'
+    )
+
+    c.setFont(
+        'Helvetica-Bold',
+        18
+    )
+
+    c.drawRightString(
+        largura - 45,
+        805,
+        'RECIBO'
+    )
+
+    c.setFont(
+        'Helvetica',
+        10
+    )
+
+    c.drawRightString(
+        largura - 45,
+        786,
+        recibo_numero
+    )
+
+    # =====================================
+    # TÍTULO PRINCIPAL
+    # =====================================
+
+    c.setFillColor(
+        preto
+    )
+
+    c.setFont(
+        'Helvetica-Bold',
+        22
+    )
+
+    c.drawCentredString(
+        largura / 2,
+        705,
+        'RECIBO DE PAGAMENTO'
+    )
+
+    c.setFont(
+        'Helvetica',
+        11
+    )
+
+    c.setFillColor(
+        cinza
+    )
+
+    c.drawCentredString(
+        largura / 2,
+        685,
+        'Comprovante referente ao pagamento de mensalidade'
+    )
+
+    # =====================================
+    # SELO PAGO
+    # =====================================
+
+    c.setFillColor(
+        verde
+    )
+
+    c.roundRect(
+        430,
+        650,
+        95,
+        34,
+        10,
+        fill=True,
+        stroke=False
+    )
+
+    c.setFillColor(
+        branco
+    )
+
+    c.setFont(
+        'Helvetica-Bold',
+        14
+    )
+
+    c.drawCentredString(
+        477,
+        661,
+        'PAGO'
+    )
+
+    # =====================================
+    # DADOS DO RECIBO
+    # =====================================
+
+    c.setFillColor(
+        cinza_claro
+    )
+
+    c.roundRect(
+        margem_x,
+        605,
+        largura - 90,
+        35,
+        8,
+        fill=True,
+        stroke=False
+    )
+
+    c.setFillColor(
+        preto
+    )
+
+    c.setFont(
+        'Helvetica-Bold',
+        10
+    )
 
     c.drawString(
-        95,
+        65,
+        618,
+        f'Recibo Nº: {recibo_numero}'
+    )
+
+    c.drawString(
+        260,
+        618,
+        f'Emissão: {data_emissao}'
+    )
+
+    c.drawString(
+        405,
+        618,
+        f'Mensalidade ID: {mensalidade.id}'
+    )
+
+    # =====================================
+    # TEXTO PRINCIPAL
+    # =====================================
+
+    texto_principal = (
+        f'Recebemos de {aluno.nome}, a importância de R$ {valor_formatado}, '
+        f'referente ao pagamento de mensalidade da AAKC Karatê.'
+    )
+
+    c.setFillColor(
+        preto
+    )
+
+    y_texto = escrever_texto_quebrado(
+        texto_principal,
+        65,
+        560,
+        82,
+        tamanho=11,
+        espacamento=17
+    )
+
+    # =====================================
+    # CAIXA DE DADOS DO PAGAMENTO
+    # =====================================
+
+    c.setStrokeColor(
+        vermelho
+    )
+
+    c.setLineWidth(
+        1.2
+    )
+
+    c.roundRect(
+        55,
+        340,
+        largura - 110,
+        180,
+        12,
+        fill=False,
+        stroke=True
+    )
+
+    c.setFillColor(
+        vermelho
+    )
+
+    c.roundRect(
+        55,
         485,
-        f"Aluno: {mensalidade.aluno.nome}"
+        largura - 110,
+        35,
+        12,
+        fill=True,
+        stroke=False
+    )
+
+    c.setFillColor(
+        branco
+    )
+
+    c.setFont(
+        'Helvetica-Bold',
+        13
     )
 
     c.drawString(
-        95,
-        460,
-        f"Valor: R$ {valor_formatado}"
+        75,
+        497,
+        'DADOS DO PAGAMENTO'
+    )
+
+    c.setFillColor(
+        preto
+    )
+
+    c.setFont(
+        'Helvetica-Bold',
+        10
     )
 
     c.drawString(
-        95,
-        435,
-        f"Vencimento: {vencimento_formatado}"
+        75,
+        455,
+        'Aluno:'
+    )
+
+    c.setFont(
+        'Helvetica',
+        10
     )
 
     c.drawString(
-        95,
-        410,
-        f"Status: {mensalidade.status}"
+        165,
+        455,
+        aluno.nome
     )
 
-    # EMISSÃO
-
-    c.setFont("Helvetica", 10)
+    c.setFont(
+        'Helvetica-Bold',
+        10
+    )
 
     c.drawString(
-        70,
-        350,
-        f"Emitido em: {data_hora_emissao}"
+        75,
+        430,
+        'Valor pago:'
     )
 
-    # OBSERVAÇÃO
+    c.setFont(
+        'Helvetica-Bold',
+        12
+    )
 
-    c.setFont("Helvetica-Oblique", 10)
+    c.setFillColor(
+        verde
+    )
 
     c.drawString(
-        70,
-        320,
-        "Este recibo foi gerado automaticamente pelo sistema Karate System."
+        165,
+        430,
+        f'R$ {valor_formatado}'
     )
 
+    c.setFillColor(
+        preto
+    )
+
+    c.setFont(
+        'Helvetica-Bold',
+        10
+    )
+
+    c.drawString(
+        75,
+        405,
+        'Referência:'
+    )
+
+    c.setFont(
+        'Helvetica',
+        10
+    )
+
+    c.drawString(
+        165,
+        405,
+        'Mensalidade da academia'
+    )
+
+    c.setFont(
+        'Helvetica-Bold',
+        10
+    )
+
+    c.drawString(
+        75,
+        380,
+        'Vencimento:'
+    )
+
+    c.setFont(
+        'Helvetica',
+        10
+    )
+
+    c.drawString(
+        165,
+        380,
+        vencimento_formatado
+    )
+
+    c.setFont(
+        'Helvetica-Bold',
+        10
+    )
+
+    c.drawString(
+        75,
+        355,
+        'Status:'
+    )
+
+    c.setFont(
+        'Helvetica-Bold',
+        10
+    )
+
+    c.setFillColor(
+        verde
+    )
+
+    c.drawString(
+        165,
+        355,
+        mensalidade.status
+    )
+
+    # =====================================
+    # OBSERVAÇÕES
+    # =====================================
+
+    c.setFillColor(
+        cinza
+    )
+
+    c.setFont(
+        'Helvetica',
+        9
+    )
+
+    c.drawString(
+        55,
+        300,
+        f'Emitido automaticamente pelo sistema Karate System em {data_hora_emissao}.'
+    )
+
+    c.drawString(
+        55,
+        285,
+        'Este documento comprova o pagamento da mensalidade informada acima.'
+    )
+
+    # =====================================
     # ASSINATURA
+    # =====================================
+
+    c.setStrokeColor(
+        preto
+    )
+
+    c.setLineWidth(
+        1
+    )
 
     c.line(
         170,
-        230,
+        205,
         425,
-        230
+        205
     )
 
-    c.setFont("Helvetica", 11)
+    c.setFillColor(
+        preto
+    )
+
+    c.setFont(
+        'Helvetica',
+        10
+    )
 
     c.drawCentredString(
         largura / 2,
-        210,
-        "Assinatura do responsável"
+        187,
+        'Assinatura do responsável pela academia'
     )
 
+    c.setFont(
+        'Helvetica-Bold',
+        10
+    )
+
+    c.drawCentredString(
+        largura / 2,
+        170,
+        'AAKC KARATÊ'
+    )
+
+    # =====================================
     # RODAPÉ
+    # =====================================
 
-    c.setFont("Helvetica", 9)
+    c.setFillColor(
+        preto
+    )
+
+    c.rect(
+        0,
+        0,
+        largura,
+        42,
+        fill=True,
+        stroke=False
+    )
+
+    c.setFillColor(
+        branco
+    )
+
+    c.setFont(
+        'Helvetica',
+        8
+    )
 
     c.drawCentredString(
         largura / 2,
-        70,
-        "Karate System - Gestão de Alunos, Frequência e Mensalidades"
+        25,
+        'AAKC Karatê | Av. Des. Armando de Souza Louzada | WhatsApp: (88) 98880-5107 | Instagram: @aakc_acarau_'
+    )
+
+    c.drawCentredString(
+        largura / 2,
+        12,
+        'Karate System - Gestão de Alunos, Frequência e Mensalidades'
     )
 
     c.save()
 
     return send_file(
         nome_arquivo,
-        as_attachment=True
+        as_attachment=True,
+        download_name=f'recibo_{mensalidade.id}.pdf',
+        mimetype='application/pdf'
     )
 
 
