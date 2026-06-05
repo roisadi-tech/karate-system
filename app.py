@@ -15,7 +15,9 @@ from models import (
     Mensalidade,
     Presenca,
     Exame,
-    Usuario
+    Usuario,
+    Professor,
+    Turma
 )
 
 import os
@@ -4578,15 +4580,17 @@ def excluir_usuario(id):
 
 
 # =====================================
-# ATUALIZAR BANCO - TURMA E PROFESSOR
+# ATUALIZAR BANCO - TURMAS E PROFESSORES
 # =====================================
 
-@app.route('/atualizar_banco_turma_professor')
+@app.route('/atualizar_banco_turmas')
 @login_obrigatorio
 @admin_obrigatorio
-def atualizar_banco_turma_professor():
+def atualizar_banco_turmas():
 
     try:
+
+        db.create_all()
 
         with db.engine.connect() as conexao:
 
@@ -4594,7 +4598,7 @@ def atualizar_banco_turma_professor():
 
                 conexao.execute(
                     db.text(
-                        'ALTER TABLE alunos ADD COLUMN turma VARCHAR(100)'
+                        'ALTER TABLE alunos ADD COLUMN turma_id INTEGER'
                     )
                 )
 
@@ -4606,7 +4610,7 @@ def atualizar_banco_turma_professor():
 
                 conexao.execute(
                     db.text(
-                        'ALTER TABLE alunos ADD COLUMN professor VARCHAR(100)'
+                        'ALTER TABLE alunos ADD CONSTRAINT fk_alunos_turmas FOREIGN KEY (turma_id) REFERENCES turmas(id)'
                     )
                 )
 
@@ -4617,7 +4621,7 @@ def atualizar_banco_turma_professor():
             conexao.commit()
 
         flash(
-            'Banco atualizado com os campos turma e professor.',
+            'Banco atualizado com tabelas de professores, turmas e vínculo com alunos.',
             'success'
         )
 
