@@ -734,6 +734,44 @@ def calcular_idade(data_nascimento):
     except Exception:
 
         return None
+    
+
+# =====================================
+# VERIFICAR SE ALUNO ESTÁ APTO PARA EXAME
+# =====================================
+
+def verificar_aluno_apto_exame(aluno):
+
+    total_presencas = Presenca.query.filter_by(
+        aluno_id=aluno.id
+    ).count()
+
+    presencas_confirmadas = Presenca.query.filter_by(
+        aluno_id=aluno.id,
+        status='PRESENTE'
+    ).count()
+
+    percentual = 0
+
+    if total_presencas > 0:
+
+        percentual = round(
+            (presencas_confirmadas / total_presencas) * 100,
+            1
+        )
+
+    apto = False
+
+    if total_presencas > 0 and percentual >= 75:
+
+        apto = True
+
+    return {
+        'apto': apto,
+        'percentual': percentual,
+        'total_presencas': total_presencas,
+        'presencas_confirmadas': presencas_confirmadas
+    }
 
 
 # =====================================
@@ -845,7 +883,9 @@ def index():
 
         faturamento = 0
 
-    faturamento = float(faturamento)
+    faturamento = float(
+        faturamento
+    )
 
     inadimplentes = Mensalidade.query.filter_by(
         status='PENDENTE'
@@ -857,26 +897,15 @@ def index():
 
     for aluno in alunos:
 
-        total = Presenca.query.filter_by(
-            aluno_id=aluno.id
-        ).count()
+        resultado_apto = verificar_aluno_apto_exame(
+            aluno
+        )
 
-        presentes = Presenca.query.filter_by(
-            aluno_id=aluno.id,
-            status='PRESENTE'
-        ).count()
+        if resultado_apto['apto']:
 
-        if total > 0:
+            aptos += 1
 
-            percentual = (
-                presentes / total
-            ) * 100
-
-            if percentual >= 75:
-
-                aptos += 1
-
-        ultimos_alunos = Aluno.query.order_by(
+    ultimos_alunos = Aluno.query.order_by(
         Aluno.id.desc()
     ).limit(5).all()
 
@@ -1027,9 +1056,27 @@ def alunos():
             Aluno.nome.asc()
         ).all()
 
+    dados_aptidao = {}
+
+    aptos_exame = 0
+
+    for aluno in lista_alunos:
+
+        resultado_apto = verificar_aluno_apto_exame(
+            aluno
+        )
+
+        dados_aptidao[aluno.id] = resultado_apto
+
+        if resultado_apto['apto']:
+
+            aptos_exame += 1
+
     return render_template(
         'alunos.html',
-        alunos=lista_alunos
+        alunos=lista_alunos,
+        dados_aptidao=dados_aptidao,
+        aptos_exame=aptos_exame
     )
 
 
