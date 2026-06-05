@@ -1456,14 +1456,10 @@ def perfil_aluno(id):
 
 
 # =====================================
-# CARTEIRINHA DO ALUNO
+# GERAR ARTE DA CARTEIRINHA
 # =====================================
 
-@app.route('/carteirinha/<int:id>')
-@login_obrigatorio
-def carteirinha_aluno(id):
-
-    aluno = Aluno.query.get_or_404(id)
+def gerar_arte_carteirinha(aluno):
 
     base_path = os.path.join(
         app.root_path,
@@ -1474,12 +1470,7 @@ def carteirinha_aluno(id):
 
     if not os.path.exists(base_path):
 
-        flash(
-            f'Modelo da carteirinha não encontrado em {base_path}',
-            'danger'
-        )
-
-        return redirect(f'/aluno/{id}')
+        return None
 
     # ABRE MOCKUP BASE
 
@@ -1742,6 +1733,32 @@ def carteirinha_aluno(id):
         camada
     ).convert('RGB')
 
+    return arte_final
+
+
+# =====================================
+# CARTEIRINHA DO ALUNO EM PDF
+# =====================================
+
+@app.route('/carteirinha/<int:id>')
+@login_obrigatorio
+def carteirinha_aluno(id):
+
+    aluno = Aluno.query.get_or_404(id)
+
+    arte_final = gerar_arte_carteirinha(
+        aluno
+    )
+
+    if arte_final is None:
+
+        flash(
+            'Modelo da carteirinha não encontrado em static/modelos/carteirinha_base.png',
+            'danger'
+        )
+
+        return redirect(f'/aluno/{id}')
+
     # =====================================
     # GERAR PDF PARA IMPRESSÃO
     # =====================================
@@ -1809,6 +1826,46 @@ def carteirinha_aluno(id):
         mimetype='application/pdf',
         as_attachment=False,
         download_name=f'carteirinha_{aluno.id}.pdf'
+    )
+
+
+# =====================================
+# CARTEIRINHA DO ALUNO EM PNG
+# =====================================
+
+@app.route('/carteirinha_png/<int:id>')
+@login_obrigatorio
+def carteirinha_aluno_png(id):
+
+    aluno = Aluno.query.get_or_404(id)
+
+    arte_final = gerar_arte_carteirinha(
+        aluno
+    )
+
+    if arte_final is None:
+
+        flash(
+            'Modelo da carteirinha não encontrado em static/modelos/carteirinha_base.png',
+            'danger'
+        )
+
+        return redirect(f'/aluno/{id}')
+
+    img_buffer = BytesIO()
+
+    arte_final.save(
+        img_buffer,
+        format='PNG'
+    )
+
+    img_buffer.seek(0)
+
+    return send_file(
+        img_buffer,
+        mimetype='image/png',
+        as_attachment=True,
+        download_name=f'carteirinha_{aluno.id}.png'
     )
 
 
