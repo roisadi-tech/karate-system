@@ -1813,7 +1813,7 @@ def carteirinha_aluno(id):
 
 
 # =====================================
-# VALIDAR CARTEIRINHA DO ALUNO
+# VALIDAR CARTEIRINHA E REGISTRAR PRESENÇA
 # =====================================
 
 @app.route('/validar_carteirinha/<int:id>')
@@ -1829,12 +1829,62 @@ def validar_carteirinha(id):
 
     validade = f'31/12/{date.today().year}'
 
+    presenca_registrada = False
+    presenca_ja_existia = False
+    usuario_logado = False
+
+    # Só registra presença se o leitor estiver usando
+    # um navegador logado no sistema.
+    if 'usuario' in session:
+
+        usuario_logado = True
+
+        hoje = date.today().strftime('%Y-%m-%d')
+
+        presenca = Presenca.query.filter_by(
+            aluno_id=aluno.id,
+            data=hoje
+        ).first()
+
+        if presenca:
+
+            if presenca.status == 'PRESENTE':
+
+                presenca_ja_existia = True
+
+            else:
+
+                presenca.status = 'PRESENTE'
+
+                db.session.commit()
+
+                presenca_registrada = True
+
+        else:
+
+            nova_presenca = Presenca(
+                aluno_id=aluno.id,
+                data=hoje,
+                status='PRESENTE'
+            )
+
+            db.session.add(
+                nova_presenca
+            )
+
+            db.session.commit()
+
+            presenca_registrada = True
+
     return render_template(
         'validar_carteirinha.html',
         aluno=aluno,
         idade=idade,
         matricula=matricula,
-        validade=validade
+        validade=validade,
+        presenca_registrada=presenca_registrada,
+        presenca_ja_existia=presenca_ja_existia,
+        usuario_logado=usuario_logado
     )
 
 

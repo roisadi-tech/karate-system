@@ -109,6 +109,12 @@
             margin: 0;
         }
 
+        .presence-alert {
+            border-radius: 16px;
+            font-weight: 600;
+            margin-bottom: 22px;
+        }
+
         .footer-validation {
             background: #198754;
             color: white;
@@ -163,9 +169,43 @@
                 {{ aluno.nome }}
             </h3>
 
-            <p class="text-muted mb-4">
+            <p class="text-muted mb-3">
                 Aluno cadastrado no sistema AAKC Karatê
             </p>
+
+            {% if usuario_logado %}
+
+                {% if presenca_registrada %}
+
+                    <div class="alert alert-success presence-alert">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Presença registrada com sucesso hoje.
+                    </div>
+
+                {% elif presenca_ja_existia %}
+
+                    <div class="alert alert-warning presence-alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        Este aluno já teve presença registrada hoje.
+                    </div>
+
+                {% else %}
+
+                    <div class="alert alert-secondary presence-alert">
+                        <i class="bi bi-info-circle-fill"></i>
+                        Carteirinha validada no sistema.
+                    </div>
+
+                {% endif %}
+
+            {% else %}
+
+                <div class="alert alert-info presence-alert">
+                    <i class="bi bi-info-circle-fill"></i>
+                    Carteirinha validada. Para registrar presença, o leitor precisa estar logado no sistema.
+                </div>
+
+            {% endif %}
 
             <div class="text-start">
 
