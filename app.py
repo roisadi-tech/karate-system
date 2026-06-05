@@ -1038,23 +1038,67 @@ def logout():
 @login_obrigatorio
 def alunos():
 
-    busca = request.args.get('busca')
+    busca = request.args.get('busca', '').strip()
+    turma_filtro = request.args.get('turma', '').strip()
+    professor_filtro = request.args.get('professor', '').strip()
+
+    query = Aluno.query
 
     if busca:
 
-        busca = busca.strip()
-
-        lista_alunos = Aluno.query.filter(
+        query = query.filter(
             Aluno.nome.ilike(f'%{busca}%')
-        ).order_by(
-            Aluno.nome.asc()
-        ).all()
+        )
 
-    else:
+    if turma_filtro:
 
-        lista_alunos = Aluno.query.order_by(
-            Aluno.nome.asc()
-        ).all()
+        query = query.filter(
+            Aluno.turma == turma_filtro
+        )
+
+    if professor_filtro:
+
+        query = query.filter(
+            Aluno.professor == professor_filtro
+        )
+
+    lista_alunos = query.order_by(
+        Aluno.nome.asc()
+    ).all()
+
+    turmas = db.session.query(
+        Aluno.turma
+    ).filter(
+        Aluno.turma.isnot(None),
+        Aluno.turma != ''
+    ).distinct().order_by(
+        Aluno.turma.asc()
+    ).all()
+
+    lista_turmas = []
+
+    for item in turmas:
+
+        lista_turmas.append(
+            item[0]
+        )
+
+    professores = db.session.query(
+        Aluno.professor
+    ).filter(
+        Aluno.professor.isnot(None),
+        Aluno.professor != ''
+    ).distinct().order_by(
+        Aluno.professor.asc()
+    ).all()
+
+    lista_professores = []
+
+    for item in professores:
+
+        lista_professores.append(
+            item[0]
+        )
 
     dados_aptidao = {}
 
@@ -1076,7 +1120,12 @@ def alunos():
         'alunos.html',
         alunos=lista_alunos,
         dados_aptidao=dados_aptidao,
-        aptos_exame=aptos_exame
+        aptos_exame=aptos_exame,
+        lista_turmas=lista_turmas,
+        lista_professores=lista_professores,
+        busca=busca,
+        turma_filtro=turma_filtro,
+        professor_filtro=professor_filtro
     )
 
 

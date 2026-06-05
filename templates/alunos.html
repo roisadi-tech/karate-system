@@ -139,15 +139,21 @@
 
 </div>
 
-<!-- BUSCA -->
+<!-- BUSCA E FILTROS -->
 
 <div class="card border-0 shadow-sm p-4 mb-4 rounded-4">
 
     <form method="GET">
 
-        <div class="row g-3 align-items-center">
+        <div class="row g-3 align-items-end">
 
-            <div class="col-md-10">
+            <!-- BUSCA -->
+
+            <div class="col-md-5">
+
+                <label class="form-label fw-semibold">
+                    Buscar aluno
+                </label>
 
                 <div class="position-relative">
 
@@ -166,26 +172,111 @@
                         name="busca"
                         class="form-control form-control-lg ps-5 rounded-4"
                         placeholder="Buscar aluno pelo nome..."
-                        value="{{ request.args.get('busca', '') }}"
+                        value="{{ busca }}"
                     >
 
                 </div>
 
             </div>
 
-            <div class="col-md-2 d-grid">
+            <!-- TURMA -->
 
-                <button
-                    class="btn btn-dark btn-lg rounded-4"
+            <div class="col-md-3">
+
+                <label class="form-label fw-semibold">
+                    Turma
+                </label>
+
+                <select
+                    name="turma"
+                    class="form-select form-select-lg rounded-4"
                 >
 
-                    Buscar
+                    <option value="">
+                        Todas as turmas
+                    </option>
+
+                    {% for turma in lista_turmas %}
+
+                        <option
+                            value="{{ turma }}"
+                            {% if turma_filtro == turma %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ turma }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <!-- PROFESSOR -->
+
+            <div class="col-md-2">
+
+                <label class="form-label fw-semibold">
+                    Professor
+                </label>
+
+                <select
+                    name="professor"
+                    class="form-select form-select-lg rounded-4"
+                >
+
+                    <option value="">
+                        Todos
+                    </option>
+
+                    {% for professor in lista_professores %}
+
+                        <option
+                            value="{{ professor }}"
+                            {% if professor_filtro == professor %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ professor }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <!-- BOTÃO -->
+
+            <div class="col-md-2 d-grid">
+
+                <button class="btn btn-dark btn-lg rounded-4">
+
+                    <i class="bi bi-funnel-fill"></i>
+                    Filtrar
 
                 </button>
 
             </div>
 
         </div>
+
+        {% if busca or turma_filtro or professor_filtro %}
+
+            <div class="mt-3">
+
+                <a
+                    href="/alunos"
+                    class="btn btn-outline-secondary rounded-4"
+                >
+                    <i class="bi bi-x-circle"></i>
+                    Limpar filtros
+                </a>
+
+            </div>
+
+        {% endif %}
 
     </form>
 
@@ -224,6 +315,10 @@
                     <th>WhatsApp</th>
 
                     <th>Faixa</th>
+
+                    <th>Turma</th>
+
+                    <th>Professor</th>
 
                     <th>Mensalidade</th>
 
@@ -390,6 +485,46 @@
 
                         </td>
 
+                        <!-- TURMA -->
+
+                        <td>
+
+                            {% if aluno.turma %}
+
+                                <span class="badge bg-info text-dark p-2 px-3 rounded-3">
+                                    {{ aluno.turma }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    Não informado
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <!-- PROFESSOR -->
+
+                        <td>
+
+                            {% if aluno.professor %}
+
+                                <span class="badge bg-dark p-2 px-3 rounded-3">
+                                    {{ aluno.professor }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    Não informado
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
                         <!-- MENSALIDADE -->
 
                         <td>
@@ -494,7 +629,7 @@
                     <tr>
 
                         <td
-                            colspan="6"
+                            colspan="8"
                             class="text-center py-5"
                         >
 
