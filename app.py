@@ -1139,6 +1139,10 @@ def alunos():
 @login_obrigatorio
 def cadastrar_aluno():
 
+    turmas = Turma.query.order_by(
+        Turma.nome.asc()
+    ).all()
+
     if request.method == 'POST':
 
         nome = formatar_nome(
@@ -1222,15 +1226,27 @@ def cadastrar_aluno():
 
             return redirect(request.url)
 
-        turma = request.form.get(
-            'turma',
+        turma_id = request.form.get(
+            'turma_id',
             ''
-        ).strip()
+        )
 
-        professor = request.form.get(
-            'professor',
-            ''
-        ).strip()
+        turma = None
+
+        if turma_id:
+
+            turma = Turma.query.get(
+                turma_id
+            )
+
+            if not turma:
+
+                flash(
+                    'Selecione uma turma válida.',
+                    'warning'
+                )
+
+                return redirect(request.url)
 
         foto = request.files.get('foto')
 
@@ -1283,8 +1299,7 @@ def cadastrar_aluno():
             faixa=faixa,
             mensalidade=mensalidade_convertida,
             foto=nome_arquivo,
-            turma=turma,
-            professor=professor
+            turma_id=turma.id if turma else None
         )
 
         db.session.add(novo_aluno)
@@ -1299,7 +1314,8 @@ def cadastrar_aluno():
         return redirect('/alunos')
 
     return render_template(
-        'cadastrar_aluno.html'
+        'cadastrar_aluno.html',
+        turmas=turmas
     )
 
 
@@ -1312,6 +1328,10 @@ def cadastrar_aluno():
 def editar_aluno(id):
 
     aluno = Aluno.query.get_or_404(id)
+
+    turmas = Turma.query.order_by(
+        Turma.nome.asc()
+    ).all()
 
     if request.method == 'POST':
 
@@ -1393,15 +1413,27 @@ def editar_aluno(id):
 
             return redirect(request.url)
 
-        turma_form = request.form.get(
-            'turma',
+        turma_id = request.form.get(
+            'turma_id',
             ''
-        ).strip()
+        )
 
-        professor_form = request.form.get(
-            'professor',
-            ''
-        ).strip()
+        turma = None
+
+        if turma_id:
+
+            turma = Turma.query.get(
+                turma_id
+            )
+
+            if not turma:
+
+                flash(
+                    'Selecione uma turma válida.',
+                    'warning'
+                )
+
+                return redirect(request.url)
 
         aluno.nome = nome_form
         aluno.nascimento = nascimento_form
@@ -1414,8 +1446,7 @@ def editar_aluno(id):
         aluno.whatsapp = whatsapp_form
         aluno.faixa = faixa_form
         aluno.mensalidade = mensalidade_convertida
-        aluno.turma = turma_form
-        aluno.professor = professor_form
+        aluno.turma_id = turma.id if turma else None
 
         foto = request.files.get('foto')
 
@@ -1480,7 +1511,8 @@ def editar_aluno(id):
 
     return render_template(
         'editar_aluno.html',
-        aluno=aluno
+        aluno=aluno,
+        turmas=turmas
     )
 
 

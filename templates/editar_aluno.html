@@ -195,7 +195,7 @@
 
                     </div>
 
-                    <!-- TURMA -->
+                    <!-- TURMA CADASTRADA -->
 
                     <div class="col-md-6">
 
@@ -203,67 +203,60 @@
                             Turma
                         </label>
 
-                        <input
-                            type="text"
-                            name="turma"
-                            value="{{ aluno.turma or '' }}"
-                            class="form-control form-control-lg"
-                            placeholder="Ex: Infantil 18h"
-                        >
-
-                        <small class="text-muted">
-                            Exemplo: Infantil 18h, Adultos 19h, Competição
-                        </small>
-
-                    </div>
-
-                    <!-- PROFESSOR -->
-
-                    <div class="col-md-6">
-
-                        <label class="form-label fw-semibold">
-                            Professor
-                        </label>
-
                         <select
-                            name="professor"
+                            name="turma_id"
                             class="form-select form-select-lg"
                         >
 
                             <option
                                 value=""
-                                {% if not aluno.professor %}
+                                {% if not aluno.turma_id %}
                                     selected
                                 {% endif %}
                             >
-                                Selecione
+                                Sem turma definida
                             </option>
 
-                            <option
-                                value="Diego"
-                                {% if aluno.professor == 'Diego' %}
-                                    selected
-                                {% endif %}
-                            >
-                                Diego
-                            </option>
+                            {% for turma in turmas %}
 
-                            <option
-                                value="Robyson"
-                                {% if aluno.professor == 'Robyson' %}
-                                    selected
-                                {% endif %}
-                            >
-                                Robyson
-                            </option>
+                                <option
+                                    value="{{ turma.id }}"
+                                    {% if aluno.turma_id == turma.id %}
+                                        selected
+                                    {% endif %}
+                                >
+
+                                    {{ turma.nome }}
+
+                                    {% if turma.professor %}
+                                        — Prof. {{ turma.professor.nome }}
+                                    {% endif %}
+
+                                </option>
+
+                            {% endfor %}
 
                         </select>
+
+                        {% if turmas|length == 0 %}
+
+                            <small class="text-danger">
+                                Nenhuma turma cadastrada. Cadastre uma turma antes, se desejar vincular o aluno.
+                            </small>
+
+                        {% else %}
+
+                            <small class="text-muted">
+                                O professor será definido automaticamente pela turma escolhida.
+                            </small>
+
+                        {% endif %}
 
                     </div>
 
                     <!-- FAIXA -->
 
-                    <div class="col-md-3">
+                    <div class="col-md-6">
 
                         <label class="form-label fw-semibold">
                             Faixa
@@ -317,7 +310,7 @@
 
                     <!-- MENSALIDADE -->
 
-                    <div class="col-md-3">
+                    <div class="col-md-6">
 
                         <label class="form-label fw-semibold">
                             Mensalidade
