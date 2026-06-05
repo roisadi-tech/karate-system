@@ -1552,21 +1552,23 @@ def carteirinha_aluno(id):
     campo_largura = int(largura * 0.175)
     campo_altura = int(altura * 0.035)
 
-    # AJUSTES DE POSIÇÃO
-    nome_y = int(altura * 0.350)         # mais para baixo
-    faixa_y = int(altura * 0.438)        # mais para baixo
-    responsavel_y = int(altura * 0.512)  # mantém
-    nascimento_y = int(altura * 0.605)   # mantém
-    whatsapp_y = int(altura * 0.690)     # mantém
-    matricula_y = int(altura * 0.768)    # um pouco mais para cima
-    validade_y = int(altura * 0.850)     # um pouco mais para cima
+    nome_y = int(altura * 0.350)
+    faixa_y = int(altura * 0.438)
+    responsavel_y = int(altura * 0.512)
+    nascimento_y = int(altura * 0.605)
+    whatsapp_y = int(altura * 0.690)
+    matricula_y = int(altura * 0.768)
+    validade_y = int(altura * 0.850)
+
+    # FOTO DO ALUNO
 
     foto_x = int(largura * 0.315)
     foto_y = int(altura * 0.420)
     foto_largura = int(largura * 0.145)
     foto_altura = int(altura * 0.280)
- 
-    # QR CODE MAIS PARA CIMA E PARA A ESQUERDA
+
+    # QR CODE NO VERSO
+
     qr_x = int(largura * 0.795)
     qr_y = int(altura * 0.285)
     qr_tamanho = int(altura * 0.185)
@@ -1684,7 +1686,7 @@ def carteirinha_aluno(id):
     # QR CODE
     # =====================================
 
-    dados_qr = request.url_root.rstrip('/') + f'/validar_carteirinha/{aluno.id}'
+    dados_qr = f'https://karate-system.onrender.com/validar-carteirinha/{aluno.id}'
 
     qr_img = criar_qr_code(
         dados_qr,
@@ -1695,7 +1697,6 @@ def carteirinha_aluno(id):
         qr_img,
         (qr_x, qr_y)
     )
-
 
     # =====================================
     # CONTATO DA ACADEMIA NO VERSO
@@ -1731,7 +1732,6 @@ def carteirinha_aluno(id):
         font=fonte_contato,
         fill=branco
     )
-
 
     # =====================================
     # JUNTA A CAMADA COM A BASE
@@ -1817,6 +1817,7 @@ def carteirinha_aluno(id):
 # =====================================
 
 @app.route('/validar_carteirinha/<int:id>')
+@app.route('/validar-carteirinha/<int:id>')
 def validar_carteirinha(id):
 
     aluno = Aluno.query.get_or_404(id)
@@ -1833,8 +1834,6 @@ def validar_carteirinha(id):
     presenca_ja_existia = False
     usuario_logado = False
 
-    # Só registra presença se o leitor estiver usando
-    # um navegador logado no sistema.
     if 'usuario' in session:
 
         usuario_logado = True
