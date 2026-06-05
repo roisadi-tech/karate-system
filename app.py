@@ -4580,6 +4580,213 @@ def excluir_usuario(id):
 
 
 # =====================================
+# PROFESSORES
+# =====================================
+
+@app.route('/professores')
+@login_obrigatorio
+@admin_obrigatorio
+def professores():
+
+    lista_professores = Professor.query.order_by(
+        Professor.nome.asc()
+    ).all()
+
+    return render_template(
+        'professores.html',
+        professores=lista_professores
+    )
+
+
+# =====================================
+# CADASTRAR PROFESSOR
+# =====================================
+
+@app.route('/cadastrar_professor', methods=['GET', 'POST'])
+@login_obrigatorio
+@admin_obrigatorio
+def cadastrar_professor():
+
+    if request.method == 'POST':
+
+        nome = formatar_nome(
+            request.form.get('nome', '')
+        )
+
+        telefone = limpar_whatsapp(
+            request.form.get('telefone', '')
+        )
+
+        observacao = request.form.get(
+            'observacao',
+            ''
+        ).strip()
+
+        if not nome:
+
+            flash(
+                'Informe o nome do professor.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        professor_existente = Professor.query.filter(
+            Professor.nome == nome
+        ).first()
+
+        if professor_existente:
+
+            flash(
+                'Já existe um professor cadastrado com este nome.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        if telefone and not validar_whatsapp(telefone):
+
+            flash(
+                'Informe um telefone válido com DDD. Exemplo: 88999998888.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        novo_professor = Professor(
+            nome=nome,
+            telefone=telefone,
+            observacao=observacao
+        )
+
+        db.session.add(novo_professor)
+        db.session.commit()
+
+        flash(
+            'Professor cadastrado com sucesso.',
+            'success'
+        )
+
+        return redirect('/professores')
+
+    return render_template(
+        'cadastrar_professor.html'
+    )
+
+
+# =====================================
+# EDITAR PROFESSOR
+# =====================================
+
+@app.route('/editar_professor/<int:id>', methods=['GET', 'POST'])
+@login_obrigatorio
+@admin_obrigatorio
+def editar_professor(id):
+
+    professor = Professor.query.get_or_404(id)
+
+    if request.method == 'POST':
+
+        nome = formatar_nome(
+            request.form.get('nome', '')
+        )
+
+        telefone = limpar_whatsapp(
+            request.form.get('telefone', '')
+        )
+
+        observacao = request.form.get(
+            'observacao',
+            ''
+        ).strip()
+
+        if not nome:
+
+            flash(
+                'Informe o nome do professor.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        professor_existente = Professor.query.filter(
+            Professor.nome == nome,
+            Professor.id != id
+        ).first()
+
+        if professor_existente:
+
+            flash(
+                'Já existe outro professor cadastrado com este nome.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        if telefone and not validar_whatsapp(telefone):
+
+            flash(
+                'Informe um telefone válido com DDD. Exemplo: 88999998888.',
+                'warning'
+            )
+
+            return redirect(request.url)
+
+        professor.nome = nome
+        professor.telefone = telefone
+        professor.observacao = observacao
+
+        db.session.commit()
+
+        flash(
+            'Professor atualizado com sucesso.',
+            'success'
+        )
+
+        return redirect('/professores')
+
+    return render_template(
+        'editar_professor.html',
+        professor=professor
+    )
+
+
+# =====================================
+# EXCLUIR PROFESSOR
+# =====================================
+
+@app.route('/excluir_professor/<int:id>')
+@login_obrigatorio
+@admin_obrigatorio
+def excluir_professor(id):
+
+    professor = Professor.query.get_or_404(id)
+
+    turmas_vinculadas = Turma.query.filter_by(
+        professor_id=professor.id
+    ).count()
+
+    if turmas_vinculadas > 0:
+
+        flash(
+            'Não é possível excluir este professor, pois ele possui turmas vinculadas.',
+            'danger'
+        )
+
+        return redirect('/professores')
+
+    db.session.delete(professor)
+    db.session.commit()
+
+    flash(
+        'Professor excluído com sucesso.',
+        'success'
+    )
+
+    return redirect('/professores')
+
+
+# =====================================
 # ATUALIZAR BANCO - TURMAS E PROFESSORES
 # =====================================
 

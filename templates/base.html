@@ -137,133 +137,133 @@
 
         .usuario-box {
 
-    background: rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.07);
 
-    border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.08);
 
-    border-radius: 14px;
+            border-radius: 14px;
 
-    padding: 10px 12px;
+            padding: 10px 12px;
 
-    margin-bottom: 18px;
+            margin-bottom: 18px;
 
-    color: white;
+            color: white;
 
-    display: flex;
+            display: flex;
 
-    align-items: center;
+            align-items: center;
 
-    gap: 10px;
+            gap: 10px;
 
-}
+        }
 
-.usuario-avatar {
+        .usuario-avatar {
 
-    width: 38px;
+            width: 38px;
 
-    height: 38px;
+            height: 38px;
 
-    border-radius: 12px;
+            border-radius: 12px;
 
-    background: rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.12);
 
-    display: flex;
+            display: flex;
 
-    align-items: center;
+            align-items: center;
 
-    justify-content: center;
+            justify-content: center;
 
-    flex-shrink: 0;
+            flex-shrink: 0;
 
-    font-size: 18px;
+            font-size: 18px;
 
-}
+        }
 
-.usuario-info {
+        .usuario-info {
 
-    flex: 1;
+            flex: 1;
 
-    min-width: 0;
+            min-width: 0;
 
-}
+        }
 
-.usuario-box small {
+        .usuario-box small {
 
-    color: #cbd5e1;
+            color: #cbd5e1;
 
-    font-size: 11px;
+            font-size: 11px;
 
-    display: block;
+            display: block;
 
-    line-height: 1.1;
+            line-height: 1.1;
 
-}
+        }
 
-.usuario-box .nome {
+        .usuario-box .nome {
 
-    font-size: 15px;
+            font-size: 15px;
 
-    font-weight: 600;
+            font-weight: 600;
 
-    white-space: nowrap;
+            white-space: nowrap;
 
-    overflow: hidden;
+            overflow: hidden;
 
-    text-overflow: ellipsis;
+            text-overflow: ellipsis;
 
-    line-height: 1.2;
+            line-height: 1.2;
 
-}
+        }
 
-.usuario-tipo {
+        .usuario-tipo {
 
-    margin-top: 5px;
+            margin-top: 5px;
 
-}
+        }
 
         .badge-admin {
 
-    background: #dc3545;
+            background: #dc3545;
 
-    padding: 5px 9px;
+            padding: 5px 9px;
 
-    border-radius: 9px;
+            border-radius: 9px;
 
-    color: white;
+            color: white;
 
-    font-size: 11px;
+            font-size: 11px;
 
-    font-weight: 600;
+            font-weight: 600;
 
-    display: inline-flex;
+            display: inline-flex;
 
-    align-items: center;
+            align-items: center;
 
-    gap: 4px;
+            gap: 4px;
 
-}
+        }
 
-.badge-professor {
+        .badge-professor {
 
-    background: #0d6efd;
+            background: #0d6efd;
 
-    padding: 5px 9px;
+            padding: 5px 9px;
 
-    border-radius: 9px;
+            border-radius: 9px;
 
-    color: white;
+            color: white;
 
-    font-size: 11px;
+            font-size: 11px;
 
-    font-weight: 600;
+            font-weight: 600;
 
-    display: inline-flex;
+            display: inline-flex;
 
-    align-items: center;
+            align-items: center;
 
-    gap: 4px;
+            gap: 4px;
 
-}
+        }
 
         .menu-label {
 
@@ -609,55 +609,55 @@
 
     <!-- USUÁRIO -->
 
-<div class="usuario-box">
+    <div class="usuario-box">
 
-    <div class="usuario-avatar">
-
-        {% if session.tipo == 'admin' %}
-
-            <i class="bi bi-shield-lock-fill"></i>
-
-        {% else %}
-
-            <i class="bi bi-person-badge-fill"></i>
-
-        {% endif %}
-
-    </div>
-
-    <div class="usuario-info">
-
-        <small>
-            Logado como
-        </small>
-
-        <div class="nome">
-
-            {{ session.usuario }}
-
-        </div>
-
-        <div class="usuario-tipo">
+        <div class="usuario-avatar">
 
             {% if session.tipo == 'admin' %}
 
-                <span class="badge-admin">
-                    ADMIN
-                </span>
+                <i class="bi bi-shield-lock-fill"></i>
 
             {% else %}
 
-                <span class="badge-professor">
-                    PROFESSOR
-                </span>
+                <i class="bi bi-person-badge-fill"></i>
 
             {% endif %}
 
         </div>
 
-    </div>
+        <div class="usuario-info">
 
-</div>
+            <small>
+                Logado como
+            </small>
+
+            <div class="nome">
+
+                {{ session.usuario }}
+
+            </div>
+
+            <div class="usuario-tipo">
+
+                {% if session.tipo == 'admin' %}
+
+                    <span class="badge-admin">
+                        ADMIN
+                    </span>
+
+                {% else %}
+
+                    <span class="badge-professor">
+                        PROFESSOR
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
 
     <!-- MENU -->
 
@@ -673,6 +673,26 @@
         >
             <i class="bi bi-speedometer2"></i>
             Dashboard
+        </a>
+
+        <div class="menu-label">
+            Turmas
+        </div>
+
+        <a
+            href="/turmas"
+            class="nav-link {% if request.path.startswith('/turmas') or request.path.startswith('/turma/') or request.path.startswith('/cadastrar_turma') or request.path.startswith('/editar_turma') %}active{% endif %}"
+        >
+            <i class="bi bi-diagram-3-fill"></i>
+            Turmas
+        </a>
+
+        <a
+            href="/professores"
+            class="nav-link {% if request.path.startswith('/professores') or request.path.startswith('/cadastrar_professor') or request.path.startswith('/editar_professor') %}active{% endif %}"
+        >
+            <i class="bi bi-person-badge-fill"></i>
+            Professores
         </a>
 
         <a
@@ -724,24 +744,24 @@
         </a>
 
         <div class="menu-label">
-    Gestão
-</div>
+            Gestão
+        </div>
 
-<a
-    href="/aniversariantes"
-    class="nav-link {% if request.path.startswith('/aniversariantes') %}active{% endif %}"
->
-    <i class="bi bi-gift-fill"></i>
-    Aniversariantes
-</a>
+        <a
+            href="/aniversariantes"
+            class="nav-link {% if request.path.startswith('/aniversariantes') %}active{% endif %}"
+        >
+            <i class="bi bi-gift-fill"></i>
+            Aniversariantes
+        </a>
 
-<a
-    href="/exames"
-    class="nav-link {% if request.path.startswith('/exames') %}active{% endif %}"
->
-    <i class="bi bi-award"></i>
-    Exames
-</a>
+        <a
+            href="/exames"
+            class="nav-link {% if request.path.startswith('/exames') %}active{% endif %}"
+        >
+            <i class="bi bi-award"></i>
+            Exames
+        </a>
 
         <a
             href="/relatorios"
@@ -753,25 +773,25 @@
 
         {% if session.tipo == 'admin' %}
 
-        <div class="menu-label">
-            Administração
-        </div>
+            <div class="menu-label">
+                Administração
+            </div>
 
-        <a
-            href="/usuarios"
-            class="nav-link {% if request.path.startswith('/usuarios') or request.path.startswith('/cadastrar_usuario') or request.path.startswith('/editar_usuario') %}active{% endif %}"
-        >
-            <i class="bi bi-person-gear"></i>
-            Usuários
-        </a>
+            <a
+                href="/usuarios"
+                class="nav-link {% if request.path.startswith('/usuarios') or request.path.startswith('/cadastrar_usuario') or request.path.startswith('/editar_usuario') %}active{% endif %}"
+            >
+                <i class="bi bi-person-gear"></i>
+                Usuários
+            </a>
 
-        <a
-            href="/backup"
-            class="nav-link {% if request.path.startswith('/backup') %}active{% endif %}"
-        >
-            <i class="bi bi-download"></i>
-            Backup
-        </a>
+            <a
+                href="/backup"
+                class="nav-link {% if request.path.startswith('/backup') %}active{% endif %}"
+            >
+                <i class="bi bi-download"></i>
+                Backup
+            </a>
 
         {% endif %}
 
