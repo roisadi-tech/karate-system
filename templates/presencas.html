@@ -13,12 +13,51 @@
         </h2>
 
         <p class="text-muted mb-0">
-            Registre, filtre e acompanhe a frequência dos alunos
+            Registre, filtre e acompanhe a frequência dos alunos por turma
         </p>
 
     </div>
 
+    {% if turma_selecionada %}
+
+        <a
+            href="/turma/{{ turma_selecionada.id }}"
+            class="btn btn-dark"
+        >
+            <i class="bi bi-arrow-left"></i>
+            Voltar para Turma
+        </a>
+
+    {% endif %}
+
 </div>
+
+<!-- AVISO DA TURMA SELECIONADA -->
+
+{% if turma_selecionada %}
+
+    <div class="alert alert-info mb-4">
+
+        <i class="bi bi-diagram-3-fill"></i>
+
+        Registrando presenças da turma:
+
+        <strong>
+            {{ turma_selecionada.nome }}
+        </strong>
+
+        {% if turma_selecionada.professor %}
+
+            — Professor:
+            <strong>
+                {{ turma_selecionada.professor.nome }}
+            </strong>
+
+        {% endif %}
+
+    </div>
+
+{% endif %}
 
 <!-- CARDS -->
 
@@ -128,6 +167,94 @@
 
 </div>
 
+<!-- ESCOLHER TURMA -->
+
+<div class="card border-0 shadow-sm p-4 mb-4 rounded-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+
+        <div>
+
+            <h4 class="fw-bold mb-1">
+                Selecionar Turma
+            </h4>
+
+            <small class="text-muted">
+                Escolha uma turma para registrar presença apenas dos alunos dela
+            </small>
+
+        </div>
+
+    </div>
+
+    <form method="GET">
+
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-8">
+
+                <label class="form-label fw-semibold">
+                    Turma
+                </label>
+
+                <select
+                    name="turma_id"
+                    class="form-select form-select-lg"
+                >
+
+                    <option value="">
+                        Todas as turmas
+                    </option>
+
+                    {% for turma in turmas %}
+
+                        <option
+                            value="{{ turma.id }}"
+                            {% if filtro_turma|string == turma.id|string %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ turma.nome }}
+
+                            {% if turma.professor %}
+                                — Prof. {{ turma.professor.nome }}
+                            {% endif %}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div class="col-md-2 d-grid">
+
+                <button class="btn btn-dark btn-lg">
+
+                    <i class="bi bi-funnel-fill"></i>
+                    Selecionar
+
+                </button>
+
+            </div>
+
+            <div class="col-md-2 d-grid">
+
+                <a
+                    href="/presencas"
+                    class="btn btn-outline-secondary btn-lg"
+                >
+                    Limpar
+                </a>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
 <!-- FORMULÁRIO -->
 
 <div class="card border-0 shadow-sm p-4 mb-4 rounded-4">
@@ -150,6 +277,12 @@
 
     <form method="POST">
 
+        <input
+            type="hidden"
+            name="turma_id"
+            value="{{ filtro_turma }}"
+        >
+
         <div class="row g-3">
 
             <!-- ALUNO -->
@@ -169,7 +302,13 @@
                 >
 
                     <option value="">
-                        Selecione um aluno
+
+                        {% if turma_selecionada %}
+                            Selecione um aluno da turma
+                        {% else %}
+                            Selecione um aluno
+                        {% endif %}
+
                     </option>
 
                     {% for aluno in alunos %}
@@ -178,11 +317,25 @@
 
                         {{ aluno.nome }}
 
+                        {% if aluno.turma_relacao %}
+                            — {{ aluno.turma_relacao.nome }}
+                        {% else %}
+                            — Sem turma
+                        {% endif %}
+
                     </option>
 
                     {% endfor %}
 
                 </select>
+
+                {% if turma_selecionada and alunos|length == 0 %}
+
+                    <small class="text-danger">
+                        Esta turma ainda não possui alunos vinculados.
+                    </small>
+
+                {% endif %}
 
             </div>
 
@@ -269,7 +422,7 @@
 
             <small class="text-muted">
 
-                Filtre por aluno, data ou status
+                Filtre por turma, aluno, data ou status
 
             </small>
 
@@ -287,9 +440,45 @@
 
         <div class="row g-3 align-items-end">
 
+            <!-- TURMA -->
+
+            <div class="col-md-3">
+
+                <label class="form-label fw-semibold">
+
+                    Turma
+
+                </label>
+
+                <select
+                    name="turma_id"
+                    class="form-select"
+                >
+
+                    <option value="">
+                        Todas
+                    </option>
+
+                    {% for turma in turmas %}
+
+                        <option
+                            value="{{ turma.id }}"
+                            {% if filtro_turma|string == turma.id|string %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ turma.nome }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
             <!-- ALUNO -->
 
-            <div class="col-md-4">
+            <div class="col-md-3">
 
                 <label class="form-label fw-semibold">
 
@@ -327,7 +516,7 @@
 
             <!-- DATA -->
 
-            <div class="col-md-3">
+            <div class="col-md-2">
 
                 <label class="form-label fw-semibold">
 
@@ -346,7 +535,7 @@
 
             <!-- STATUS -->
 
-            <div class="col-md-3">
+            <div class="col-md-2">
 
                 <label class="form-label fw-semibold">
 
@@ -456,6 +645,8 @@
 
                     <th>Aluno</th>
 
+                    <th>Turma</th>
+
                     <th>Data</th>
 
                     <th>Status</th>
@@ -531,6 +722,29 @@
 
                     </td>
 
+                    <!-- TURMA -->
+
+                    <td>
+
+                        {% if presenca.aluno.turma_relacao %}
+
+                            <a
+                                href="/turma/{{ presenca.aluno.turma_relacao.id }}"
+                                class="badge bg-info text-dark text-decoration-none p-2"
+                            >
+                                {{ presenca.aluno.turma_relacao.nome }}
+                            </a>
+
+                        {% else %}
+
+                            <span class="text-muted">
+                                Sem turma
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
                     <!-- DATA -->
 
                     <td>
@@ -573,50 +787,50 @@
 
                     <!-- AÇÕES -->
 
-<td class="text-center">
+                    <td class="text-center">
 
-    <div class="d-flex gap-2 justify-content-center flex-wrap">
+                        <div class="d-flex gap-2 justify-content-center flex-wrap">
 
-        <!-- PERFIL -->
+                            <!-- PERFIL -->
 
-        <a
-            href="/aluno/{{ presenca.aluno.id }}"
-            class="btn btn-dark btn-sm rounded-3"
-            title="Ver perfil do aluno"
-        >
+                            <a
+                                href="/aluno/{{ presenca.aluno.id }}"
+                                class="btn btn-dark btn-sm rounded-3"
+                                title="Ver perfil do aluno"
+                            >
 
-            <i class="bi bi-person-vcard-fill"></i>
+                                <i class="bi bi-person-vcard-fill"></i>
 
-        </a>
+                            </a>
 
-        <!-- EDITAR -->
+                            <!-- EDITAR -->
 
-        <a
-            href="/editar_presenca/{{ presenca.id }}"
-            class="btn btn-warning btn-sm rounded-3 text-white"
-            title="Editar presença"
-        >
+                            <a
+                                href="/editar_presenca/{{ presenca.id }}"
+                                class="btn btn-warning btn-sm rounded-3 text-white"
+                                title="Editar presença"
+                            >
 
-            <i class="bi bi-pencil-fill"></i>
+                                <i class="bi bi-pencil-fill"></i>
 
-        </a>
+                            </a>
 
-        <!-- EXCLUIR -->
+                            <!-- EXCLUIR -->
 
-        <a
-            href="/excluir_presenca/{{ presenca.id }}"
-            class="btn btn-danger btn-sm rounded-3"
-            title="Excluir presença"
-            onclick="return confirm('Deseja realmente excluir este registro de presença?')"
-        >
+                            <a
+                                href="/excluir_presenca/{{ presenca.id }}"
+                                class="btn btn-danger btn-sm rounded-3"
+                                title="Excluir presença"
+                                onclick="return confirm('Deseja realmente excluir este registro de presença?')"
+                            >
 
-            <i class="bi bi-trash-fill"></i>
+                                <i class="bi bi-trash-fill"></i>
 
-        </a>
+                            </a>
 
-    </div>
+                        </div>
 
-</td>
+                    </td>
 
                 </tr>
 
@@ -627,7 +841,7 @@
                 <tr>
 
                     <td
-                        colspan="4"
+                        colspan="5"
                         class="text-center py-5"
                     >
 

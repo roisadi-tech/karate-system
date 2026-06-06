@@ -2224,12 +2224,20 @@ def presencas():
             request.form['aluno_id']
         )
 
+        turma_retorno = request.form.get(
+            'turma_id',
+            ''
+        )
+
         if not aluno:
 
             flash(
                 'Aluno inválido. Selecione um aluno cadastrado.',
                 'warning'
             )
+
+            if turma_retorno:
+                return redirect(f'/presencas?turma_id={turma_retorno}')
 
             return redirect('/presencas')
 
@@ -2242,6 +2250,9 @@ def presencas():
                 'warning'
             )
 
+            if turma_retorno:
+                return redirect(f'/presencas?turma_id={turma_retorno}')
+
             return redirect('/presencas')
 
         status_form = request.form['status']
@@ -2252,6 +2263,9 @@ def presencas():
                 'Status de presença inválido.',
                 'warning'
             )
+
+            if turma_retorno:
+                return redirect(f'/presencas?turma_id={turma_retorno}')
 
             return redirect('/presencas')
 
@@ -2266,6 +2280,9 @@ def presencas():
                 'Este aluno já possui presença registrada nesta data.',
                 'warning'
             )
+
+            if turma_retorno:
+                return redirect(f'/presencas?turma_id={turma_retorno}')
 
             return redirect('/presencas')
 
@@ -2285,15 +2302,31 @@ def presencas():
             'success'
         )
 
+        if turma_retorno:
+            return redirect(f'/presencas?turma_id={turma_retorno}')
+
         return redirect('/presencas')
 
-    alunos = Aluno.query.order_by(
-        Aluno.nome.asc()
+    filtro_aluno = request.args.get('aluno_id', '').strip()
+    filtro_data = request.args.get('data', '').strip()
+    filtro_status = request.args.get('status', '').strip()
+    filtro_turma = request.args.get('turma_id', '').strip()
+
+    turmas = Turma.query.order_by(
+        Turma.nome.asc()
     ).all()
 
-    filtro_aluno = request.args.get('aluno_id')
-    filtro_data = request.args.get('data')
-    filtro_status = request.args.get('status')
+    query_alunos = Aluno.query
+
+    if filtro_turma:
+
+        query_alunos = query_alunos.filter(
+            Aluno.turma_id == filtro_turma
+        )
+
+    alunos = query_alunos.order_by(
+        Aluno.nome.asc()
+    ).all()
 
     query = Presenca.query
 
@@ -2315,30 +2348,49 @@ def presencas():
             Presenca.status == filtro_status
         )
 
+    if filtro_turma:
+
+        query = query.filter(
+            Presenca.aluno.has(
+                Aluno.turma_id == int(filtro_turma)
+            )
+        )
+
     lista_presencas = query.order_by(
         Presenca.data.desc()
     ).all()
 
-    total_registros = Presenca.query.count()
+    total_registros = query.count()
 
-    total_presentes = Presenca.query.filter_by(
-        status='PRESENTE'
+    total_presentes = query.filter(
+        Presenca.status == 'PRESENTE'
     ).count()
 
-    total_faltas = Presenca.query.filter_by(
-        status='FALTA'
+    total_faltas = query.filter(
+        Presenca.status == 'FALTA'
     ).count()
+
+    turma_selecionada = None
+
+    if filtro_turma:
+
+        turma_selecionada = Turma.query.get(
+            filtro_turma
+        )
 
     return render_template(
         'presencas.html',
         alunos=alunos,
+        turmas=turmas,
         presencas=lista_presencas,
         total_registros=total_registros,
         total_presentes=total_presentes,
         total_faltas=total_faltas,
         filtro_aluno=filtro_aluno,
         filtro_data=filtro_data,
-        filtro_status=filtro_status
+        filtro_status=filtro_status,
+        filtro_turma=filtro_turma,
+        turma_selecionada=turma_selecionada
     )
 
 
