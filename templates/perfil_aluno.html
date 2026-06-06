@@ -179,16 +179,19 @@
                 <p>
                     <strong>Turma:</strong>
 
-                    {% if aluno.turma %}
+                    {% if aluno.turma_relacao %}
 
-                        <span class="badge bg-info text-dark">
-                            {{ aluno.turma }}
-                        </span>
+                        <a
+                            href="/turma/{{ aluno.turma_relacao.id }}"
+                            class="badge bg-info text-dark text-decoration-none"
+                        >
+                            {{ aluno.turma_relacao.nome }}
+                        </a>
 
                     {% else %}
 
                         <span class="text-muted">
-                            Não informado
+                            Sem turma
                         </span>
 
                     {% endif %}
@@ -198,10 +201,10 @@
                 <p>
                     <strong>Professor:</strong>
 
-                    {% if aluno.professor %}
+                    {% if aluno.turma_relacao and aluno.turma_relacao.professor %}
 
                         <span class="badge bg-dark">
-                            {{ aluno.professor }}
+                            {{ aluno.turma_relacao.professor.nome }}
                         </span>
 
                     {% else %}
