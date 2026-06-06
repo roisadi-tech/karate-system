@@ -1629,24 +1629,6 @@ def gerar_arte_carteirinha(aluno):
 
     validade = f'31/12/{date.today().year}'
 
-    # TURMA E PROFESSOR PELO NOVO MODELO
-
-    if aluno.turma_relacao:
-
-        turma_nome = aluno.turma_relacao.nome or 'Não informado'
-
-    else:
-
-        turma_nome = 'Sem turma'
-
-    if aluno.turma_relacao and aluno.turma_relacao.professor:
-
-        professor_nome = aluno.turma_relacao.professor.nome or 'Não informado'
-
-    else:
-
-        professor_nome = 'Não informado'
-
     # =====================================
     # FONTES
     # =====================================
@@ -1671,16 +1653,6 @@ def gerar_arte_carteirinha(aluno):
         int(largura * 0.18),
         tamanho_inicial=20,
         tamanho_min=14,
-        negrito=False
-    )
-
-    fonte_verso_titulo = carregar_fonte(
-        18,
-        negrito=True
-    )
-
-    fonte_verso_valor = carregar_fonte(
-        17,
         negrito=False
     )
 
@@ -1836,67 +1808,6 @@ def gerar_arte_carteirinha(aluno):
     base.paste(
         qr_img,
         (qr_x, qr_y)
-    )
-
-    # =====================================
-    # TURMA E PROFESSOR NO VERSO
-    # =====================================
-
-    dados_x = int(largura * 0.555)
-
-    turma_titulo_y = int(altura * 0.610)
-    turma_valor_y = int(altura * 0.645)
-
-    professor_titulo_y = int(altura * 0.685)
-    professor_valor_y = int(altura * 0.720)
-
-    turma_texto = turma_nome
-    professor_texto = professor_nome
-
-    fonte_turma = ajustar_fonte(
-        draw,
-        turma_texto,
-        int(largura * 0.250),
-        tamanho_inicial=17,
-        tamanho_min=12,
-        negrito=False
-    )
-
-    fonte_professor = ajustar_fonte(
-        draw,
-        professor_texto,
-        int(largura * 0.250),
-        tamanho_inicial=17,
-        tamanho_min=12,
-        negrito=False
-    )
-
-    draw.text(
-        (dados_x, turma_titulo_y),
-        'Turma:',
-        font=fonte_verso_titulo,
-        fill=branco
-    )
-
-    draw.text(
-        (dados_x, turma_valor_y),
-        turma_texto,
-        font=fonte_turma,
-        fill=branco
-    )
-
-    draw.text(
-        (dados_x, professor_titulo_y),
-        'Professor:',
-        font=fonte_verso_titulo,
-        fill=branco
-    )
-
-    draw.text(
-        (dados_x, professor_valor_y),
-        professor_texto,
-        font=fonte_professor,
-        fill=branco
     )
 
     # =====================================
@@ -2097,22 +2008,6 @@ def validar_carteirinha(id):
 
     validade = f'31/12/{date.today().year}'
 
-    if aluno.turma_relacao:
-
-        turma_nome = aluno.turma_relacao.nome or 'Não informado'
-
-    else:
-
-        turma_nome = 'Sem turma'
-
-    if aluno.turma_relacao and aluno.turma_relacao.professor:
-
-        professor_nome = aluno.turma_relacao.professor.nome or 'Não informado'
-
-    else:
-
-        professor_nome = 'Não informado'
-
     presenca_registrada = False
     presenca_ja_existia = False
     usuario_logado = False
@@ -2164,8 +2059,6 @@ def validar_carteirinha(id):
         idade=idade,
         matricula=matricula,
         validade=validade,
-        turma_nome=turma_nome,
-        professor_nome=professor_nome,
         presenca_registrada=presenca_registrada,
         presenca_ja_existia=presenca_ja_existia,
         usuario_logado=usuario_logado
@@ -5166,11 +5059,102 @@ def perfil_turma(id):
         Aluno.nome.asc()
     ).all()
 
+    alunos_disponiveis = Aluno.query.filter(
+        (Aluno.turma_id == None) | (Aluno.turma_id != turma.id)
+    ).order_by(
+        Aluno.nome.asc()
+    ).all()
+
     return render_template(
         'perfil_turma.html',
         turma=turma,
-        alunos=alunos
+        alunos=alunos,
+        alunos_disponiveis=alunos_disponiveis
     )
+
+
+# =====================================
+# ADICIONAR ALUNO À TURMA
+# =====================================
+
+@app.route('/turma/<int:turma_id>/adicionar_aluno', methods=['POST'])
+@login_obrigatorio
+@admin_obrigatorio
+def adicionar_aluno_turma(turma_id):
+
+    turma = Turma.query.get_or_404(turma_id)
+
+    aluno_id = request.form.get(
+        'aluno_id',
+        ''
+    )
+
+    if not aluno_id:
+
+        flash(
+            'Selecione um aluno para adicionar à turma.',
+            'warning'
+        )
+
+        return redirect(f'/turma/{turma.id}')
+
+    aluno = Aluno.query.get(
+        aluno_id
+    )
+
+    if not aluno:
+
+        flash(
+            'Aluno não encontrado.',
+            'danger'
+        )
+
+        return redirect(f'/turma/{turma.id}')
+
+    aluno.turma_id = turma.id
+
+    db.session.commit()
+
+    flash(
+        f'Aluno {aluno.nome} adicionado à turma {turma.nome}.',
+        'success'
+    )
+
+    return redirect(f'/turma/{turma.id}')
+
+
+# =====================================
+# REMOVER ALUNO DA TURMA
+# =====================================
+
+@app.route('/turma/<int:turma_id>/remover_aluno/<int:aluno_id>')
+@login_obrigatorio
+@admin_obrigatorio
+def remover_aluno_turma(turma_id, aluno_id):
+
+    turma = Turma.query.get_or_404(turma_id)
+
+    aluno = Aluno.query.get_or_404(aluno_id)
+
+    if aluno.turma_id != turma.id:
+
+        flash(
+            'Este aluno não pertence a esta turma.',
+            'warning'
+        )
+
+        return redirect(f'/turma/{turma.id}')
+
+    aluno.turma_id = None
+
+    db.session.commit()
+
+    flash(
+        f'Aluno {aluno.nome} removido da turma {turma.nome}.',
+        'success'
+    )
+
+    return redirect(f'/turma/{turma.id}')
 
 
 # =====================================
