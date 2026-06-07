@@ -2654,6 +2654,125 @@ def frequencia():
 
 
 # =====================================
+# FREQUÊNCIA POR TURMA
+# =====================================
+
+@app.route('/frequencia_turma/<int:id>')
+@login_obrigatorio
+def frequencia_turma(id):
+
+    turma = Turma.query.get_or_404(id)
+
+    alunos = Aluno.query.filter_by(
+        turma_id=turma.id
+    ).order_by(
+        Aluno.nome.asc()
+    ).all()
+
+    data_inicio = request.args.get(
+        'data_inicio',
+        ''
+    ).strip()
+
+    data_fim = request.args.get(
+        'data_fim',
+        ''
+    ).strip()
+
+    dados_frequencia = []
+
+    total_geral_registros = 0
+    total_geral_presentes = 0
+    total_geral_faltas = 0
+
+    for aluno in alunos:
+
+        query = Presenca.query.filter_by(
+            aluno_id=aluno.id
+        )
+
+        if data_inicio:
+
+            query = query.filter(
+                Presenca.data >= data_inicio
+            )
+
+        if data_fim:
+
+            query = query.filter(
+                Presenca.data <= data_fim
+            )
+
+        total_registros = query.count()
+
+        total_presentes = query.filter(
+            Presenca.status == 'PRESENTE'
+        ).count()
+
+        total_faltas = query.filter(
+            Presenca.status == 'FALTA'
+        ).count()
+
+        percentual = 0
+
+        if total_registros > 0:
+
+            percentual = round(
+                (total_presentes / total_registros) * 100,
+                1
+            )
+
+        if percentual >= 75:
+
+            situacao = 'Boa frequência'
+
+        elif percentual >= 50:
+
+            situacao = 'Atenção'
+
+        else:
+
+            situacao = 'Baixa frequência'
+
+        dados_frequencia.append(
+            {
+                'aluno': aluno,
+                'total_registros': total_registros,
+                'total_presentes': total_presentes,
+                'total_faltas': total_faltas,
+                'percentual': percentual,
+                'situacao': situacao
+            }
+        )
+
+        total_geral_registros += total_registros
+        total_geral_presentes += total_presentes
+        total_geral_faltas += total_faltas
+
+    percentual_geral = 0
+
+    if total_geral_registros > 0:
+
+        percentual_geral = round(
+            (total_geral_presentes / total_geral_registros) * 100,
+            1
+        )
+
+    return render_template(
+        'frequencia_turma.html',
+        turma=turma,
+        alunos=alunos,
+        dados_frequencia=dados_frequencia,
+        data_inicio=data_inicio,
+        data_fim=data_fim,
+        total_geral_registros=total_geral_registros,
+        total_geral_presentes=total_geral_presentes,
+        total_geral_faltas=total_geral_faltas,
+        percentual_geral=percentual_geral
+    )
+
+
+# =====================================
 # MENSALIDADES
 # =====================================
 
