@@ -997,6 +997,15 @@ def login():
             session['usuario_id'] = usuario.id
             session['usuario'] = usuario.usuario
             session['tipo'] = usuario.tipo
+            session['professor_id'] = usuario.professor_id
+
+            if usuario.professor:
+
+                session['professor_nome'] = usuario.professor.nome
+
+            else:
+
+                session['professor_nome'] = ''
 
             flash(
                 'Login realizado com sucesso.',
