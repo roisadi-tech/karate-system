@@ -103,6 +103,37 @@
             value="{{ data_chamada }}"
         >
 
+        <div class="d-flex gap-2 flex-wrap mb-4">
+
+    <button
+        type="button"
+        class="btn btn-success"
+        onclick="marcarTodos('PRESENTE')"
+    >
+        <i class="bi bi-check-circle-fill"></i>
+        Marcar todos como PRESENTE
+    </button>
+
+    <button
+        type="button"
+        class="btn btn-danger"
+        onclick="marcarTodos('FALTA')"
+    >
+        <i class="bi bi-x-circle-fill"></i>
+        Marcar todos como FALTA
+    </button>
+
+    <button
+        type="button"
+        class="btn btn-outline-secondary"
+        onclick="limparMarcacoes()"
+    >
+        <i class="bi bi-eraser-fill"></i>
+        Limpar marcações
+    </button>
+
+</div>
+
         <div class="table-responsive">
 
             <table class="table align-middle table-hover">
@@ -286,5 +317,33 @@
     </form>
 
 </div>
+
+<script>
+
+    function marcarTodos(status) {
+
+        const radios = document.querySelectorAll(
+            'input[type="radio"][value="' + status + '"]'
+        );
+
+        radios.forEach(function(radio) {
+            radio.checked = true;
+        });
+
+    }
+
+    function limparMarcacoes() {
+
+        const radios = document.querySelectorAll(
+            'input[type="radio"]'
+        );
+
+        radios.forEach(function(radio) {
+            radio.checked = false;
+        });
+
+    }
+
+</script>
 
 {% endblock %}
