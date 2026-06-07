@@ -2798,6 +2798,11 @@ def mensalidades():
         'todas'
     )
 
+    filtro_turma = request.args.get(
+        'turma_id',
+        ''
+    ).strip()
+
     prefixo_data = f'{ano}-{mes}'
 
     if request.method == 'POST':
@@ -2805,6 +2810,17 @@ def mensalidades():
         aluno = buscar_aluno_valido(
             request.form['aluno_id']
         )
+
+        turma_retorno = request.form.get(
+            'turma_id',
+            ''
+        ).strip()
+
+        url_retorno = f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
+
+        if turma_retorno:
+
+            url_retorno += f'&turma_id={turma_retorno}'
 
         if not aluno:
 
@@ -2814,7 +2830,7 @@ def mensalidades():
             )
 
             return redirect(
-                f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
+                url_retorno
             )
 
         valor_form = converter_mensalidade(
@@ -2829,7 +2845,7 @@ def mensalidades():
             )
 
             return redirect(
-                f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
+                url_retorno
             )
 
         vencimento_form = request.form['vencimento']
@@ -2842,7 +2858,7 @@ def mensalidades():
             )
 
             return redirect(
-                f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
+                url_retorno
             )
 
         status_form = request.form['status']
@@ -2855,7 +2871,7 @@ def mensalidades():
             )
 
             return redirect(
-                f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
+                url_retorno
             )
 
         mensalidade_existente = Mensalidade.query.filter_by(
@@ -2871,7 +2887,7 @@ def mensalidades():
             )
 
             return redirect(
-                f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
+                url_retorno
             )
 
         nova_mensalidade = Mensalidade(
@@ -2894,11 +2910,37 @@ def mensalidades():
         mes_novo = vencimento_form[5:7]
         ano_novo = vencimento_form[0:4]
 
+        url_sucesso = f'/mensalidades?mes={mes_novo}&ano={ano_novo}&filtro=todas'
+
+        if turma_retorno:
+
+            url_sucesso += f'&turma_id={turma_retorno}'
+
         return redirect(
-            f'/mensalidades?mes={mes_novo}&ano={ano_novo}&filtro=todas'
+            url_sucesso
         )
 
-    alunos = Aluno.query.order_by(
+    turmas = Turma.query.order_by(
+        Turma.nome.asc()
+    ).all()
+
+    turma_selecionada = None
+
+    if filtro_turma:
+
+        turma_selecionada = Turma.query.get(
+            filtro_turma
+        )
+
+    query_alunos = Aluno.query
+
+    if filtro_turma:
+
+        query_alunos = query_alunos.filter(
+            Aluno.turma_id == filtro_turma
+        )
+
+    alunos = query_alunos.order_by(
         Aluno.nome.asc()
     ).all()
 
@@ -2907,6 +2949,14 @@ def mensalidades():
     query = Mensalidade.query.filter(
         Mensalidade.vencimento.like(f'{prefixo_data}%')
     )
+
+    if filtro_turma:
+
+        query = query.filter(
+            Mensalidade.aluno.has(
+                Aluno.turma_id == int(filtro_turma)
+            )
+        )
 
     if filtro == 'pagas':
 
@@ -2938,9 +2988,19 @@ def mensalidades():
         Mensalidade.vencimento.asc()
     ).all()
 
-    todas_do_mes = Mensalidade.query.filter(
+    query_todas_do_mes = Mensalidade.query.filter(
         Mensalidade.vencimento.like(f'{prefixo_data}%')
-    ).all()
+    )
+
+    if filtro_turma:
+
+        query_todas_do_mes = query_todas_do_mes.filter(
+            Mensalidade.aluno.has(
+                Aluno.turma_id == int(filtro_turma)
+            )
+        )
+
+    todas_do_mes = query_todas_do_mes.all()
 
     total_registros = len(
         todas_do_mes
@@ -3027,9 +3087,12 @@ def mensalidades():
     return render_template(
         'mensalidades.html',
         alunos=alunos,
+        turmas=turmas,
+        turma_selecionada=turma_selecionada,
         mensalidades=lista,
         hoje=hoje,
         filtro=filtro,
+        filtro_turma=filtro_turma,
         total_registros=total_registros,
         total_pagos=total_pagos,
         total_pendentes=total_pendentes,

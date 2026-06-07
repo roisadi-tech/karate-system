@@ -20,29 +20,29 @@
 
     <div class="d-flex gap-2 flex-wrap">
 
-    <a
-        href="/exportar_mensalidades_excel?mes={{ mes }}&ano={{ ano }}&filtro={{ filtro }}"
-        class="btn btn-primary btn-lg"
-    >
+        <a
+            href="/exportar_mensalidades_excel?mes={{ mes }}&ano={{ ano }}&filtro={{ filtro }}&turma_id={{ filtro_turma }}"
+            class="btn btn-primary btn-lg"
+        >
 
-        <i class="bi bi-file-earmark-excel-fill"></i>
+            <i class="bi bi-file-earmark-excel-fill"></i>
 
-        Exportar Excel
+            Exportar Excel
 
-    </a>
+        </a>
 
-    <a
-        href="/cobrar"
-        class="btn btn-success btn-lg"
-    >
+        <a
+            href="/cobrar"
+            class="btn btn-success btn-lg"
+        >
 
-        <i class="bi bi-whatsapp"></i>
+            <i class="bi bi-whatsapp"></i>
 
-        Cobranças
+            Cobranças
 
-    </a>
+        </a>
 
-</div>
+    </div>
 
 </div>
 
@@ -55,23 +55,17 @@
         <div>
 
             <h4 class="fw-bold mb-1">
-
                 Período Financeiro
-
             </h4>
 
             <small class="text-muted">
-
                 A tela abre automaticamente no mês atual
-
             </small>
 
         </div>
 
         <span class="badge bg-dark p-2">
-
             {{ nome_mes }} / {{ ano }}
-
         </span>
 
     </div>
@@ -80,7 +74,7 @@
 
         <div class="row g-3 align-items-end">
 
-            <div class="col-md-4">
+            <div class="col-md-3">
 
                 <label class="form-label fw-semibold">
                     Mês
@@ -103,7 +97,7 @@
 
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-2">
 
                 <label class="form-label fw-semibold">
                     Ano
@@ -127,6 +121,42 @@
             </div>
 
             <div class="col-md-3">
+
+                <label class="form-label fw-semibold">
+                    Turma
+                </label>
+
+                <select
+                    name="turma_id"
+                    class="form-select form-select-lg"
+                >
+
+                    <option value="">
+                        Todas as turmas
+                    </option>
+
+                    {% for turma in turmas %}
+
+                        <option
+                            value="{{ turma.id }}"
+                            {% if filtro_turma|string == turma.id|string %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ turma.nome }}
+
+                            {% if turma.professor %}
+                                — Prof. {{ turma.professor.nome }}
+                            {% endif %}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div class="col-md-2">
 
                 <label class="form-label fw-semibold">
                     Status
@@ -178,6 +208,34 @@
     </form>
 
 </div>
+
+<!-- AVISO DA TURMA SELECIONADA -->
+
+{% if turma_selecionada %}
+
+<div class="alert alert-info mb-4">
+
+    <i class="bi bi-diagram-3-fill"></i>
+
+    Exibindo mensalidades da turma:
+
+    <strong>
+        {{ turma_selecionada.nome }}
+    </strong>
+
+    {% if turma_selecionada.professor %}
+
+        — Professor:
+
+        <strong>
+            {{ turma_selecionada.professor.nome }}
+        </strong>
+
+    {% endif %}
+
+</div>
+
+{% endif %}
 
 <!-- RESUMO FINANCEIRO DO MÊS -->
 
@@ -472,6 +530,12 @@
 
     <form method="POST">
 
+        <input
+            type="hidden"
+            name="turma_id"
+            value="{{ filtro_turma }}"
+        >
+
         <div class="row g-3">
 
             <!-- ALUNO -->
@@ -500,11 +564,25 @@
 
                         {{ aluno.nome }}
 
+                        {% if aluno.turma_relacao %}
+                            — {{ aluno.turma_relacao.nome }}
+                        {% else %}
+                            — Sem turma
+                        {% endif %}
+
                     </option>
 
                     {% endfor %}
 
                 </select>
+
+                {% if turma_selecionada and alunos|length == 0 %}
+
+                    <small class="text-danger">
+                        Esta turma ainda não possui alunos vinculados.
+                    </small>
+
+                {% endif %}
 
             </div>
 
@@ -639,6 +717,8 @@
 
                     <th>Aluno</th>
 
+                    <th>Turma</th>
+
                     <th>Valor</th>
 
                     <th>Vencimento</th>
@@ -671,6 +751,29 @@
 
                             <span class="text-muted">
                                 Sem aluno vinculado
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <!-- TURMA -->
+
+                    <td>
+
+                        {% if mensalidade.aluno and mensalidade.aluno.turma_relacao %}
+
+                            <a
+                                href="/turma/{{ mensalidade.aluno.turma_relacao.id }}"
+                                class="badge bg-info text-dark text-decoration-none p-2"
+                            >
+                                {{ mensalidade.aluno.turma_relacao.nome }}
+                            </a>
+
+                        {% else %}
+
+                            <span class="text-muted">
+                                Sem turma
                             </span>
 
                         {% endif %}
@@ -803,7 +906,7 @@
                             {% if mensalidade.status == 'PENDENTE' %}
 
                             <a
-                                href="/pagar_mensalidade/{{ mensalidade.id }}?mes={{ mes }}&ano={{ ano }}&filtro={{ filtro }}"
+                                href="/pagar_mensalidade/{{ mensalidade.id }}?mes={{ mes }}&ano={{ ano }}&filtro={{ filtro }}&turma_id={{ filtro_turma }}"
                                 class="btn btn-warning btn-sm"
                                 title="Marcar como pago"
                                 onclick="return confirm('Confirmar pagamento?')"
@@ -818,7 +921,7 @@
                             <!-- EDITAR -->
 
                             <a
-                                href="/editar_mensalidade/{{ mensalidade.id }}?mes={{ mes }}&ano={{ ano }}&filtro={{ filtro }}"
+                                href="/editar_mensalidade/{{ mensalidade.id }}?mes={{ mes }}&ano={{ ano }}&filtro={{ filtro }}&turma_id={{ filtro_turma }}"
                                 class="btn btn-dark btn-sm"
                                 title="Editar mensalidade"
                             >
@@ -832,7 +935,7 @@
                             {% if session.tipo == 'admin' %}
 
                             <a
-                                href="/excluir_mensalidade/{{ mensalidade.id }}?mes={{ mes }}&ano={{ ano }}&filtro={{ filtro }}"
+                                href="/excluir_mensalidade/{{ mensalidade.id }}?mes={{ mes }}&ano={{ ano }}&filtro={{ filtro }}&turma_id={{ filtro_turma }}"
                                 class="btn btn-danger btn-sm"
                                 title="Excluir mensalidade"
                                 onclick="return confirm('Deseja excluir esta mensalidade?')"
