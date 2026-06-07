@@ -20,31 +20,53 @@
 
     {% if mes and ano %}
 
-<a
-    href="/mensalidades?mes={{ mes }}&ano={{ ano }}&filtro={{ filtro }}"
-    class="btn btn-dark"
->
-    Voltar
-</a>
+        <a
+            href="/mensalidades?mes={{ mes }}&ano={{ ano }}&filtro={{ filtro }}&turma_id={{ turma_id }}"
+            class="btn btn-dark"
+        >
+            <i class="bi bi-arrow-left"></i>
+            Voltar
+        </a>
 
-{% else %}
+    {% else %}
 
-<a
-    href="/mensalidades"
-    class="btn btn-dark"
->
-    Voltar
-</a>
+        <a
+            href="/mensalidades{% if turma_id %}?turma_id={{ turma_id }}{% endif %}"
+            class="btn btn-dark"
+        >
+            <i class="bi bi-arrow-left"></i>
+            Voltar
+        </a>
 
-{% endif %}
+    {% endif %}
 
 </div>
+
+<!-- AVISO -->
+
+{% if turma_id %}
+
+<div class="alert alert-info mb-4">
+
+    <i class="bi bi-diagram-3-fill"></i>
+
+    Editando mensalidade dentro do filtro de turma selecionado.
+
+</div>
+
+{% endif %}
 
 <!-- FORM -->
 
 <div class="card border-0 shadow-sm p-4 rounded-4">
 
     <form method="POST">
+
+        <input
+            type="hidden"
+            name="turma_id"
+            value="{{ turma_id }}"
+        >
 
         <div class="row g-3">
 
@@ -53,9 +75,7 @@
             <div class="col-md-4">
 
                 <label class="form-label fw-semibold">
-
                     Aluno
-
                 </label>
 
                 <select
@@ -66,20 +86,34 @@
 
                     {% for aluno in alunos %}
 
-                    <option
-                        value="{{ aluno.id }}"
-                        {% if mensalidade.aluno_id == aluno.id %}
-                            selected
-                        {% endif %}
-                    >
+                        <option
+                            value="{{ aluno.id }}"
+                            {% if mensalidade.aluno_id == aluno.id %}
+                                selected
+                            {% endif %}
+                        >
 
-                        {{ aluno.nome }}
+                            {{ aluno.nome }}
 
-                    </option>
+                            {% if aluno.turma_relacao %}
+                                — {{ aluno.turma_relacao.nome }}
+                            {% else %}
+                                — Sem turma
+                            {% endif %}
+
+                        </option>
 
                     {% endfor %}
 
                 </select>
+
+                {% if alunos|length == 0 %}
+
+                    <small class="text-danger">
+                        Nenhum aluno encontrado para o filtro selecionado.
+                    </small>
+
+                {% endif %}
 
             </div>
 
@@ -88,9 +122,7 @@
             <div class="col-md-3">
 
                 <label class="form-label fw-semibold">
-
                     Valor
-
                 </label>
 
                 <input
@@ -109,9 +141,7 @@
             <div class="col-md-3">
 
                 <label class="form-label fw-semibold">
-
                     Vencimento
-
                 </label>
 
                 <input
@@ -129,9 +159,7 @@
             <div class="col-md-2">
 
                 <label class="form-label fw-semibold">
-
                     Status
-
                 </label>
 
                 <select
@@ -164,7 +192,7 @@
 
         </div>
 
-        <div class="mt-4 d-flex gap-3">
+        <div class="mt-4 d-flex gap-3 flex-wrap">
 
             <button
                 class="btn btn-warning btn-lg text-white"
@@ -176,14 +204,29 @@
 
             </button>
 
-            <a
-                href="/mensalidades"
-                class="btn btn-secondary btn-lg"
-            >
+            {% if mes and ano %}
 
-                Cancelar
+                <a
+                    href="/mensalidades?mes={{ mes }}&ano={{ ano }}&filtro={{ filtro }}&turma_id={{ turma_id }}"
+                    class="btn btn-secondary btn-lg"
+                >
 
-            </a>
+                    Cancelar
+
+                </a>
+
+            {% else %}
+
+                <a
+                    href="/mensalidades{% if turma_id %}?turma_id={{ turma_id }}{% endif %}"
+                    class="btn btn-secondary btn-lg"
+                >
+
+                    Cancelar
+
+                </a>
+
+            {% endif %}
 
         </div>
 
