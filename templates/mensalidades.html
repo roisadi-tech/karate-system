@@ -32,7 +32,7 @@
         </a>
 
         <a
-            href="/cobrar"
+            href="/cobrar{% if filtro_turma %}?turma_id={{ filtro_turma }}{% endif %}"
             class="btn btn-success btn-lg"
         >
 
@@ -456,7 +456,7 @@
 
             <small class="text-muted">
 
-                Crie mensalidades pendentes para todos os alunos cadastrados
+                Crie mensalidades pendentes para os alunos do filtro selecionado
 
             </small>
 
@@ -475,11 +475,11 @@
         action="/gerar_mensalidades"
     >
 
-    <input
-    type="hidden"
-    name="turma_id"
-    value="{{ filtro_turma }}"
-    >
+        <input
+            type="hidden"
+            name="turma_id"
+            value="{{ filtro_turma }}"
+        >
 
         <div class="row g-3 align-items-end">
 
@@ -505,12 +505,12 @@
 
                 <button
                     class="btn btn-danger btn-lg"
-                    onclick="return confirm('Deseja gerar mensalidades para todos os alunos?')"
+                    onclick="return confirm('Deseja gerar mensalidades para os alunos do filtro selecionado?')"
                 >
 
                     <i class="bi bi-calendar-plus-fill"></i>
 
-                    Gerar para Todos
+                    Gerar Mensalidades
 
                 </button>
 

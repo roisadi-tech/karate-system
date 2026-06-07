@@ -3672,7 +3672,24 @@ def pagar_mensalidade(id):
         ''
     ).strip()
 
-    if mes and ano:
+    origem = request.args.get(
+        'origem',
+        ''
+    ).strip()
+
+    # RETORNO PARA COBRANÇAS
+
+    if origem == 'cobrar':
+
+        retorno = '/cobrar'
+
+        if turma_id:
+
+            retorno += f'?turma_id={turma_id}'
+
+    # RETORNO PARA MENSALIDADES
+
+    elif mes and ano:
 
         retorno = f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
 
