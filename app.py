@@ -5445,6 +5445,57 @@ def excluir_professor(id):
 
 
 # =====================================
+# PERFIL DO PROFESSOR
+# =====================================
+
+@app.route('/professor/<int:id>')
+@login_obrigatorio
+@admin_obrigatorio
+def perfil_professor(id):
+
+    professor = Professor.query.get_or_404(id)
+
+    turmas = Turma.query.filter_by(
+        professor_id=professor.id
+    ).order_by(
+        Turma.nome.asc()
+    ).all()
+
+    total_turmas = len(turmas)
+
+    total_alunos = 0
+
+    dados_turmas = []
+
+    for turma in turmas:
+
+        alunos = Aluno.query.filter_by(
+            turma_id=turma.id
+        ).order_by(
+            Aluno.nome.asc()
+        ).all()
+
+        quantidade_alunos = len(alunos)
+
+        total_alunos += quantidade_alunos
+
+        dados_turmas.append({
+            'turma': turma,
+            'alunos': alunos,
+            'quantidade_alunos': quantidade_alunos
+        })
+
+    return render_template(
+        'perfil_professor.html',
+        professor=professor,
+        turmas=turmas,
+        total_turmas=total_turmas,
+        total_alunos=total_alunos,
+        dados_turmas=dados_turmas
+    )
+
+
+# =====================================
 # TURMAS
 # =====================================
 

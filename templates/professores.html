@@ -2,7 +2,9 @@
 
 {% block conteudo %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<!-- TOPO -->
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
 
     <div>
 
@@ -25,6 +27,8 @@
     </a>
 
 </div>
+
+<!-- RESUMO -->
 
 <div class="row g-4 mb-4">
 
@@ -58,16 +62,18 @@
 
 </div>
 
+<!-- LISTA -->
+
 <div class="card border-0 shadow-sm p-4 rounded-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
 
         <h5 class="fw-bold mb-0">
             Lista de Professores
         </h5>
 
         <span class="badge bg-dark p-2 px-3 rounded-3">
-            {{ professores|length }} registros
+            {{ professores|length }} registro(s)
         </span>
 
     </div>
@@ -81,9 +87,14 @@
                 <tr>
 
                     <th>Professor</th>
+
                     <th>Telefone</th>
+
                     <th>Observação</th>
-                    <th class="text-center">Ações</th>
+
+                    <th class="text-center">
+                        Ações
+                    </th>
 
                 </tr>
 
@@ -94,6 +105,8 @@
                 {% for professor in professores %}
 
                     <tr>
+
+                        <!-- PROFESSOR -->
 
                         <td>
 
@@ -126,6 +139,8 @@
 
                         </td>
 
+                        <!-- TELEFONE -->
+
                         <td>
 
                             {% if professor.telefone %}
@@ -149,6 +164,8 @@
 
                         </td>
 
+                        <!-- OBSERVAÇÃO -->
+
                         <td>
 
                             {% if professor.observacao %}
@@ -165,22 +182,38 @@
 
                         </td>
 
-                        <td>
+                        <!-- AÇÕES -->
+
+                        <td class="text-center">
 
                             <div class="d-flex justify-content-center gap-2 flex-wrap">
 
+                                <!-- PERFIL -->
+
+                                <a
+                                    href="/professor/{{ professor.id }}"
+                                    class="btn btn-dark btn-sm rounded-3"
+                                    title="Ver perfil do professor"
+                                >
+                                    <i class="bi bi-person-badge-fill"></i>
+                                </a>
+
+                                <!-- EDITAR -->
+
                                 <a
                                     href="/editar_professor/{{ professor.id }}"
-                                    class="btn btn-primary btn-sm rounded-3"
-                                    title="Editar"
+                                    class="btn btn-warning btn-sm rounded-3 text-white"
+                                    title="Editar professor"
                                 >
                                     <i class="bi bi-pencil-fill"></i>
                                 </a>
 
+                                <!-- EXCLUIR -->
+
                                 <a
                                     href="/excluir_professor/{{ professor.id }}"
                                     class="btn btn-danger btn-sm rounded-3"
-                                    title="Excluir"
+                                    title="Excluir professor"
                                     onclick="return confirm('Deseja excluir este professor?')"
                                 >
                                     <i class="bi bi-trash-fill"></i>
@@ -211,9 +244,17 @@
                                     Nenhum professor cadastrado
                                 </h5>
 
-                                <p>
+                                <p class="mb-3">
                                     Cadastre o primeiro professor da academia
                                 </p>
+
+                                <a
+                                    href="/cadastrar_professor"
+                                    class="btn btn-danger"
+                                >
+                                    <i class="bi bi-person-plus-fill"></i>
+                                    Novo Professor
+                                </a>
 
                             </div>
 
