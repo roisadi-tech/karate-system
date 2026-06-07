@@ -90,6 +90,16 @@ class Usuario(db.Model):
     senha = db.Column(db.String(300), nullable=False)
     tipo = db.Column(db.String(30), default='professor')
 
+    professor_id = db.Column(
+        db.Integer,
+        db.ForeignKey('professores.id')
+    )
+
+    professor = db.relationship(
+        'Professor',
+        backref='usuarios'
+    )
+
 
 class Professor(db.Model):
 

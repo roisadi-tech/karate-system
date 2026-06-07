@@ -2,7 +2,9 @@
 
 {% block conteudo %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<!-- TOPO -->
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
 
     <div>
 
@@ -11,16 +13,24 @@
         </h2>
 
         <p class="text-muted mb-0">
-            Cadastre administradores e professores
+            Cadastre administradores e professores com acesso ao sistema
         </p>
 
     </div>
+
+    <a
+        href="/usuarios"
+        class="btn btn-dark"
+    >
+        <i class="bi bi-arrow-left"></i>
+        Voltar
+    </a>
 
 </div>
 
 <!-- FORM -->
 
-<div class="card p-4">
+<div class="card border-0 shadow-sm rounded-4 p-4">
 
     <form method="POST">
 
@@ -30,18 +40,21 @@
 
             <div class="col-md-6">
 
-                <label class="form-label">
-
+                <label class="form-label fw-semibold">
                     Usuário
-
                 </label>
 
                 <input
                     type="text"
                     name="usuario"
                     class="form-control form-control-lg"
+                    placeholder="Ex: professor.joao"
                     required
                 >
+
+                <small class="text-muted">
+                    Esse será o nome usado para entrar no sistema.
+                </small>
 
             </div>
 
@@ -49,31 +62,88 @@
 
             <div class="col-md-6">
 
-                <label class="form-label">
-
+                <label class="form-label fw-semibold">
                     Tipo de Usuário
-
                 </label>
 
                 <select
                     name="tipo"
+                    id="tipo_usuario"
                     class="form-select form-select-lg"
                     required
+                    onchange="controlarProfessorVinculado()"
                 >
 
                     <option value="professor">
-
                         PROFESSOR
-
                     </option>
 
                     <option value="admin">
-
                         ADMIN
-
                     </option>
 
                 </select>
+
+                <small class="text-muted">
+                    Administrador vê tudo. Professor poderá ser vinculado a um professor cadastrado.
+                </small>
+
+            </div>
+
+            <!-- PROFESSOR VINCULADO -->
+
+            <div class="col-md-12" id="campo_professor_vinculado">
+
+                <label class="form-label fw-semibold">
+                    Professor Vinculado
+                </label>
+
+                <select
+                    name="professor_id"
+                    id="professor_id"
+                    class="form-select form-select-lg"
+                >
+
+                    <option value="">
+                        Sem vínculo por enquanto
+                    </option>
+
+                    {% for professor in professores %}
+
+                        <option value="{{ professor.id }}">
+                            {{ professor.nome }}
+
+                            {% if professor.telefone %}
+                                — {{ formatar_whatsapp(professor.telefone) }}
+                            {% endif %}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <small class="text-muted">
+                    Use este campo para ligar o login ao cadastro real do professor.
+                </small>
+
+                {% if professores|length == 0 %}
+
+                    <div class="alert alert-warning mt-3 mb-0">
+
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+
+                        Nenhum professor cadastrado ainda.
+
+                        <a
+                            href="/cadastrar_professor"
+                            class="alert-link"
+                        >
+                            Cadastre um professor primeiro
+                        </a>.
+
+                    </div>
+
+                {% endif %}
 
             </div>
 
@@ -81,18 +151,21 @@
 
             <div class="col-md-12">
 
-                <label class="form-label">
-
+                <label class="form-label fw-semibold">
                     Senha
-
                 </label>
 
                 <input
                     type="password"
                     name="senha"
                     class="form-control form-control-lg"
+                    placeholder="Mínimo de 4 caracteres"
                     required
                 >
+
+                <small class="text-muted">
+                    A senha poderá ser alterada depois na tela de edição.
+                </small>
 
             </div>
 
@@ -100,7 +173,7 @@
 
         <!-- BOTÕES -->
 
-        <div class="mt-5 d-flex gap-3">
+        <div class="mt-5 d-flex gap-3 flex-wrap">
 
             <button
                 class="btn btn-danger btn-lg"
@@ -117,7 +190,7 @@
                 class="btn btn-secondary btn-lg"
             >
 
-                Voltar
+                Cancelar
 
             </a>
 
@@ -126,5 +199,30 @@
     </form>
 
 </div>
+
+<script>
+
+    function controlarProfessorVinculado() {
+
+        const tipoUsuario = document.getElementById('tipo_usuario');
+        const campoProfessor = document.getElementById('campo_professor_vinculado');
+        const professorId = document.getElementById('professor_id');
+
+        if (tipoUsuario.value === 'admin') {
+
+            campoProfessor.style.display = 'none';
+            professorId.value = '';
+
+        } else {
+
+            campoProfessor.style.display = 'block';
+
+        }
+
+    }
+
+    controlarProfessorVinculado();
+
+</script>
 
 {% endblock %}

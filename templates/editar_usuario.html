@@ -2,7 +2,9 @@
 
 {% block conteudo %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<!-- TOPO -->
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
 
     <div>
 
@@ -11,16 +13,24 @@
         </h2>
 
         <p class="text-muted mb-0">
-            Atualize os dados do usuário
+            Atualize os dados, permissões e vínculo do usuário
         </p>
 
     </div>
+
+    <a
+        href="/usuarios"
+        class="btn btn-dark"
+    >
+        <i class="bi bi-arrow-left"></i>
+        Voltar
+    </a>
 
 </div>
 
 <!-- FORM -->
 
-<div class="card p-4">
+<div class="card border-0 shadow-sm rounded-4 p-4">
 
     <form method="POST">
 
@@ -30,10 +40,8 @@
 
             <div class="col-md-6">
 
-                <label class="form-label">
-
+                <label class="form-label fw-semibold">
                     Usuário
-
                 </label>
 
                 <input
@@ -44,22 +52,37 @@
                     required
                 >
 
+                {% if usuario.usuario == session.usuario %}
+
+                    <small class="text-success fw-semibold">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Este é o usuário atualmente logado.
+                    </small>
+
+                {% else %}
+
+                    <small class="text-muted">
+                        Nome usado para entrar no sistema.
+                    </small>
+
+                {% endif %}
+
             </div>
 
             <!-- TIPO -->
 
             <div class="col-md-6">
 
-                <label class="form-label">
-
+                <label class="form-label fw-semibold">
                     Tipo de Usuário
-
                 </label>
 
                 <select
                     name="tipo"
+                    id="tipo_usuario"
                     class="form-select form-select-lg"
                     required
+                    onchange="controlarProfessorVinculado()"
                 >
 
                     <option
@@ -78,16 +101,92 @@
 
                 </select>
 
+                <small class="text-muted">
+                    Administrador vê tudo. Professor pode ser vinculado a um professor cadastrado.
+                </small>
+
+            </div>
+
+            <!-- PROFESSOR VINCULADO -->
+
+            <div class="col-md-12" id="campo_professor_vinculado">
+
+                <label class="form-label fw-semibold">
+                    Professor Vinculado
+                </label>
+
+                <select
+                    name="professor_id"
+                    id="professor_id"
+                    class="form-select form-select-lg"
+                >
+
+                    <option value="">
+                        Sem vínculo por enquanto
+                    </option>
+
+                    {% for professor in professores %}
+
+                        <option
+                            value="{{ professor.id }}"
+                            {% if usuario.professor_id|string == professor.id|string %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ professor.nome }}
+
+                            {% if professor.telefone %}
+                                — {{ formatar_whatsapp(professor.telefone) }}
+                            {% endif %}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <small class="text-muted">
+                    Este campo liga o login ao cadastro real do professor.
+                </small>
+
+                {% if professores|length == 0 %}
+
+                    <div class="alert alert-warning mt-3 mb-0">
+
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+
+                        Nenhum professor cadastrado ainda.
+
+                        <a
+                            href="/cadastrar_professor"
+                            class="alert-link"
+                        >
+                            Cadastre um professor primeiro
+                        </a>.
+
+                    </div>
+
+                {% endif %}
+
+                {% if usuario.tipo == 'professor' and not usuario.professor_id %}
+
+                    <div class="alert alert-warning mt-3 mb-0">
+
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+
+                        Este usuário é do tipo professor, mas ainda não está vinculado a nenhum professor cadastrado.
+
+                    </div>
+
+                {% endif %}
+
             </div>
 
             <!-- NOVA SENHA -->
 
             <div class="col-md-12">
 
-                <label class="form-label">
-
+                <label class="form-label fw-semibold">
                     Nova Senha
-
                 </label>
 
                 <input
@@ -97,13 +196,17 @@
                     placeholder="Deixe vazio para não alterar"
                 >
 
+                <small class="text-muted">
+                    Preencha apenas se desejar trocar a senha.
+                </small>
+
             </div>
 
         </div>
 
         <!-- BOTÕES -->
 
-        <div class="mt-5 d-flex gap-3">
+        <div class="mt-5 d-flex gap-3 flex-wrap">
 
             <button
                 class="btn btn-warning btn-lg text-white"
@@ -120,7 +223,7 @@
                 class="btn btn-secondary btn-lg"
             >
 
-                Voltar
+                Cancelar
 
             </a>
 
@@ -129,5 +232,30 @@
     </form>
 
 </div>
+
+<script>
+
+    function controlarProfessorVinculado() {
+
+        const tipoUsuario = document.getElementById('tipo_usuario');
+        const campoProfessor = document.getElementById('campo_professor_vinculado');
+        const professorId = document.getElementById('professor_id');
+
+        if (tipoUsuario.value === 'admin') {
+
+            campoProfessor.style.display = 'none';
+            professorId.value = '';
+
+        } else {
+
+            campoProfessor.style.display = 'block';
+
+        }
+
+    }
+
+    controlarProfessorVinculado();
+
+</script>
 
 {% endblock %}

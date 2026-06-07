@@ -4993,12 +4993,23 @@ def usuarios():
         tipo='professor'
     ).count()
 
+    usuarios_vinculados = Usuario.query.filter(
+        Usuario.professor_id != None
+    ).count()
+
+    usuarios_sem_vinculo = Usuario.query.filter(
+        Usuario.tipo == 'professor',
+        Usuario.professor_id == None
+    ).count()
+
     return render_template(
         'usuarios.html',
         usuarios=lista_usuarios,
         total_usuarios=total_usuarios,
         total_admins=total_admins,
-        total_professores=total_professores
+        total_professores=total_professores,
+        usuarios_vinculados=usuarios_vinculados,
+        usuarios_sem_vinculo=usuarios_sem_vinculo
     )
 
 
@@ -5011,11 +5022,20 @@ def usuarios():
 @admin_obrigatorio
 def cadastrar_usuario():
 
+    professores = Professor.query.order_by(
+        Professor.nome.asc()
+    ).all()
+
     if request.method == 'POST':
 
         usuario_form = request.form['usuario'].strip()
         senha_form = request.form['senha'].strip()
         tipo_form = request.form['tipo']
+
+        professor_id_form = request.form.get(
+            'professor_id',
+            ''
+        ).strip()
 
         if usuario_form == '':
 
@@ -5044,6 +5064,31 @@ def cadastrar_usuario():
 
             return redirect('/cadastrar_usuario')
 
+        professor_id = None
+
+        if tipo_form == 'professor':
+
+            if professor_id_form:
+
+                professor = Professor.query.get(
+                    professor_id_form
+                )
+
+                if not professor:
+
+                    flash(
+                        'Professor vinculado inválido.',
+                        'warning'
+                    )
+
+                    return redirect('/cadastrar_usuario')
+
+                professor_id = professor.id
+
+        else:
+
+            professor_id = None
+
         existe = Usuario.query.filter_by(
             usuario=usuario_form
         ).first()
@@ -5065,7 +5110,8 @@ def cadastrar_usuario():
 
             usuario=usuario_form,
             senha=senha_hash,
-            tipo=tipo_form
+            tipo=tipo_form,
+            professor_id=professor_id
         )
 
         db.session.add(novo_usuario)
@@ -5080,7 +5126,8 @@ def cadastrar_usuario():
         return redirect('/usuarios')
 
     return render_template(
-        'cadastrar_usuario.html'
+        'cadastrar_usuario.html',
+        professores=professores
     )
 
 
@@ -5095,11 +5142,20 @@ def editar_usuario(id):
 
     usuario = Usuario.query.get_or_404(id)
 
+    professores = Professor.query.order_by(
+        Professor.nome.asc()
+    ).all()
+
     if request.method == 'POST':
 
         usuario_form = request.form['usuario'].strip()
         tipo_form = request.form['tipo']
         senha_form = request.form['senha'].strip()
+
+        professor_id_form = request.form.get(
+            'professor_id',
+            ''
+        ).strip()
 
         if usuario_form == '':
 
@@ -5166,8 +5222,34 @@ def editar_usuario(id):
 
             return redirect(f'/editar_usuario/{id}')
 
+        professor_id = None
+
+        if tipo_form == 'professor':
+
+            if professor_id_form:
+
+                professor = Professor.query.get(
+                    professor_id_form
+                )
+
+                if not professor:
+
+                    flash(
+                        'Professor vinculado inválido.',
+                        'warning'
+                    )
+
+                    return redirect(f'/editar_usuario/{id}')
+
+                professor_id = professor.id
+
+        else:
+
+            professor_id = None
+
         usuario.usuario = usuario_form
         usuario.tipo = tipo_form
+        usuario.professor_id = professor_id
 
         if senha_form != '':
 
@@ -5186,7 +5268,8 @@ def editar_usuario(id):
 
     return render_template(
         'editar_usuario.html',
-        usuario=usuario
+        usuario=usuario,
+        professores=professores
     )
 
 
@@ -5870,13 +5953,13 @@ def remover_aluno_turma(turma_id, aluno_id):
 
 
 # =====================================
-# ATUALIZAR BANCO - TURMAS E PROFESSORES
+# ATUALIZAR BANCO - USUÁRIO PROFESSOR
 # =====================================
 
-@app.route('/atualizar_banco_turmas')
+@app.route('/atualizar_banco_usuario_professor')
 @login_obrigatorio
 @admin_obrigatorio
-def atualizar_banco_turmas():
+def atualizar_banco_usuario_professor():
 
     try:
 
@@ -5888,19 +5971,7 @@ def atualizar_banco_turmas():
 
                 conexao.execute(
                     db.text(
-                        'ALTER TABLE alunos ADD COLUMN turma_id INTEGER'
-                    )
-                )
-
-            except Exception:
-
-                pass
-
-            try:
-
-                conexao.execute(
-                    db.text(
-                        'ALTER TABLE alunos ADD CONSTRAINT fk_alunos_turmas FOREIGN KEY (turma_id) REFERENCES turmas(id)'
+                        'ALTER TABLE usuarios ADD COLUMN professor_id INTEGER'
                     )
                 )
 
@@ -5911,7 +5982,7 @@ def atualizar_banco_turmas():
             conexao.commit()
 
         flash(
-            'Banco atualizado com tabelas de professores, turmas e vínculo com alunos.',
+            'Banco atualizado com vínculo entre usuário e professor.',
             'success'
         )
 
@@ -5922,7 +5993,7 @@ def atualizar_banco_turmas():
             'danger'
         )
 
-    return redirect('/alunos')
+    return redirect('/usuarios')
 
 
 # =====================================
