@@ -3342,6 +3342,11 @@ def gerar_mensalidades():
 
     vencimento = request.form['vencimento']
 
+    turma_id = request.form.get(
+        'turma_id',
+        ''
+    ).strip()
+
     if not validar_data_vencimento(vencimento):
 
         flash(
@@ -3351,7 +3356,26 @@ def gerar_mensalidades():
 
         return redirect('/mensalidades')
 
-    alunos = Aluno.query.order_by(
+    query_alunos = Aluno.query
+
+    if turma_id:
+
+        turma = Turma.query.get(turma_id)
+
+        if not turma:
+
+            flash(
+                'Turma inválida.',
+                'warning'
+            )
+
+            return redirect('/mensalidades')
+
+        query_alunos = query_alunos.filter(
+            Aluno.turma_id == turma.id
+        )
+
+    alunos = query_alunos.order_by(
         Aluno.nome.asc()
     ).all()
 
@@ -3401,8 +3425,14 @@ def gerar_mensalidades():
     mes = vencimento[5:7]
     ano = vencimento[0:4]
 
+    url_retorno = f'/mensalidades?mes={mes}&ano={ano}&filtro=todas'
+
+    if turma_id:
+
+        url_retorno += f'&turma_id={turma_id}'
+
     return redirect(
-        f'/mensalidades?mes={mes}&ano={ano}&filtro=todas'
+        url_retorno
     )
 
 
@@ -3418,13 +3448,26 @@ def editar_mensalidade(id):
     ano = request.args.get('ano')
     filtro = request.args.get('filtro', 'todas')
 
+    turma_id = request.args.get(
+        'turma_id',
+        ''
+    ).strip()
+
     if mes and ano:
 
         retorno = f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
 
+        if turma_id:
+
+            retorno += f'&turma_id={turma_id}'
+
     else:
 
         retorno = '/mensalidades'
+
+        if turma_id:
+
+            retorno += f'?turma_id={turma_id}'
 
     mensalidade = Mensalidade.query.get_or_404(id)
 
@@ -3442,6 +3485,11 @@ def editar_mensalidade(id):
         aluno = buscar_aluno_valido(
             request.form['aluno_id']
         )
+
+        turma_post = request.form.get(
+            'turma_id',
+            turma_id
+        ).strip()
 
         if not aluno:
 
@@ -3517,11 +3565,25 @@ def editar_mensalidade(id):
         mes_novo = vencimento_form[5:7]
         ano_novo = vencimento_form[0:4]
 
+        url_sucesso = f'/mensalidades?mes={mes_novo}&ano={ano_novo}&filtro=todas'
+
+        if turma_post:
+
+            url_sucesso += f'&turma_id={turma_post}'
+
         return redirect(
-            f'/mensalidades?mes={mes_novo}&ano={ano_novo}&filtro=todas'
+            url_sucesso
         )
 
-    alunos = Aluno.query.order_by(
+    query_alunos = Aluno.query
+
+    if turma_id:
+
+        query_alunos = query_alunos.filter(
+            Aluno.turma_id == turma_id
+        )
+
+    alunos = query_alunos.order_by(
         Aluno.nome.asc()
     ).all()
 
@@ -3531,7 +3593,8 @@ def editar_mensalidade(id):
         alunos=alunos,
         mes=mes,
         ano=ano,
-        filtro=filtro
+        filtro=filtro,
+        turma_id=turma_id
     )
 
 
@@ -3548,13 +3611,26 @@ def excluir_mensalidade(id):
     ano = request.args.get('ano')
     filtro = request.args.get('filtro', 'todas')
 
+    turma_id = request.args.get(
+        'turma_id',
+        ''
+    ).strip()
+
     if mes and ano:
 
         retorno = f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
 
+        if turma_id:
+
+            retorno += f'&turma_id={turma_id}'
+
     else:
 
         retorno = '/mensalidades'
+
+        if turma_id:
+
+            retorno += f'?turma_id={turma_id}'
 
     mensalidade = Mensalidade.query.get_or_404(id)
 
@@ -3591,13 +3667,26 @@ def pagar_mensalidade(id):
     ano = request.args.get('ano')
     filtro = request.args.get('filtro', 'todas')
 
+    turma_id = request.args.get(
+        'turma_id',
+        ''
+    ).strip()
+
     if mes and ano:
 
         retorno = f'/mensalidades?mes={mes}&ano={ano}&filtro={filtro}'
 
+        if turma_id:
+
+            retorno += f'&turma_id={turma_id}'
+
     else:
 
         retorno = '/mensalidades'
+
+        if turma_id:
+
+            retorno += f'?turma_id={turma_id}'
 
     mensalidade = Mensalidade.query.get_or_404(id)
 
