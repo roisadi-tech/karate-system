@@ -2503,6 +2503,108 @@ def editar_presenca(id):
 
 
 # =====================================
+# CHAMADA DA TURMA
+# =====================================
+
+@app.route('/chamada_turma/<int:id>', methods=['GET', 'POST'])
+@login_obrigatorio
+def chamada_turma(id):
+
+    turma = Turma.query.get_or_404(id)
+
+    alunos = Aluno.query.filter_by(
+        turma_id=turma.id
+    ).order_by(
+        Aluno.nome.asc()
+    ).all()
+
+    data_chamada = request.args.get(
+        'data',
+        date.today().strftime('%Y-%m-%d')
+    )
+
+    if request.method == 'POST':
+
+        data_form = request.form.get(
+            'data',
+            ''
+        )
+
+        if not validar_data_presenca(data_form):
+
+            flash(
+                'Informe uma data válida para a chamada. A data não pode ser futura.',
+                'warning'
+            )
+
+            return redirect(f'/chamada_turma/{turma.id}')
+
+        for aluno in alunos:
+
+            status = request.form.get(
+                f'status_{aluno.id}',
+                ''
+            )
+
+            if status not in ['PRESENTE', 'FALTA', '']:
+
+                continue
+
+            if status == '':
+
+                continue
+
+            presenca_existente = Presenca.query.filter_by(
+                aluno_id=aluno.id,
+                data=data_form
+            ).first()
+
+            if presenca_existente:
+
+                presenca_existente.status = status
+
+            else:
+
+                nova_presenca = Presenca(
+                    aluno_id=aluno.id,
+                    data=data_form,
+                    status=status
+                )
+
+                db.session.add(nova_presenca)
+
+        db.session.commit()
+
+        flash(
+            f'Chamada da turma {turma.nome} salva com sucesso.',
+            'success'
+        )
+
+        return redirect(f'/chamada_turma/{turma.id}?data={data_form}')
+
+    presencas_do_dia = Presenca.query.filter(
+        Presenca.data == data_chamada,
+        Presenca.aluno.has(
+            Aluno.turma_id == turma.id
+        )
+    ).all()
+
+    status_por_aluno = {}
+
+    for presenca in presencas_do_dia:
+
+        status_por_aluno[presenca.aluno_id] = presenca.status
+
+    return render_template(
+        'chamada_turma.html',
+        turma=turma,
+        alunos=alunos,
+        data_chamada=data_chamada,
+        status_por_aluno=status_por_aluno
+    )
+
+
+# =====================================
 # FREQUÊNCIA
 # =====================================
 
