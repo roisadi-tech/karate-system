@@ -3837,46 +3837,103 @@ def cobrar():
     hoje = date.today()
     hoje_str = hoje.strftime('%Y-%m-%d')
 
-    dados = Mensalidade.query.join(
+    turma_id = request.args.get(
+        'turma_id',
+        ''
+    ).strip()
+
+    turmas = Turma.query.order_by(
+        Turma.nome.asc()
+    ).all()
+
+    turma_selecionada = None
+
+    if turma_id:
+
+        turma_selecionada = Turma.query.get(
+            turma_id
+        )
+
+    query = Mensalidade.query.join(
         Aluno
     ).filter(
         Mensalidade.status == 'PENDENTE'
-    ).order_by(
+    )
+
+    if turma_id:
+
+        query = query.filter(
+            Aluno.turma_id == int(turma_id)
+        )
+
+    dados = query.order_by(
         Mensalidade.vencimento.asc()
     ).all()
 
-    total_pendente = db.session.query(
+    query_total = db.session.query(
         db.func.sum(Mensalidade.valor)
     ).join(
         Aluno
     ).filter(
         Mensalidade.status == 'PENDENTE'
-    ).scalar()
+    )
+
+    if turma_id:
+
+        query_total = query_total.filter(
+            Aluno.turma_id == int(turma_id)
+        )
+
+    total_pendente = query_total.scalar()
 
     if total_pendente is None:
 
         total_pendente = 0
 
-    vencidas = Mensalidade.query.join(
+    query_vencidas = Mensalidade.query.join(
         Aluno
     ).filter(
         Mensalidade.status == 'PENDENTE',
         Mensalidade.vencimento < hoje_str
-    ).count()
+    )
 
-    vence_hoje = Mensalidade.query.join(
+    if turma_id:
+
+        query_vencidas = query_vencidas.filter(
+            Aluno.turma_id == int(turma_id)
+        )
+
+    vencidas = query_vencidas.count()
+
+    query_vence_hoje = Mensalidade.query.join(
         Aluno
     ).filter(
         Mensalidade.status == 'PENDENTE',
         Mensalidade.vencimento == hoje_str
-    ).count()
+    )
 
-    pendentes_futuras = Mensalidade.query.join(
+    if turma_id:
+
+        query_vence_hoje = query_vence_hoje.filter(
+            Aluno.turma_id == int(turma_id)
+        )
+
+    vence_hoje = query_vence_hoje.count()
+
+    query_pendentes_futuras = Mensalidade.query.join(
         Aluno
     ).filter(
         Mensalidade.status == 'PENDENTE',
         Mensalidade.vencimento > hoje_str
-    ).count()
+    )
+
+    if turma_id:
+
+        query_pendentes_futuras = query_pendentes_futuras.filter(
+            Aluno.turma_id == int(turma_id)
+        )
+
+    pendentes_futuras = query_pendentes_futuras.count()
 
     return render_template(
         'cobrar.html',
@@ -3886,7 +3943,10 @@ def cobrar():
         total_pendente=total_pendente,
         vencidas=vencidas,
         vence_hoje=vence_hoje,
-        pendentes_futuras=pendentes_futuras
+        pendentes_futuras=pendentes_futuras,
+        turmas=turmas,
+        turma_id=turma_id,
+        turma_selecionada=turma_selecionada
     )
 
 
