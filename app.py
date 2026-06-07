@@ -865,6 +865,23 @@ def admin_obrigatorio(f):
     return decorated_function
 
 
+def usuario_pode_acessar_turma(turma):
+
+    if session.get('tipo') == 'admin':
+
+        return True
+
+    if session.get('tipo') == 'professor':
+
+        professor_id = session.get('professor_id')
+
+        if professor_id and turma.professor_id == professor_id:
+
+            return True
+
+    return False
+
+
 # =====================================
 # DASHBOARD
 # =====================================
@@ -873,13 +890,65 @@ def admin_obrigatorio(f):
 @login_obrigatorio
 def index():
 
-    total_alunos = Aluno.query.count()
+    # =====================================
+    # ALUNOS DO USUÁRIO
+    # =====================================
 
-    faturamento = db.session.query(
+    query_alunos = Aluno.query
+
+    if session.get('tipo') == 'professor':
+
+        professor_id = session.get('professor_id')
+
+        if not professor_id:
+
+            flash(
+                'Seu usuário de professor ainda não está vinculado a um professor cadastrado. Procure o administrador.',
+                'warning'
+            )
+
+            return redirect('/turmas')
+
+        query_alunos = query_alunos.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == professor_id
+        )
+
+    alunos = query_alunos.order_by(
+        Aluno.nome.asc()
+    ).all()
+
+    total_alunos = len(
+        alunos
+    )
+
+    ids_alunos = []
+
+    for aluno in alunos:
+
+        ids_alunos.append(
+            aluno.id
+        )
+
+    # =====================================
+    # FATURAMENTO
+    # =====================================
+
+    query_faturamento = db.session.query(
         db.func.sum(Mensalidade.valor)
     ).filter(
         Mensalidade.status == 'PAGO'
-    ).scalar()
+    )
+
+    if session.get('tipo') == 'professor':
+
+        query_faturamento = query_faturamento.filter(
+            Mensalidade.aluno_id.in_(ids_alunos)
+        )
+
+    faturamento = query_faturamento.scalar()
 
     if faturamento is None:
 
@@ -889,11 +958,25 @@ def index():
         faturamento
     )
 
-    inadimplentes = Mensalidade.query.filter_by(
-        status='PENDENTE'
-    ).count()
+    # =====================================
+    # INADIMPLENTES
+    # =====================================
 
-    alunos = Aluno.query.all()
+    query_inadimplentes = Mensalidade.query.filter_by(
+        status='PENDENTE'
+    )
+
+    if session.get('tipo') == 'professor':
+
+        query_inadimplentes = query_inadimplentes.filter(
+            Mensalidade.aluno_id.in_(ids_alunos)
+        )
+
+    inadimplentes = query_inadimplentes.count()
+
+    # =====================================
+    # APTOS PARA EXAME
+    # =====================================
 
     aptos = 0
 
@@ -907,15 +990,46 @@ def index():
 
             aptos += 1
 
-    ultimos_alunos = Aluno.query.order_by(
+    # =====================================
+    # ÚLTIMOS ALUNOS
+    # =====================================
+
+    query_ultimos_alunos = Aluno.query
+
+    if session.get('tipo') == 'professor':
+
+        query_ultimos_alunos = query_ultimos_alunos.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
+
+    ultimos_alunos = query_ultimos_alunos.order_by(
         Aluno.id.desc()
     ).limit(5).all()
 
-    pendencias = Mensalidade.query.filter_by(
+    # =====================================
+    # PENDÊNCIAS
+    # =====================================
+
+    query_pendencias = Mensalidade.query.filter_by(
         status='PENDENTE'
-    ).order_by(
+    )
+
+    if session.get('tipo') == 'professor':
+
+        query_pendencias = query_pendencias.filter(
+            Mensalidade.aluno_id.in_(ids_alunos)
+        )
+
+    pendencias = query_pendencias.order_by(
         Mensalidade.vencimento.asc()
     ).limit(5).all()
+
+    # =====================================
+    # ANIVERSARIANTES
+    # =====================================
 
     hoje = date.today()
 
@@ -1052,7 +1166,75 @@ def alunos():
     busca = request.args.get('busca', '').strip()
     turma_filtro = request.args.get('turma_id', '').strip()
 
+    # =====================================
+    # TURMAS DISPONÍVEIS PARA O USUÁRIO
+    # =====================================
+
+    query_turmas = Turma.query
+
+    if session.get('tipo') == 'professor':
+
+        professor_id = session.get('professor_id')
+
+        if not professor_id:
+
+            flash(
+                'Seu usuário de professor ainda não está vinculado a um professor cadastrado. Procure o administrador.',
+                'warning'
+            )
+
+            return redirect('/turmas')
+
+        query_turmas = query_turmas.filter(
+            Turma.professor_id == professor_id
+        )
+
+    lista_turmas = query_turmas.order_by(
+        Turma.nome.asc()
+    ).all()
+
+    # =====================================
+    # VALIDAR TURMA FILTRADA
+    # =====================================
+
+    if turma_filtro:
+
+        turma = Turma.query.get(
+            turma_filtro
+        )
+
+        if not turma:
+
+            flash(
+                'Turma inválida.',
+                'warning'
+            )
+
+            return redirect('/alunos')
+
+        if not usuario_pode_acessar_turma(turma):
+
+            flash(
+                'Você não tem permissão para acessar alunos desta turma.',
+                'danger'
+            )
+
+            return redirect('/alunos')
+
+    # =====================================
+    # LISTA DE ALUNOS
+    # =====================================
+
     query = Aluno.query
+
+    if session.get('tipo') == 'professor':
+
+        query = query.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
 
     if busca:
 
@@ -1063,15 +1245,11 @@ def alunos():
     if turma_filtro:
 
         query = query.filter(
-            Aluno.turma_id == turma_filtro
+            Aluno.turma_id == int(turma_filtro)
         )
 
     lista_alunos = query.order_by(
         Aluno.nome.asc()
-    ).all()
-
-    lista_turmas = Turma.query.order_by(
-        Turma.nome.asc()
     ).all()
 
     dados_aptidao = {}
@@ -1109,7 +1287,30 @@ def alunos():
 @login_obrigatorio
 def cadastrar_aluno():
 
-    turmas = Turma.query.order_by(
+    # =====================================
+    # TURMAS DISPONÍVEIS PARA O USUÁRIO
+    # =====================================
+
+    query_turmas = Turma.query
+
+    if session.get('tipo') == 'professor':
+
+        professor_id = session.get('professor_id')
+
+        if not professor_id:
+
+            flash(
+                'Seu usuário de professor ainda não está vinculado a um professor cadastrado. Procure o administrador.',
+                'warning'
+            )
+
+            return redirect('/turmas')
+
+        query_turmas = query_turmas.filter(
+            Turma.professor_id == professor_id
+        )
+
+    turmas = query_turmas.order_by(
         Turma.nome.asc()
     ).all()
 
@@ -1199,7 +1400,7 @@ def cadastrar_aluno():
         turma_id = request.form.get(
             'turma_id',
             ''
-        )
+        ).strip()
 
         turma = None
 
@@ -1217,6 +1418,24 @@ def cadastrar_aluno():
                 )
 
                 return redirect(request.url)
+
+            if not usuario_pode_acessar_turma(turma):
+
+                flash(
+                    'Você não tem permissão para cadastrar aluno nesta turma.',
+                    'danger'
+                )
+
+                return redirect(request.url)
+
+        if session.get('tipo') == 'professor' and not turma:
+
+            flash(
+                'Selecione uma turma para cadastrar o aluno.',
+                'warning'
+            )
+
+            return redirect(request.url)
 
         foto = request.files.get('foto')
 
@@ -1299,7 +1518,30 @@ def editar_aluno(id):
 
     aluno = Aluno.query.get_or_404(id)
 
-    turmas = Turma.query.order_by(
+    if session.get('tipo') == 'professor':
+
+        if not aluno.turma_relacao or not usuario_pode_acessar_turma(aluno.turma_relacao):
+
+            flash(
+                'Você não tem permissão para editar este aluno.',
+                'danger'
+            )
+
+            return redirect('/alunos')
+
+    # =====================================
+    # TURMAS DISPONÍVEIS PARA O USUÁRIO
+    # =====================================
+
+    query_turmas = Turma.query
+
+    if session.get('tipo') == 'professor':
+
+        query_turmas = query_turmas.filter(
+            Turma.professor_id == session.get('professor_id')
+        )
+
+    turmas = query_turmas.order_by(
         Turma.nome.asc()
     ).all()
 
@@ -1386,7 +1628,7 @@ def editar_aluno(id):
         turma_id = request.form.get(
             'turma_id',
             ''
-        )
+        ).strip()
 
         turma = None
 
@@ -1404,6 +1646,24 @@ def editar_aluno(id):
                 )
 
                 return redirect(request.url)
+
+            if not usuario_pode_acessar_turma(turma):
+
+                flash(
+                    'Você não tem permissão para mover este aluno para esta turma.',
+                    'danger'
+                )
+
+                return redirect(request.url)
+
+        if session.get('tipo') == 'professor' and not turma:
+
+            flash(
+                'O professor não pode deixar aluno sem turma.',
+                'warning'
+            )
+
+            return redirect(request.url)
 
         aluno.nome = nome_form
         aluno.nascimento = nascimento_form
@@ -1487,6 +1747,64 @@ def editar_aluno(id):
 
 
 # =====================================
+# EXCLUIR ALUNO
+# =====================================
+
+@app.route('/excluir_aluno/<int:id>')
+@login_obrigatorio
+@admin_obrigatorio
+def excluir_aluno(id):
+
+    aluno = Aluno.query.get_or_404(id)
+
+    total_presencas = Presenca.query.filter_by(
+        aluno_id=aluno.id
+    ).count()
+
+    total_mensalidades = Mensalidade.query.filter_by(
+        aluno_id=aluno.id
+    ).count()
+
+    total_exames = Exame.query.filter_by(
+        aluno_id=aluno.id
+    ).count()
+
+    if total_presencas > 0 or total_mensalidades > 0 or total_exames > 0:
+
+        flash(
+            f'Não é possível excluir este aluno, pois ele possui histórico no sistema: '
+            f'{total_presencas} presença(s), '
+            f'{total_mensalidades} mensalidade(s) e '
+            f'{total_exames} exame(s).',
+            'warning'
+        )
+
+        return redirect('/alunos')
+
+    if aluno.foto:
+
+        caminho = os.path.join(
+            'static/uploads',
+            aluno.foto
+        )
+
+        if os.path.exists(caminho):
+
+            os.remove(caminho)
+
+    db.session.delete(aluno)
+
+    db.session.commit()
+
+    flash(
+        'Aluno excluído com sucesso.',
+        'success'
+    )
+
+    return redirect('/alunos')
+
+
+# =====================================
 # PERFIL DO ALUNO
 # =====================================
 
@@ -1496,6 +1814,17 @@ def editar_aluno(id):
 def perfil_aluno(id):
 
     aluno = Aluno.query.get_or_404(id)
+
+    if session.get('tipo') == 'professor':
+
+        if not aluno.turma_relacao or not usuario_pode_acessar_turma(aluno.turma_relacao):
+
+            flash(
+                'Você não tem permissão para acessar este aluno.',
+                'danger'
+            )
+
+            return redirect('/alunos')
 
     presencas = Presenca.query.filter_by(
         aluno_id=id
@@ -2162,64 +2491,6 @@ def aniversariantes():
 
 
 # =====================================
-# EXCLUIR ALUNO
-# =====================================
-
-@app.route('/excluir_aluno/<int:id>')
-@login_obrigatorio
-@admin_obrigatorio
-def excluir_aluno(id):
-
-    aluno = Aluno.query.get_or_404(id)
-
-    total_presencas = Presenca.query.filter_by(
-        aluno_id=aluno.id
-    ).count()
-
-    total_mensalidades = Mensalidade.query.filter_by(
-        aluno_id=aluno.id
-    ).count()
-
-    total_exames = Exame.query.filter_by(
-        aluno_id=aluno.id
-    ).count()
-
-    if total_presencas > 0 or total_mensalidades > 0 or total_exames > 0:
-
-        flash(
-            f'Não é possível excluir este aluno, pois ele possui histórico no sistema: '
-            f'{total_presencas} presença(s), '
-            f'{total_mensalidades} mensalidade(s) e '
-            f'{total_exames} exame(s).',
-            'warning'
-        )
-
-        return redirect('/alunos')
-
-    if aluno.foto:
-
-        caminho = os.path.join(
-            'static/uploads',
-            aluno.foto
-        )
-
-        if os.path.exists(caminho):
-
-            os.remove(caminho)
-
-    db.session.delete(aluno)
-
-    db.session.commit()
-
-    flash(
-        'Aluno excluído com sucesso.',
-        'success'
-    )
-
-    return redirect('/alunos')
-
-
-# =====================================
 # PRESENÇAS
 # =====================================
 
@@ -2236,7 +2507,7 @@ def presencas():
         turma_retorno = request.form.get(
             'turma_id',
             ''
-        )
+        ).strip()
 
         if not aluno:
 
@@ -2249,6 +2520,17 @@ def presencas():
                 return redirect(f'/presencas?turma_id={turma_retorno}')
 
             return redirect('/presencas')
+
+        if session.get('tipo') == 'professor':
+
+            if not aluno.turma_relacao or not usuario_pode_acessar_turma(aluno.turma_relacao):
+
+                flash(
+                    'Você não tem permissão para registrar presença deste aluno.',
+                    'danger'
+                )
+
+                return redirect('/presencas')
 
         data_form = request.form['data']
 
@@ -2321,28 +2603,109 @@ def presencas():
     filtro_status = request.args.get('status', '').strip()
     filtro_turma = request.args.get('turma_id', '').strip()
 
-    turmas = Turma.query.order_by(
+    # =====================================
+    # TURMAS DISPONÍVEIS
+    # =====================================
+
+    query_turmas = Turma.query
+
+    if session.get('tipo') == 'professor':
+
+        professor_id = session.get('professor_id')
+
+        if not professor_id:
+
+            flash(
+                'Seu usuário de professor ainda não está vinculado a um professor cadastrado. Procure o administrador.',
+                'warning'
+            )
+
+            return redirect('/turmas')
+
+        query_turmas = query_turmas.filter(
+            Turma.professor_id == professor_id
+        )
+
+    turmas = query_turmas.order_by(
         Turma.nome.asc()
     ).all()
 
+    # =====================================
+    # VALIDAR TURMA FILTRADA
+    # =====================================
+
+    turma_selecionada = None
+
+    if filtro_turma:
+
+        turma_selecionada = Turma.query.get(
+            filtro_turma
+        )
+
+        if not turma_selecionada:
+
+            flash(
+                'Turma inválida.',
+                'warning'
+            )
+
+            return redirect('/presencas')
+
+        if not usuario_pode_acessar_turma(turma_selecionada):
+
+            flash(
+                'Você não tem permissão para acessar presenças desta turma.',
+                'danger'
+            )
+
+            return redirect('/presencas')
+
+    # =====================================
+    # ALUNOS DISPONÍVEIS
+    # =====================================
+
     query_alunos = Aluno.query
+
+    if session.get('tipo') == 'professor':
+
+        query_alunos = query_alunos.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
 
     if filtro_turma:
 
         query_alunos = query_alunos.filter(
-            Aluno.turma_id == filtro_turma
+            Aluno.turma_id == int(filtro_turma)
         )
 
     alunos = query_alunos.order_by(
         Aluno.nome.asc()
     ).all()
 
-    query = Presenca.query
+    # =====================================
+    # REGISTROS DE PRESENÇA
+    # =====================================
+
+    query = Presenca.query.join(
+        Aluno
+    )
+
+    if session.get('tipo') == 'professor':
+
+        query = query.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
 
     if filtro_aluno:
 
         query = query.filter(
-            Presenca.aluno_id == filtro_aluno
+            Presenca.aluno_id == int(filtro_aluno)
         )
 
     if filtro_data:
@@ -2360,9 +2723,7 @@ def presencas():
     if filtro_turma:
 
         query = query.filter(
-            Presenca.aluno.has(
-                Aluno.turma_id == int(filtro_turma)
-            )
+            Aluno.turma_id == int(filtro_turma)
         )
 
     lista_presencas = query.order_by(
@@ -2378,14 +2739,6 @@ def presencas():
     total_faltas = query.filter(
         Presenca.status == 'FALTA'
     ).count()
-
-    turma_selecionada = None
-
-    if filtro_turma:
-
-        turma_selecionada = Turma.query.get(
-            filtro_turma
-        )
 
     return render_template(
         'presencas.html',
@@ -2413,6 +2766,17 @@ def excluir_presenca(id):
 
     presenca = Presenca.query.get_or_404(id)
 
+    if session.get('tipo') == 'professor':
+
+        if not presenca.aluno or not presenca.aluno.turma_relacao or not usuario_pode_acessar_turma(presenca.aluno.turma_relacao):
+
+            flash(
+                'Você não tem permissão para excluir este registro de presença.',
+                'danger'
+            )
+
+            return redirect('/presencas')
+
     db.session.delete(presenca)
 
     db.session.commit()
@@ -2435,7 +2799,29 @@ def editar_presenca(id):
 
     presenca = Presenca.query.get_or_404(id)
 
-    alunos = Aluno.query.order_by(
+    if session.get('tipo') == 'professor':
+
+        if not presenca.aluno or not presenca.aluno.turma_relacao or not usuario_pode_acessar_turma(presenca.aluno.turma_relacao):
+
+            flash(
+                'Você não tem permissão para editar este registro de presença.',
+                'danger'
+            )
+
+            return redirect('/presencas')
+
+    query_alunos = Aluno.query
+
+    if session.get('tipo') == 'professor':
+
+        query_alunos = query_alunos.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
+
+    alunos = query_alunos.order_by(
         Aluno.nome.asc()
     ).all()
 
@@ -2453,6 +2839,17 @@ def editar_presenca(id):
             )
 
             return redirect(request.url)
+
+        if session.get('tipo') == 'professor':
+
+            if not aluno.turma_relacao or not usuario_pode_acessar_turma(aluno.turma_relacao):
+
+                flash(
+                    'Você não tem permissão para vincular esta presença a este aluno.',
+                    'danger'
+                )
+
+                return redirect(request.url)
 
         data_form = request.form['data']
 
@@ -2520,6 +2917,15 @@ def editar_presenca(id):
 def chamada_turma(id):
 
     turma = Turma.query.get_or_404(id)
+
+    if not usuario_pode_acessar_turma(turma):
+
+        flash(
+            'Você não tem permissão para acessar a chamada desta turma.',
+            'danger'
+        )
+
+        return redirect('/turmas')
 
     alunos = Aluno.query.filter_by(
         turma_id=turma.id
@@ -2621,7 +3027,29 @@ def chamada_turma(id):
 @login_obrigatorio
 def frequencia():
 
-    alunos = Aluno.query.order_by(
+    query_alunos = Aluno.query
+
+    if session.get('tipo') == 'professor':
+
+        professor_id = session.get('professor_id')
+
+        if not professor_id:
+
+            flash(
+                'Seu usuário de professor ainda não está vinculado a um professor cadastrado. Procure o administrador.',
+                'warning'
+            )
+
+            return redirect('/turmas')
+
+        query_alunos = query_alunos.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == professor_id
+        )
+
+    alunos = query_alunos.order_by(
         Aluno.nome.asc()
     ).all()
 
@@ -2671,6 +3099,15 @@ def frequencia():
 def frequencia_turma(id):
 
     turma = Turma.query.get_or_404(id)
+
+    if not usuario_pode_acessar_turma(turma):
+
+        flash(
+            'Você não tem permissão para acessar a frequência desta turma.',
+            'danger'
+        )
+
+        return redirect('/turmas')
 
     alunos = Aluno.query.filter_by(
         turma_id=turma.id
@@ -2731,7 +3168,11 @@ def frequencia_turma(id):
                 1
             )
 
-        if percentual >= 75:
+        if total_registros == 0:
+
+            situacao = 'Sem registros'
+
+        elif percentual >= 75:
 
             situacao = 'Boa frequência'
 
@@ -2814,6 +3255,67 @@ def mensalidades():
 
     prefixo_data = f'{ano}-{mes}'
 
+    # =====================================
+    # TURMAS DISPONÍVEIS PARA O USUÁRIO
+    # =====================================
+
+    query_turmas = Turma.query
+
+    if session.get('tipo') == 'professor':
+
+        professor_id = session.get('professor_id')
+
+        if not professor_id:
+
+            flash(
+                'Seu usuário de professor ainda não está vinculado a um professor cadastrado. Procure o administrador.',
+                'warning'
+            )
+
+            return redirect('/turmas')
+
+        query_turmas = query_turmas.filter(
+            Turma.professor_id == professor_id
+        )
+
+    turmas = query_turmas.order_by(
+        Turma.nome.asc()
+    ).all()
+
+    # =====================================
+    # VALIDAR TURMA FILTRADA
+    # =====================================
+
+    turma_selecionada = None
+
+    if filtro_turma:
+
+        turma_selecionada = Turma.query.get(
+            filtro_turma
+        )
+
+        if not turma_selecionada:
+
+            flash(
+                'Turma inválida.',
+                'warning'
+            )
+
+            return redirect('/mensalidades')
+
+        if not usuario_pode_acessar_turma(turma_selecionada):
+
+            flash(
+                'Você não tem permissão para acessar mensalidades desta turma.',
+                'danger'
+            )
+
+            return redirect('/mensalidades')
+
+    # =====================================
+    # CADASTRAR MENSALIDADE
+    # =====================================
+
     if request.method == 'POST':
 
         aluno = buscar_aluno_valido(
@@ -2841,6 +3343,17 @@ def mensalidades():
             return redirect(
                 url_retorno
             )
+
+        if session.get('tipo') == 'professor':
+
+            if not aluno.turma_relacao or not usuario_pode_acessar_turma(aluno.turma_relacao):
+
+                flash(
+                    'Você não tem permissão para cadastrar mensalidade para este aluno.',
+                    'danger'
+                )
+
+                return redirect('/mensalidades')
 
         valor_form = converter_mensalidade(
             request.form['valor']
@@ -2929,24 +3442,25 @@ def mensalidades():
             url_sucesso
         )
 
-    turmas = Turma.query.order_by(
-        Turma.nome.asc()
-    ).all()
-
-    turma_selecionada = None
-
-    if filtro_turma:
-
-        turma_selecionada = Turma.query.get(
-            filtro_turma
-        )
+    # =====================================
+    # ALUNOS DISPONÍVEIS
+    # =====================================
 
     query_alunos = Aluno.query
+
+    if session.get('tipo') == 'professor':
+
+        query_alunos = query_alunos.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
 
     if filtro_turma:
 
         query_alunos = query_alunos.filter(
-            Aluno.turma_id == filtro_turma
+            Aluno.turma_id == int(filtro_turma)
         )
 
     alunos = query_alunos.order_by(
@@ -2955,16 +3469,29 @@ def mensalidades():
 
     hoje_str = hoje.strftime('%Y-%m-%d')
 
-    query = Mensalidade.query.filter(
+    # =====================================
+    # LISTA DE MENSALIDADES
+    # =====================================
+
+    query = Mensalidade.query.join(
+        Aluno
+    ).filter(
         Mensalidade.vencimento.like(f'{prefixo_data}%')
     )
+
+    if session.get('tipo') == 'professor':
+
+        query = query.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
 
     if filtro_turma:
 
         query = query.filter(
-            Mensalidade.aluno.has(
-                Aluno.turma_id == int(filtro_turma)
-            )
+            Aluno.turma_id == int(filtro_turma)
         )
 
     if filtro == 'pagas':
@@ -2997,16 +3524,29 @@ def mensalidades():
         Mensalidade.vencimento.asc()
     ).all()
 
-    query_todas_do_mes = Mensalidade.query.filter(
+    # =====================================
+    # RESUMO DO MÊS
+    # =====================================
+
+    query_todas_do_mes = Mensalidade.query.join(
+        Aluno
+    ).filter(
         Mensalidade.vencimento.like(f'{prefixo_data}%')
     )
+
+    if session.get('tipo') == 'professor':
+
+        query_todas_do_mes = query_todas_do_mes.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
 
     if filtro_turma:
 
         query_todas_do_mes = query_todas_do_mes.filter(
-            Mensalidade.aluno.has(
-                Aluno.turma_id == int(filtro_turma)
-            )
+            Aluno.turma_id == int(filtro_turma)
         )
 
     todas_do_mes = query_todas_do_mes.all()
@@ -3117,7 +3657,6 @@ def mensalidades():
         nome_mes=nome_mes,
         vencimento_padrao=vencimento_padrao
     )
-
 
 # =====================================
 # EXPORTAR MENSALIDADES EXCEL
@@ -3480,6 +4019,17 @@ def editar_mensalidade(id):
 
     mensalidade = Mensalidade.query.get_or_404(id)
 
+    if session.get('tipo') == 'professor':
+
+        if not mensalidade.aluno or not mensalidade.aluno.turma_relacao or not usuario_pode_acessar_turma(mensalidade.aluno.turma_relacao):
+
+            flash(
+                'Você não tem permissão para editar esta mensalidade.',
+                'danger'
+            )
+
+            return redirect('/mensalidades')
+
     if mensalidade.status == 'PAGO':
 
         flash(
@@ -3508,6 +4058,17 @@ def editar_mensalidade(id):
             )
 
             return redirect(request.url)
+
+        if session.get('tipo') == 'professor':
+
+            if not aluno.turma_relacao or not usuario_pode_acessar_turma(aluno.turma_relacao):
+
+                flash(
+                    'Você não tem permissão para vincular esta mensalidade a este aluno.',
+                    'danger'
+                )
+
+                return redirect(request.url)
 
         valor_form = converter_mensalidade(
             request.form['valor']
@@ -3586,10 +4147,39 @@ def editar_mensalidade(id):
 
     query_alunos = Aluno.query
 
+    if session.get('tipo') == 'professor':
+
+        query_alunos = query_alunos.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
+
     if turma_id:
 
+        turma = Turma.query.get(turma_id)
+
+        if not turma:
+
+            flash(
+                'Turma inválida.',
+                'warning'
+            )
+
+            return redirect('/mensalidades')
+
+        if not usuario_pode_acessar_turma(turma):
+
+            flash(
+                'Você não tem permissão para acessar esta turma.',
+                'danger'
+            )
+
+            return redirect('/mensalidades')
+
         query_alunos = query_alunos.filter(
-            Aluno.turma_id == turma_id
+            Aluno.turma_id == int(turma_id)
         )
 
     alunos = query_alunos.order_by(
@@ -3686,8 +4276,6 @@ def pagar_mensalidade(id):
         ''
     ).strip()
 
-    # RETORNO PARA COBRANÇAS
-
     if origem == 'cobrar':
 
         retorno = '/cobrar'
@@ -3695,8 +4283,6 @@ def pagar_mensalidade(id):
         if turma_id:
 
             retorno += f'?turma_id={turma_id}'
-
-    # RETORNO PARA MENSALIDADES
 
     elif mes and ano:
 
@@ -3715,6 +4301,17 @@ def pagar_mensalidade(id):
             retorno += f'?turma_id={turma_id}'
 
     mensalidade = Mensalidade.query.get_or_404(id)
+
+    if session.get('tipo') == 'professor':
+
+        if not mensalidade.aluno or not mensalidade.aluno.turma_relacao or not usuario_pode_acessar_turma(mensalidade.aluno.turma_relacao):
+
+            flash(
+                'Você não tem permissão para marcar esta mensalidade como paga.',
+                'danger'
+            )
+
+            return redirect('/mensalidades')
 
     if mensalidade.status == 'PAGO':
 
@@ -3768,6 +4365,17 @@ def exames():
             )
 
             return redirect('/exames')
+
+        if session.get('tipo') == 'professor':
+
+            if not aluno.turma_relacao or not usuario_pode_acessar_turma(aluno.turma_relacao):
+
+                flash(
+                    'Você não tem permissão para registrar exame para este aluno.',
+                    'danger'
+                )
+
+                return redirect('/exames')
 
         faixa_atual_form = request.form['faixa_atual']
 
@@ -3837,11 +4445,46 @@ def exames():
 
         return redirect('/exames')
 
-    alunos = Aluno.query.order_by(
+    query_alunos = Aluno.query
+
+    if session.get('tipo') == 'professor':
+
+        professor_id = session.get('professor_id')
+
+        if not professor_id:
+
+            flash(
+                'Seu usuário de professor ainda não está vinculado a um professor cadastrado. Procure o administrador.',
+                'warning'
+            )
+
+            return redirect('/turmas')
+
+        query_alunos = query_alunos.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == professor_id
+        )
+
+    alunos = query_alunos.order_by(
         Aluno.nome.asc()
     ).all()
 
-    lista = Exame.query.order_by(
+    query_exames = Exame.query.join(
+        Aluno
+    )
+
+    if session.get('tipo') == 'professor':
+
+        query_exames = query_exames.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
+
+    lista = query_exames.order_by(
         Exame.data_exame.desc()
     ).all()
 
@@ -3868,9 +4511,36 @@ def cobrar():
         ''
     ).strip()
 
-    turmas = Turma.query.order_by(
+    # =====================================
+    # TURMAS DISPONÍVEIS PARA O USUÁRIO
+    # =====================================
+
+    query_turmas = Turma.query
+
+    if session.get('tipo') == 'professor':
+
+        professor_id = session.get('professor_id')
+
+        if not professor_id:
+
+            flash(
+                'Seu usuário de professor ainda não está vinculado a um professor cadastrado. Procure o administrador.',
+                'warning'
+            )
+
+            return redirect('/turmas')
+
+        query_turmas = query_turmas.filter(
+            Turma.professor_id == professor_id
+        )
+
+    turmas = query_turmas.order_by(
         Turma.nome.asc()
     ).all()
+
+    # =====================================
+    # VALIDAR TURMA FILTRADA
+    # =====================================
 
     turma_selecionada = None
 
@@ -3880,11 +4550,42 @@ def cobrar():
             turma_id
         )
 
+        if not turma_selecionada:
+
+            flash(
+                'Turma inválida.',
+                'warning'
+            )
+
+            return redirect('/cobrar')
+
+        if not usuario_pode_acessar_turma(turma_selecionada):
+
+            flash(
+                'Você não tem permissão para acessar cobranças desta turma.',
+                'danger'
+            )
+
+            return redirect('/cobrar')
+
+    # =====================================
+    # LISTA DE COBRANÇAS
+    # =====================================
+
     query = Mensalidade.query.join(
         Aluno
     ).filter(
         Mensalidade.status == 'PENDENTE'
     )
+
+    if session.get('tipo') == 'professor':
+
+        query = query.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
 
     if turma_id:
 
@@ -3896,6 +4597,10 @@ def cobrar():
         Mensalidade.vencimento.asc()
     ).all()
 
+    # =====================================
+    # TOTAL PENDENTE
+    # =====================================
+
     query_total = db.session.query(
         db.func.sum(Mensalidade.valor)
     ).join(
@@ -3903,6 +4608,15 @@ def cobrar():
     ).filter(
         Mensalidade.status == 'PENDENTE'
     )
+
+    if session.get('tipo') == 'professor':
+
+        query_total = query_total.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
 
     if turma_id:
 
@@ -3916,12 +4630,25 @@ def cobrar():
 
         total_pendente = 0
 
+    # =====================================
+    # VENCIDAS
+    # =====================================
+
     query_vencidas = Mensalidade.query.join(
         Aluno
     ).filter(
         Mensalidade.status == 'PENDENTE',
         Mensalidade.vencimento < hoje_str
     )
+
+    if session.get('tipo') == 'professor':
+
+        query_vencidas = query_vencidas.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
 
     if turma_id:
 
@@ -3931,12 +4658,25 @@ def cobrar():
 
     vencidas = query_vencidas.count()
 
+    # =====================================
+    # VENCE HOJE
+    # =====================================
+
     query_vence_hoje = Mensalidade.query.join(
         Aluno
     ).filter(
         Mensalidade.status == 'PENDENTE',
         Mensalidade.vencimento == hoje_str
     )
+
+    if session.get('tipo') == 'professor':
+
+        query_vence_hoje = query_vence_hoje.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
 
     if turma_id:
 
@@ -3946,12 +4686,25 @@ def cobrar():
 
     vence_hoje = query_vence_hoje.count()
 
+    # =====================================
+    # PENDENTES FUTURAS
+    # =====================================
+
     query_pendentes_futuras = Mensalidade.query.join(
         Aluno
     ).filter(
         Mensalidade.status == 'PENDENTE',
         Mensalidade.vencimento > hoje_str
     )
+
+    if session.get('tipo') == 'professor':
+
+        query_pendentes_futuras = query_pendentes_futuras.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
 
     if turma_id:
 
@@ -4746,9 +5499,36 @@ def relatorios():
         ''
     ).strip()
 
-    turmas = Turma.query.order_by(
+    # =====================================
+    # TURMAS DISPONÍVEIS PARA O USUÁRIO
+    # =====================================
+
+    query_turmas = Turma.query
+
+    if session.get('tipo') == 'professor':
+
+        professor_id = session.get('professor_id')
+
+        if not professor_id:
+
+            flash(
+                'Seu usuário de professor ainda não está vinculado a um professor cadastrado. Procure o administrador.',
+                'warning'
+            )
+
+            return redirect('/turmas')
+
+        query_turmas = query_turmas.filter(
+            Turma.professor_id == professor_id
+        )
+
+    turmas = query_turmas.order_by(
         Turma.nome.asc()
     ).all()
+
+    # =====================================
+    # VALIDAR TURMA FILTRADA
+    # =====================================
 
     turma_selecionada = None
 
@@ -4758,11 +5538,38 @@ def relatorios():
             turma_id
         )
 
+        if not turma_selecionada:
+
+            flash(
+                'Turma inválida.',
+                'warning'
+            )
+
+            return redirect('/relatorios')
+
+        if not usuario_pode_acessar_turma(turma_selecionada):
+
+            flash(
+                'Você não tem permissão para acessar relatórios desta turma.',
+                'danger'
+            )
+
+            return redirect('/relatorios')
+
     # =====================================
     # ALUNOS
     # =====================================
 
     query_alunos = Aluno.query
+
+    if session.get('tipo') == 'professor':
+
+        query_alunos = query_alunos.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
 
     if turma_id:
 
@@ -4773,7 +5580,7 @@ def relatorios():
     total_alunos = query_alunos.count()
 
     # =====================================
-    # FINANCEIRO
+    # FINANCEIRO - RECEBIDO
     # =====================================
 
     query_recebido = db.session.query(
@@ -4783,6 +5590,15 @@ def relatorios():
     ).filter(
         Mensalidade.status == 'PAGO'
     )
+
+    if session.get('tipo') == 'professor':
+
+        query_recebido = query_recebido.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
 
     if turma_id:
 
@@ -4798,6 +5614,10 @@ def relatorios():
 
     recebido = float(recebido)
 
+    # =====================================
+    # FINANCEIRO - PENDENTE
+    # =====================================
+
     query_pendente = db.session.query(
         db.func.sum(Mensalidade.valor)
     ).join(
@@ -4805,6 +5625,15 @@ def relatorios():
     ).filter(
         Mensalidade.status == 'PENDENTE'
     )
+
+    if session.get('tipo') == 'professor':
+
+        query_pendente = query_pendente.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
 
     if turma_id:
 
@@ -4845,6 +5674,15 @@ def relatorios():
         Aluno
     )
 
+    if session.get('tipo') == 'professor':
+
+        query_mensalidades = query_mensalidades.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
+
     if turma_id:
 
         query_mensalidades = query_mensalidades.filter(
@@ -4859,6 +5697,15 @@ def relatorios():
         Mensalidade.status == 'PAGO'
     )
 
+    if session.get('tipo') == 'professor':
+
+        query_mensalidades_pagas = query_mensalidades_pagas.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
+
     if turma_id:
 
         query_mensalidades_pagas = query_mensalidades_pagas.filter(
@@ -4872,6 +5719,15 @@ def relatorios():
     ).filter(
         Mensalidade.status == 'PENDENTE'
     )
+
+    if session.get('tipo') == 'professor':
+
+        query_mensalidades_pendentes = query_mensalidades_pendentes.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
 
     if turma_id:
 
@@ -4889,6 +5745,15 @@ def relatorios():
         Aluno
     )
 
+    if session.get('tipo') == 'professor':
+
+        query_presencas = query_presencas.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
+
     if turma_id:
 
         query_presencas = query_presencas.filter(
@@ -4903,6 +5768,15 @@ def relatorios():
         Presenca.status == 'PRESENTE'
     )
 
+    if session.get('tipo') == 'professor':
+
+        query_presentes = query_presentes.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
+
     if turma_id:
 
         query_presentes = query_presentes.filter(
@@ -4916,6 +5790,15 @@ def relatorios():
     ).filter(
         Presenca.status == 'FALTA'
     )
+
+    if session.get('tipo') == 'professor':
+
+        query_faltas = query_faltas.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
 
     if turma_id:
 
@@ -4944,6 +5827,15 @@ def relatorios():
     ).filter(
         Aluno.faixa != None
     )
+
+    if session.get('tipo') == 'professor':
+
+        query_faixas = query_faixas.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
 
     if turma_id:
 
@@ -5595,9 +6487,34 @@ def perfil_professor(id):
 @login_obrigatorio
 def turmas():
 
-    lista_turmas = Turma.query.order_by(
-        Turma.nome.asc()
-    ).all()
+    query_turmas = Turma.query
+
+    if session.get('tipo') == 'professor':
+
+        professor_id = session.get('professor_id')
+
+        if not professor_id:
+
+            flash(
+                'Seu usuário de professor ainda não está vinculado a um professor cadastrado. Procure o administrador.',
+                'warning'
+            )
+
+            lista_turmas = []
+
+        else:
+
+            lista_turmas = query_turmas.filter(
+                Turma.professor_id == professor_id
+            ).order_by(
+                Turma.nome.asc()
+            ).all()
+
+    else:
+
+        lista_turmas = query_turmas.order_by(
+            Turma.nome.asc()
+        ).all()
 
     return render_template(
         'turmas.html',
@@ -5693,6 +6610,7 @@ def cadastrar_turma():
         )
 
         db.session.add(nova_turma)
+
         db.session.commit()
 
         flash(
@@ -5837,6 +6755,7 @@ def excluir_turma(id):
         return redirect('/turmas')
 
     db.session.delete(turma)
+
     db.session.commit()
 
     flash(
@@ -5857,17 +6776,30 @@ def perfil_turma(id):
 
     turma = Turma.query.get_or_404(id)
 
+    if not usuario_pode_acessar_turma(turma):
+
+        flash(
+            'Você não tem permissão para acessar esta turma.',
+            'danger'
+        )
+
+        return redirect('/turmas')
+
     alunos = Aluno.query.filter_by(
         turma_id=turma.id
     ).order_by(
         Aluno.nome.asc()
     ).all()
 
-    alunos_disponiveis = Aluno.query.filter(
-        (Aluno.turma_id == None) | (Aluno.turma_id != turma.id)
-    ).order_by(
-        Aluno.nome.asc()
-    ).all()
+    alunos_disponiveis = []
+
+    if session.get('tipo') == 'admin':
+
+        alunos_disponiveis = Aluno.query.filter(
+            (Aluno.turma_id == None) | (Aluno.turma_id != turma.id)
+        ).order_by(
+            Aluno.nome.asc()
+        ).all()
 
     return render_template(
         'perfil_turma.html',
