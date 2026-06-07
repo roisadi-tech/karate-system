@@ -4732,13 +4732,56 @@ def backup():
 @login_obrigatorio
 def relatorios():
 
-    total_alunos = Aluno.query.count()
+    turma_id = request.args.get(
+        'turma_id',
+        ''
+    ).strip()
 
-    recebido = db.session.query(
+    turmas = Turma.query.order_by(
+        Turma.nome.asc()
+    ).all()
+
+    turma_selecionada = None
+
+    if turma_id:
+
+        turma_selecionada = Turma.query.get(
+            turma_id
+        )
+
+    # =====================================
+    # ALUNOS
+    # =====================================
+
+    query_alunos = Aluno.query
+
+    if turma_id:
+
+        query_alunos = query_alunos.filter(
+            Aluno.turma_id == int(turma_id)
+        )
+
+    total_alunos = query_alunos.count()
+
+    # =====================================
+    # FINANCEIRO
+    # =====================================
+
+    query_recebido = db.session.query(
         db.func.sum(Mensalidade.valor)
+    ).join(
+        Aluno
     ).filter(
         Mensalidade.status == 'PAGO'
-    ).scalar()
+    )
+
+    if turma_id:
+
+        query_recebido = query_recebido.filter(
+            Aluno.turma_id == int(turma_id)
+        )
+
+    recebido = query_recebido.scalar()
 
     if recebido is None:
 
@@ -4746,11 +4789,21 @@ def relatorios():
 
     recebido = float(recebido)
 
-    pendente = db.session.query(
+    query_pendente = db.session.query(
         db.func.sum(Mensalidade.valor)
+    ).join(
+        Aluno
     ).filter(
         Mensalidade.status == 'PENDENTE'
-    ).scalar()
+    )
+
+    if turma_id:
+
+        query_pendente = query_pendente.filter(
+            Aluno.turma_id == int(turma_id)
+        )
+
+    pendente = query_pendente.scalar()
 
     if pendente is None:
 
@@ -4775,22 +4828,121 @@ def relatorios():
             1
         )
 
-    total_mensalidades = Mensalidade.query.count()
+    # =====================================
+    # MENSALIDADES
+    # =====================================
 
-    mensalidades_pagas = Mensalidade.query.filter_by(
-        status='PAGO'
-    ).count()
+    query_mensalidades = Mensalidade.query.join(
+        Aluno
+    )
 
-    mensalidades_pendentes = Mensalidade.query.filter_by(
-        status='PENDENTE'
-    ).count()
+    if turma_id:
 
-    faixas = db.session.query(
+        query_mensalidades = query_mensalidades.filter(
+            Aluno.turma_id == int(turma_id)
+        )
+
+    total_mensalidades = query_mensalidades.count()
+
+    query_mensalidades_pagas = Mensalidade.query.join(
+        Aluno
+    ).filter(
+        Mensalidade.status == 'PAGO'
+    )
+
+    if turma_id:
+
+        query_mensalidades_pagas = query_mensalidades_pagas.filter(
+            Aluno.turma_id == int(turma_id)
+        )
+
+    mensalidades_pagas = query_mensalidades_pagas.count()
+
+    query_mensalidades_pendentes = Mensalidade.query.join(
+        Aluno
+    ).filter(
+        Mensalidade.status == 'PENDENTE'
+    )
+
+    if turma_id:
+
+        query_mensalidades_pendentes = query_mensalidades_pendentes.filter(
+            Aluno.turma_id == int(turma_id)
+        )
+
+    mensalidades_pendentes = query_mensalidades_pendentes.count()
+
+    # =====================================
+    # PRESENÇAS
+    # =====================================
+
+    query_presencas = Presenca.query.join(
+        Aluno
+    )
+
+    if turma_id:
+
+        query_presencas = query_presencas.filter(
+            Aluno.turma_id == int(turma_id)
+        )
+
+    total_presencas = query_presencas.count()
+
+    query_presentes = Presenca.query.join(
+        Aluno
+    ).filter(
+        Presenca.status == 'PRESENTE'
+    )
+
+    if turma_id:
+
+        query_presentes = query_presentes.filter(
+            Aluno.turma_id == int(turma_id)
+        )
+
+    total_presentes = query_presentes.count()
+
+    query_faltas = Presenca.query.join(
+        Aluno
+    ).filter(
+        Presenca.status == 'FALTA'
+    )
+
+    if turma_id:
+
+        query_faltas = query_faltas.filter(
+            Aluno.turma_id == int(turma_id)
+        )
+
+    total_faltas = query_faltas.count()
+
+    percentual_frequencia = 0
+
+    if total_presencas > 0:
+
+        percentual_frequencia = round(
+            (total_presentes / total_presencas) * 100,
+            1
+        )
+
+    # =====================================
+    # FAIXAS
+    # =====================================
+
+    query_faixas = db.session.query(
         Aluno.faixa,
         db.func.count(Aluno.id)
     ).filter(
         Aluno.faixa != None
-    ).group_by(
+    )
+
+    if turma_id:
+
+        query_faixas = query_faixas.filter(
+            Aluno.turma_id == int(turma_id)
+        )
+
+    faixas = query_faixas.group_by(
         Aluno.faixa
     ).order_by(
         db.func.count(Aluno.id).desc()
@@ -4798,6 +4950,9 @@ def relatorios():
 
     return render_template(
         'relatorios.html',
+        turmas=turmas,
+        turma_id=turma_id,
+        turma_selecionada=turma_selecionada,
         total_alunos=total_alunos,
         recebido=recebido,
         pendente=pendente,
@@ -4807,6 +4962,10 @@ def relatorios():
         total_mensalidades=total_mensalidades,
         mensalidades_pagas=mensalidades_pagas,
         mensalidades_pendentes=mensalidades_pendentes,
+        total_presencas=total_presencas,
+        total_presentes=total_presentes,
+        total_faltas=total_faltas,
+        percentual_frequencia=percentual_frequencia,
         faixas=faixas
     )
 

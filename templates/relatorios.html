@@ -9,19 +9,29 @@
     <div>
 
         <h2 class="fw-bold">
-            📈 Relatórios Gerais
+            📈 Relatórios
         </h2>
 
         <p class="text-muted mb-0">
-            Visão estratégica da academia
+
+            {% if turma_selecionada %}
+
+                Visão estratégica da turma {{ turma_selecionada.nome }}
+
+            {% else %}
+
+                Visão estratégica geral da academia
+
+            {% endif %}
+
         </p>
 
     </div>
 
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap">
 
         <a
-            href="/alunos"
+            href="/alunos{% if turma_id %}?turma_id={{ turma_id }}{% endif %}"
             class="btn btn-dark"
         >
 
@@ -32,7 +42,7 @@
         </a>
 
         <a
-            href="/cobrar"
+            href="/cobrar{% if turma_id %}?turma_id={{ turma_id }}{% endif %}"
             class="btn btn-danger"
         >
 
@@ -45,6 +55,136 @@
     </div>
 
 </div>
+
+<!-- FILTRO POR TURMA -->
+
+<div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+
+        <div>
+
+            <h4 class="fw-bold mb-1">
+                Filtrar Relatório por Turma
+            </h4>
+
+            <small class="text-muted">
+                Escolha uma turma para visualizar os dados específicos dela
+            </small>
+
+        </div>
+
+        {% if turma_selecionada %}
+
+            <span class="badge bg-info text-dark p-2">
+                {{ turma_selecionada.nome }}
+            </span>
+
+        {% else %}
+
+            <span class="badge bg-dark p-2">
+                Relatório geral
+            </span>
+
+        {% endif %}
+
+    </div>
+
+    <form method="GET">
+
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-8">
+
+                <label class="form-label fw-semibold">
+                    Turma
+                </label>
+
+                <select
+                    name="turma_id"
+                    class="form-select form-select-lg"
+                >
+
+                    <option value="">
+                        Todas as turmas
+                    </option>
+
+                    {% for turma in turmas %}
+
+                        <option
+                            value="{{ turma.id }}"
+                            {% if turma_id|string == turma.id|string %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ turma.nome }}
+
+                            {% if turma.professor %}
+                                — Prof. {{ turma.professor.nome }}
+                            {% endif %}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div class="col-md-2 d-grid">
+
+                <button class="btn btn-primary btn-lg">
+
+                    <i class="bi bi-search"></i>
+                    Filtrar
+
+                </button>
+
+            </div>
+
+            <div class="col-md-2 d-grid">
+
+                <a
+                    href="/relatorios"
+                    class="btn btn-outline-secondary btn-lg"
+                >
+                    Limpar
+                </a>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+<!-- AVISO DA TURMA SELECIONADA -->
+
+{% if turma_selecionada %}
+
+<div class="alert alert-info mb-4">
+
+    <i class="bi bi-diagram-3-fill"></i>
+
+    Exibindo relatório da turma:
+
+    <strong>
+        {{ turma_selecionada.nome }}
+    </strong>
+
+    {% if turma_selecionada.professor %}
+
+        — Professor:
+
+        <strong>
+            {{ turma_selecionada.professor.nome }}
+        </strong>
+
+    {% endif %}
+
+</div>
+
+{% endif %}
 
 <!-- CARDS PRINCIPAIS -->
 
@@ -314,6 +454,84 @@
 
 </div>
 
+<!-- CARDS DE FREQUÊNCIA -->
+
+<div class="row g-4 mb-4">
+
+    <!-- TOTAL PRESENÇAS -->
+
+    <div class="col-md-3">
+
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+
+            <small class="text-muted">
+                Registros de Frequência
+            </small>
+
+            <h2 class="fw-bold mt-2 text-primary">
+                {{ total_presencas }}
+            </h2>
+
+        </div>
+
+    </div>
+
+    <!-- PRESENTES -->
+
+    <div class="col-md-3">
+
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+
+            <small class="text-muted">
+                Presenças
+            </small>
+
+            <h2 class="fw-bold mt-2 text-success">
+                {{ total_presentes }}
+            </h2>
+
+        </div>
+
+    </div>
+
+    <!-- FALTAS -->
+
+    <div class="col-md-3">
+
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+
+            <small class="text-muted">
+                Faltas
+            </small>
+
+            <h2 class="fw-bold mt-2 text-danger">
+                {{ total_faltas }}
+            </h2>
+
+        </div>
+
+    </div>
+
+    <!-- FREQUÊNCIA -->
+
+    <div class="col-md-3">
+
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+
+            <small class="text-muted">
+                Frequência Geral
+            </small>
+
+            <h2 class="fw-bold mt-2 text-warning">
+                {{ percentual_frequencia }}%
+            </h2>
+
+        </div>
+
+    </div>
+
+</div>
+
 <!-- RESUMO FINANCEIRO -->
 
 <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
@@ -337,7 +555,7 @@
         </div>
 
         <a
-            href="/mensalidades"
+            href="/mensalidades{% if turma_id %}?turma_id={{ turma_id }}{% endif %}"
             class="btn btn-sm btn-dark rounded-3"
         >
 
@@ -383,6 +601,91 @@
             >
 
                 Nenhum dado financeiro cadastrado
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+<!-- RESUMO DE FREQUÊNCIA -->
+
+<div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+
+        <div>
+
+            <h4 class="fw-bold mb-1">
+                Resumo de Frequência
+            </h4>
+
+            <small class="text-muted">
+                Relação entre presenças e faltas registradas
+            </small>
+
+        </div>
+
+        {% if turma_id %}
+
+            <a
+                href="/frequencia_turma/{{ turma_id }}"
+                class="btn btn-sm btn-primary rounded-3"
+            >
+                Ver Frequência da Turma
+            </a>
+
+        {% else %}
+
+            <a
+                href="/presencas"
+                class="btn btn-sm btn-primary rounded-3"
+            >
+                Ver Presenças
+            </a>
+
+        {% endif %}
+
+    </div>
+
+    <div
+        class="progress"
+        style="
+            height: 32px;
+            border-radius: 30px;
+        "
+    >
+
+        {% if total_presencas > 0 %}
+
+            <div
+                class="progress-bar bg-success fw-semibold"
+                style="width: {{ percentual_frequencia }}%;"
+            >
+
+                Presenças {{ percentual_frequencia }}%
+
+            </div>
+
+            <div
+                class="progress-bar bg-danger fw-semibold"
+                style="width: {{ 100 - percentual_frequencia }}%;"
+            >
+
+                Faltas {{ 100 - percentual_frequencia }}%
+
+            </div>
+
+        {% else %}
+
+            <div
+                class="progress-bar bg-secondary fw-semibold"
+                style="width: 100%;"
+            >
+
+                Nenhum dado de frequência cadastrado
 
             </div>
 
