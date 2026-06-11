@@ -13,7 +13,17 @@
         </h2>
 
         <p class="text-muted mb-0">
-            Dados completos, frequência, mensalidades e exames
+
+            {% if session.tipo == 'admin' %}
+
+                Dados completos, frequência, mensalidades e exames
+
+            {% else %}
+
+                Dados, frequência, mensalidades e exames do aluno da sua turma
+
+            {% endif %}
+
         </p>
 
     </div>
@@ -30,6 +40,18 @@
     </a>
 
 </div>
+
+{% if session.tipo == 'professor' %}
+
+    <div class="alert alert-info mb-4">
+
+        <i class="bi bi-info-circle-fill"></i>
+
+        Você está visualizando um aluno vinculado às suas turmas.
+
+    </div>
+
+{% endif %}
 
 <div class="row g-4">
 
@@ -127,9 +149,13 @@
                     style="background: #8b4513;"
                 >
 
-            {% else %}
+            {% elif aluno.faixa == 'Preta' %}
 
                 <span class="badge bg-dark p-2 px-3 mb-3">
+
+            {% else %}
+
+                <span class="badge bg-secondary p-2 px-3 mb-3">
 
             {% endif %}
 
@@ -173,7 +199,17 @@
 
                 <p>
                     <strong>WhatsApp:</strong>
-                    {{ formatar_whatsapp(aluno.whatsapp) }}
+
+                    {% if aluno.whatsapp %}
+
+                        {{ formatar_whatsapp(aluno.whatsapp) }}
+
+                    {% else %}
+
+                        Não informado
+
+                    {% endif %}
+
                 </p>
 
                 <p>
@@ -306,6 +342,23 @@
                 <i class="bi bi-image-fill"></i>
                 Baixar Carteirinha PNG
             </a>
+
+            {% if session.tipo == 'admin' %}
+
+                <hr>
+
+                <!-- BOTÃO EXCLUIR -->
+
+                <a
+                    href="/excluir_aluno/{{ aluno.id }}"
+                    class="btn btn-outline-danger w-100 mt-2"
+                    onclick="return confirm('Deseja realmente excluir este aluno? Esta ação não poderá ser desfeita.')"
+                >
+                    <i class="bi bi-trash-fill"></i>
+                    Excluir Aluno
+                </a>
+
+            {% endif %}
 
         </div>
 

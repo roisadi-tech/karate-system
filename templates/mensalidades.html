@@ -13,7 +13,17 @@
         </h2>
 
         <p class="text-muted mb-0">
-            Controle financeiro mensal da academia
+
+            {% if session.tipo == 'admin' %}
+
+                Controle financeiro mensal da academia
+
+            {% else %}
+
+                Controle financeiro mensal dos alunos das suas turmas
+
+            {% endif %}
+
         </p>
 
     </div>
@@ -45,6 +55,18 @@
     </div>
 
 </div>
+
+{% if session.tipo == 'professor' %}
+
+    <div class="alert alert-info mb-4">
+
+        <i class="bi bi-info-circle-fill"></i>
+
+        Você está visualizando apenas mensalidades dos alunos vinculados às suas turmas.
+
+    </div>
+
+{% endif %}
 
 <!-- FILTRO MENSAL -->
 
@@ -132,7 +154,17 @@
                 >
 
                     <option value="">
-                        Todas as turmas
+
+                        {% if session.tipo == 'admin' %}
+
+                            Todas as turmas
+
+                        {% else %}
+
+                            Minhas turmas
+
+                        {% endif %}
+
                     </option>
 
                     {% for turma in turmas %}

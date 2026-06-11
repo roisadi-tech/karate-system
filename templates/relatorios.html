@@ -20,7 +20,15 @@
 
             {% else %}
 
-                Visão estratégica geral da academia
+                {% if session.tipo == 'admin' %}
+
+                    Visão estratégica geral da academia
+
+                {% else %}
+
+                    Visão estratégica das suas turmas
+
+                {% endif %}
 
             {% endif %}
 
@@ -56,6 +64,18 @@
 
 </div>
 
+{% if session.tipo == 'professor' %}
+
+    <div class="alert alert-info mb-4">
+
+        <i class="bi bi-info-circle-fill"></i>
+
+        Você está visualizando apenas relatórios dos alunos vinculados às suas turmas.
+
+    </div>
+
+{% endif %}
+
 <!-- FILTRO POR TURMA -->
 
 <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
@@ -69,7 +89,17 @@
             </h4>
 
             <small class="text-muted">
-                Escolha uma turma para visualizar os dados específicos dela
+
+                {% if session.tipo == 'admin' %}
+
+                    Escolha uma turma para visualizar os dados específicos dela
+
+                {% else %}
+
+                    Escolha uma das suas turmas para visualizar os dados específicos dela
+
+                {% endif %}
+
             </small>
 
         </div>
@@ -83,7 +113,17 @@
         {% else %}
 
             <span class="badge bg-dark p-2">
-                Relatório geral
+
+                {% if session.tipo == 'admin' %}
+
+                    Relatório geral
+
+                {% else %}
+
+                    Minhas turmas
+
+                {% endif %}
+
             </span>
 
         {% endif %}
@@ -106,7 +146,17 @@
                 >
 
                     <option value="">
-                        Todas as turmas
+
+                        {% if session.tipo == 'admin' %}
+
+                            Todas as turmas
+
+                        {% else %}
+
+                            Minhas turmas
+
+                        {% endif %}
+
                     </option>
 
                     {% for turma in turmas %}
@@ -201,7 +251,17 @@
                 <div>
 
                     <small class="text-muted">
-                        Total de Alunos
+
+                        {% if session.tipo == 'admin' %}
+
+                            Total de Alunos
+
+                        {% else %}
+
+                            Meus Alunos
+
+                        {% endif %}
+
                     </small>
 
                     <h2 class="fw-bold mt-2">

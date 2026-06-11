@@ -661,151 +661,155 @@
 
     <!-- MENU -->
 
-    <nav class="nav flex-column">
+<nav class="nav flex-column">
 
-        <div class="menu-label">
-            Principal
-        </div>
+    <div class="menu-label">
+        Principal
+    </div>
 
-        <a
-            href="/"
-            class="nav-link {% if request.path == '/' %}active{% endif %}"
-        >
-            <i class="bi bi-speedometer2"></i>
-            Dashboard
-        </a>
+    <a
+        href="/"
+        class="nav-link {% if request.path == '/' %}active{% endif %}"
+    >
+        <i class="bi bi-speedometer2"></i>
+        Dashboard
+    </a>
 
-        <div class="menu-label">
-            Turmas
-        </div>
+    <div class="menu-label">
+        Turmas
+    </div>
 
-        <a
-            href="/turmas"
-            class="nav-link {% if request.path.startswith('/turmas') or request.path.startswith('/turma/') or request.path.startswith('/cadastrar_turma') or request.path.startswith('/editar_turma') %}active{% endif %}"
-        >
-            <i class="bi bi-diagram-3-fill"></i>
-            Turmas
-        </a>
+    <a
+        href="/turmas"
+        class="nav-link {% if request.path.startswith('/turmas') or request.path.startswith('/turma/') or request.path.startswith('/cadastrar_turma') or request.path.startswith('/editar_turma') %}active{% endif %}"
+    >
+        <i class="bi bi-diagram-3-fill"></i>
+        Turmas
+    </a>
+
+    {% if session.tipo == 'admin' %}
 
         <a
             href="/professores"
-            class="nav-link {% if request.path.startswith('/professores') or request.path.startswith('/cadastrar_professor') or request.path.startswith('/editar_professor') %}active{% endif %}"
+            class="nav-link {% if request.path.startswith('/professores') or request.path.startswith('/professor/') or request.path.startswith('/cadastrar_professor') or request.path.startswith('/editar_professor') %}active{% endif %}"
         >
             <i class="bi bi-person-badge-fill"></i>
             Professores
         </a>
 
-        <a
-            href="/alunos"
-            class="nav-link {% if request.path.startswith('/alunos') or request.path.startswith('/aluno') or request.path.startswith('/cadastrar_aluno') or request.path.startswith('/editar_aluno') %}active{% endif %}"
-        >
-            <i class="bi bi-people"></i>
-            Alunos
-        </a>
+    {% endif %}
+
+    <a
+        href="/alunos"
+        class="nav-link {% if request.path.startswith('/alunos') or request.path.startswith('/aluno') or request.path.startswith('/perfil_aluno') or request.path.startswith('/cadastrar_aluno') or request.path.startswith('/editar_aluno') %}active{% endif %}"
+    >
+        <i class="bi bi-people"></i>
+        Alunos
+    </a>
+
+    <div class="menu-label">
+        Frequência
+    </div>
+
+    <a
+        href="/presencas"
+        class="nav-link {% if request.path.startswith('/presencas') or request.path.startswith('/editar_presenca') %}active{% endif %}"
+    >
+        <i class="bi bi-check2-square"></i>
+        Presenças
+    </a>
+
+    <a
+        href="/frequencia"
+        class="nav-link {% if request.path.startswith('/frequencia') or request.path.startswith('/frequencia_turma') %}active{% endif %}"
+    >
+        <i class="bi bi-bar-chart-line"></i>
+        Frequência
+    </a>
+
+    <div class="menu-label">
+        Financeiro
+    </div>
+
+    <a
+        href="/mensalidades"
+        class="nav-link {% if request.path.startswith('/mensalidades') or request.path.startswith('/editar_mensalidade') %}active{% endif %}"
+    >
+        <i class="bi bi-cash-stack"></i>
+        Mensalidades
+    </a>
+
+    <a
+        href="/cobrar"
+        class="nav-link {% if request.path.startswith('/cobrar') %}active{% endif %}"
+    >
+        <i class="bi bi-whatsapp"></i>
+        Cobranças
+    </a>
+
+    <div class="menu-label">
+        Gestão
+    </div>
+
+    <a
+        href="/aniversariantes"
+        class="nav-link {% if request.path.startswith('/aniversariantes') %}active{% endif %}"
+    >
+        <i class="bi bi-gift-fill"></i>
+        Aniversariantes
+    </a>
+
+    <a
+        href="/exames"
+        class="nav-link {% if request.path.startswith('/exames') %}active{% endif %}"
+    >
+        <i class="bi bi-award"></i>
+        Exames
+    </a>
+
+    <a
+        href="/relatorios"
+        class="nav-link {% if request.path.startswith('/relatorios') %}active{% endif %}"
+    >
+        <i class="bi bi-graph-up-arrow"></i>
+        Relatórios
+    </a>
+
+    {% if session.tipo == 'admin' %}
 
         <div class="menu-label">
-            Frequência
+            Administração
         </div>
 
         <a
-            href="/presencas"
-            class="nav-link {% if request.path.startswith('/presencas') %}active{% endif %}"
+            href="/usuarios"
+            class="nav-link {% if request.path.startswith('/usuarios') or request.path.startswith('/cadastrar_usuario') or request.path.startswith('/editar_usuario') %}active{% endif %}"
         >
-            <i class="bi bi-check2-square"></i>
-            Presenças
+            <i class="bi bi-person-gear"></i>
+            Usuários
         </a>
 
         <a
-            href="/frequencia"
-            class="nav-link {% if request.path.startswith('/frequencia') %}active{% endif %}"
+            href="/backup"
+            class="nav-link {% if request.path.startswith('/backup') %}active{% endif %}"
         >
-            <i class="bi bi-bar-chart-line"></i>
-            Frequência
+            <i class="bi bi-download"></i>
+            Backup
         </a>
 
-        <div class="menu-label">
-            Financeiro
-        </div>
+    {% endif %}
 
-        <a
-            href="/mensalidades"
-            class="nav-link {% if request.path.startswith('/mensalidades') or request.path.startswith('/editar_mensalidade') %}active{% endif %}"
-        >
-            <i class="bi bi-cash-stack"></i>
-            Mensalidades
-        </a>
+    <hr class="text-secondary">
 
-        <a
-            href="/cobrar"
-            class="nav-link {% if request.path.startswith('/cobrar') %}active{% endif %}"
-        >
-            <i class="bi bi-whatsapp"></i>
-            Cobranças
-        </a>
+    <a
+        href="/logout"
+        class="nav-link logout"
+    >
+        <i class="bi bi-box-arrow-right"></i>
+        Sair
+    </a>
 
-        <div class="menu-label">
-            Gestão
-        </div>
-
-        <a
-            href="/aniversariantes"
-            class="nav-link {% if request.path.startswith('/aniversariantes') %}active{% endif %}"
-        >
-            <i class="bi bi-gift-fill"></i>
-            Aniversariantes
-        </a>
-
-        <a
-            href="/exames"
-            class="nav-link {% if request.path.startswith('/exames') %}active{% endif %}"
-        >
-            <i class="bi bi-award"></i>
-            Exames
-        </a>
-
-        <a
-            href="/relatorios"
-            class="nav-link {% if request.path.startswith('/relatorios') %}active{% endif %}"
-        >
-            <i class="bi bi-graph-up-arrow"></i>
-            Relatórios
-        </a>
-
-        {% if session.tipo == 'admin' %}
-
-            <div class="menu-label">
-                Administração
-            </div>
-
-            <a
-                href="/usuarios"
-                class="nav-link {% if request.path.startswith('/usuarios') or request.path.startswith('/cadastrar_usuario') or request.path.startswith('/editar_usuario') %}active{% endif %}"
-            >
-                <i class="bi bi-person-gear"></i>
-                Usuários
-            </a>
-
-            <a
-                href="/backup"
-                class="nav-link {% if request.path.startswith('/backup') %}active{% endif %}"
-            >
-                <i class="bi bi-download"></i>
-                Backup
-            </a>
-
-        {% endif %}
-
-        <hr class="text-secondary">
-
-        <a
-            href="/logout"
-            class="nav-link logout"
-        >
-            <i class="bi bi-box-arrow-right"></i>
-            Sair
-        </a>
-
-    </nav>
+</nav>
 
 </div>
 

@@ -13,7 +13,17 @@
         </h2>
 
         <p class="text-muted mb-0">
-            Gerencie todos os alunos da academia
+
+            {% if session.tipo == 'admin' %}
+
+                Gerencie todos os alunos da academia
+
+            {% else %}
+
+                Visualize e gerencie os alunos das suas turmas
+
+            {% endif %}
+
         </p>
 
     </div>
@@ -31,6 +41,18 @@
 
 </div>
 
+{% if session.tipo == 'professor' %}
+
+    <div class="alert alert-info mb-4">
+
+        <i class="bi bi-info-circle-fill"></i>
+
+        Você está visualizando apenas alunos vinculados às suas turmas.
+
+    </div>
+
+{% endif %}
+
 <!-- CARDS -->
 
 <div class="row g-4 mb-4">
@@ -46,7 +68,17 @@
                 <div>
 
                     <small class="text-muted">
-                        Total de Alunos
+
+                        {% if session.tipo == 'admin' %}
+
+                            Total de Alunos
+
+                        {% else %}
+
+                            Meus Alunos
+
+                        {% endif %}
+
                     </small>
 
                     <h2 class="fw-bold mt-2">
@@ -193,7 +225,17 @@
                 >
 
                     <option value="">
-                        Todas as turmas
+
+                        {% if session.tipo == 'admin' %}
+
+                            Todas as turmas
+
+                        {% else %}
+
+                            Minhas turmas
+
+                        {% endif %}
+
                     </option>
 
                     {% for turma in lista_turmas %}
@@ -570,6 +612,31 @@
 
                                 </a>
 
+                                <!-- CARTEIRINHA PDF -->
+
+                                <a
+                                    href="/carteirinha/{{ aluno.id }}"
+                                    class="btn btn-success btn-sm rounded-3"
+                                    title="Carteirinha PDF"
+                                    target="_blank"
+                                >
+
+                                    <i class="bi bi-file-earmark-pdf-fill"></i>
+
+                                </a>
+
+                                <!-- CARTEIRINHA PNG -->
+
+                                <a
+                                    href="/carteirinha_png/{{ aluno.id }}"
+                                    class="btn btn-warning btn-sm rounded-3 text-white"
+                                    title="Baixar Carteirinha PNG"
+                                >
+
+                                    <i class="bi bi-image-fill"></i>
+
+                                </a>
+
                                 <!-- EXCLUIR -->
 
                                 {% if session.tipo == 'admin' %}
@@ -616,11 +683,23 @@
 
                                 </h5>
 
-                                <p>
+                                {% if session.tipo == 'admin' %}
 
-                                    Cadastre o primeiro aluno da academia
+                                    <p>
 
-                                </p>
+                                        Cadastre o primeiro aluno da academia
+
+                                    </p>
+
+                                {% else %}
+
+                                    <p>
+
+                                        Nenhum aluno foi encontrado nas suas turmas
+
+                                    </p>
+
+                                {% endif %}
 
                             </div>
 

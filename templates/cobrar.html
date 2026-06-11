@@ -13,7 +13,17 @@
         </h2>
 
         <p class="text-muted mb-0">
-            Controle de mensalidades pendentes e cobranças via WhatsApp
+
+            {% if session.tipo == 'admin' %}
+
+                Controle de mensalidades pendentes e cobranças via WhatsApp
+
+            {% else %}
+
+                Controle de mensalidades pendentes dos alunos das suas turmas
+
+            {% endif %}
+
         </p>
 
     </div>
@@ -32,7 +42,7 @@
         </a>
 
         <a
-            href="/relatorios"
+            href="/relatorios{% if turma_id %}?turma_id={{ turma_id }}{% endif %}"
             class="btn btn-outline-dark"
         >
 
@@ -45,6 +55,18 @@
     </div>
 
 </div>
+
+{% if session.tipo == 'professor' %}
+
+    <div class="alert alert-info mb-4">
+
+        <i class="bi bi-info-circle-fill"></i>
+
+        Você está visualizando apenas cobranças dos alunos vinculados às suas turmas.
+
+    </div>
+
+{% endif %}
 
 <!-- FILTRO POR TURMA -->
 
@@ -59,7 +81,17 @@
             </h4>
 
             <small class="text-muted">
-                Selecione uma turma para visualizar apenas as cobranças dela
+
+                {% if session.tipo == 'admin' %}
+
+                    Selecione uma turma para visualizar apenas as cobranças dela
+
+                {% else %}
+
+                    Selecione uma das suas turmas para visualizar as cobranças
+
+                {% endif %}
+
             </small>
 
         </div>
@@ -73,7 +105,17 @@
         {% else %}
 
             <span class="badge bg-dark p-2">
-                Todas as turmas
+
+                {% if session.tipo == 'admin' %}
+
+                    Todas as turmas
+
+                {% else %}
+
+                    Minhas turmas
+
+                {% endif %}
+
             </span>
 
         {% endif %}
@@ -96,7 +138,17 @@
                 >
 
                     <option value="">
-                        Todas as turmas
+
+                        {% if session.tipo == 'admin' %}
+
+                            Todas as turmas
+
+                        {% else %}
+
+                            Minhas turmas
+
+                        {% endif %}
+
                     </option>
 
                     {% for turma in turmas %}

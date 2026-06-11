@@ -2205,6 +2205,17 @@ def carteirinha_aluno(id):
 
     aluno = Aluno.query.get_or_404(id)
 
+    if session.get('tipo') == 'professor':
+
+        if not aluno.turma_relacao or not usuario_pode_acessar_turma(aluno.turma_relacao):
+
+            flash(
+                'Você não tem permissão para gerar carteirinha deste aluno.',
+                'danger'
+            )
+
+            return redirect('/alunos')
+
     arte_final = gerar_arte_carteirinha(
         aluno
     )
@@ -2217,10 +2228,6 @@ def carteirinha_aluno(id):
         )
 
         return redirect(f'/aluno/{id}')
-
-    # =====================================
-    # GERAR PDF PARA IMPRESSÃO
-    # =====================================
 
     img_buffer = BytesIO()
 
@@ -2298,6 +2305,17 @@ def carteirinha_aluno_png(id):
 
     aluno = Aluno.query.get_or_404(id)
 
+    if session.get('tipo') == 'professor':
+
+        if not aluno.turma_relacao or not usuario_pode_acessar_turma(aluno.turma_relacao):
+
+            flash(
+                'Você não tem permissão para gerar carteirinha deste aluno.',
+                'danger'
+            )
+
+            return redirect('/alunos')
+
     arte_final = gerar_arte_carteirinha(
         aluno
     )
@@ -2353,6 +2371,26 @@ def validar_carteirinha(id):
     if 'usuario' in session:
 
         usuario_logado = True
+
+        if session.get('tipo') == 'professor':
+
+            if not aluno.turma_relacao or not usuario_pode_acessar_turma(aluno.turma_relacao):
+
+                flash(
+                    'Você não tem permissão para registrar presença deste aluno.',
+                    'danger'
+                )
+
+                return render_template(
+                    'validar_carteirinha.html',
+                    aluno=aluno,
+                    idade=idade,
+                    matricula=matricula,
+                    validade=validade,
+                    presenca_registrada=presenca_registrada,
+                    presenca_ja_existia=presenca_ja_existia,
+                    usuario_logado=usuario_logado
+                )
 
         hoje = date.today().strftime('%Y-%m-%d')
 
@@ -3672,6 +3710,11 @@ def exportar_mensalidades_excel():
     ano = request.args.get('ano')
     filtro = request.args.get('filtro', 'todas')
 
+    turma_id = request.args.get(
+        'turma_id',
+        ''
+    ).strip()
+
     if not mes:
 
         mes = str(hoje.month).zfill(2)
@@ -3684,9 +3727,77 @@ def exportar_mensalidades_excel():
 
     hoje_str = hoje.strftime('%Y-%m-%d')
 
-    query = Mensalidade.query.filter(
+    # =====================================
+    # VALIDAR PROFESSOR VINCULADO
+    # =====================================
+
+    if session.get('tipo') == 'professor':
+
+        professor_id = session.get('professor_id')
+
+        if not professor_id:
+
+            flash(
+                'Seu usuário de professor ainda não está vinculado a um professor cadastrado. Procure o administrador.',
+                'warning'
+            )
+
+            return redirect('/turmas')
+
+    # =====================================
+    # VALIDAR TURMA FILTRADA
+    # =====================================
+
+    turma_selecionada = None
+
+    if turma_id:
+
+        turma_selecionada = Turma.query.get(
+            turma_id
+        )
+
+        if not turma_selecionada:
+
+            flash(
+                'Turma inválida.',
+                'warning'
+            )
+
+            return redirect('/mensalidades')
+
+        if not usuario_pode_acessar_turma(turma_selecionada):
+
+            flash(
+                'Você não tem permissão para exportar mensalidades desta turma.',
+                'danger'
+            )
+
+            return redirect('/mensalidades')
+
+    # =====================================
+    # BUSCAR MENSALIDADES
+    # =====================================
+
+    query = Mensalidade.query.join(
+        Aluno
+    ).filter(
         Mensalidade.vencimento.like(f'{prefixo_data}%')
     )
+
+    if session.get('tipo') == 'professor':
+
+        query = query.join(
+            Turma,
+            Aluno.turma_id == Turma.id
+        ).filter(
+            Turma.professor_id == session.get('professor_id')
+        )
+
+    if turma_id:
+
+        query = query.filter(
+            Aluno.turma_id == int(turma_id)
+        )
 
     if filtro == 'pagas':
 
@@ -3744,9 +3855,15 @@ def exportar_mensalidades_excel():
 
     ws.title = 'Mensalidades'
 
-    ws.merge_cells('A1:E1')
+    ws.merge_cells('A1:F1')
 
-    ws['A1'] = f'Mensalidades - {nome_mes} / {ano}'
+    titulo = f'Mensalidades - {nome_mes} / {ano}'
+
+    if turma_selecionada:
+
+        titulo += f' - Turma: {turma_selecionada.nome}'
+
+    ws['A1'] = titulo
 
     ws['A1'].font = Font(
         bold=True,
@@ -3766,6 +3883,7 @@ def exportar_mensalidades_excel():
 
     cabecalhos = [
         'Aluno',
+        'Turma',
         'Valor',
         'Vencimento',
         'Status',
@@ -3812,7 +3930,7 @@ def exportar_mensalidades_excel():
             pendente += float(valor)
 
         nome_aluno = 'Sem aluno'
-
+        nome_turma = 'Sem turma'
         whatsapp = ''
 
         if mensalidade.aluno:
@@ -3820,8 +3938,13 @@ def exportar_mensalidades_excel():
             nome_aluno = mensalidade.aluno.nome
             whatsapp = mensalidade.aluno.whatsapp or ''
 
+            if mensalidade.aluno.turma_relacao:
+
+                nome_turma = mensalidade.aluno.turma_relacao.nome
+
         ws.append([
             nome_aluno,
+            nome_turma,
             float(valor),
             formatar_data(mensalidade.vencimento),
             mensalidade.status,
@@ -3831,29 +3954,35 @@ def exportar_mensalidades_excel():
     linha_resumo = ws.max_row + 2
 
     ws[f'A{linha_resumo}'] = 'Resumo'
+
     ws[f'A{linha_resumo}'].font = Font(
         bold=True,
         size=13
     )
 
     ws[f'A{linha_resumo + 1}'] = 'Total'
-    ws[f'B{linha_resumo + 1}'] = total
+    ws[f'C{linha_resumo + 1}'] = total
 
     ws[f'A{linha_resumo + 2}'] = 'Recebido'
-    ws[f'B{linha_resumo + 2}'] = recebido
+    ws[f'C{linha_resumo + 2}'] = recebido
 
     ws[f'A{linha_resumo + 3}'] = 'Pendente'
-    ws[f'B{linha_resumo + 3}'] = pendente
+    ws[f'C{linha_resumo + 3}'] = pendente
 
     for linha in range(4, ws.max_row + 1):
 
-        ws[f'B{linha}'].number_format = 'R$ #,##0.00'
+        ws[f'C{linha}'].number_format = 'R$ #,##0.00'
+
+    ws[f'C{linha_resumo + 1}'].number_format = 'R$ #,##0.00'
+    ws[f'C{linha_resumo + 2}'].number_format = 'R$ #,##0.00'
+    ws[f'C{linha_resumo + 3}'].number_format = 'R$ #,##0.00'
 
     ws.column_dimensions['A'].width = 35
-    ws.column_dimensions['B'].width = 15
-    ws.column_dimensions['C'].width = 18
-    ws.column_dimensions['D'].width = 15
-    ws.column_dimensions['E'].width = 18
+    ws.column_dimensions['B'].width = 25
+    ws.column_dimensions['C'].width = 15
+    ws.column_dimensions['D'].width = 18
+    ws.column_dimensions['E'].width = 15
+    ws.column_dimensions['F'].width = 18
 
     for row in ws.iter_rows():
 
@@ -3869,7 +3998,17 @@ def exportar_mensalidades_excel():
 
     arquivo.seek(0)
 
-    nome_arquivo = f'mensalidades_{ano}_{mes}_{filtro}.xlsx'
+    nome_arquivo = f'mensalidades_{ano}_{mes}_{filtro}'
+
+    if turma_selecionada:
+
+        nome_turma_arquivo = secure_filename(
+            turma_selecionada.nome
+        )
+
+        nome_arquivo += f'_{nome_turma_arquivo}'
+
+    nome_arquivo += '.xlsx'
 
     return send_file(
         arquivo,
@@ -4740,6 +4879,21 @@ def recibo(id):
     import textwrap
 
     mensalidade = Mensalidade.query.get_or_404(id)
+
+    # =====================================
+    # PROTEÇÃO DE ACESSO
+    # =====================================
+
+    if session.get('tipo') == 'professor':
+
+        if not mensalidade.aluno or not mensalidade.aluno.turma_relacao or not usuario_pode_acessar_turma(mensalidade.aluno.turma_relacao):
+
+            flash(
+                'Você não tem permissão para gerar recibo desta mensalidade.',
+                'danger'
+            )
+
+            return redirect('/mensalidades')
 
     if mensalidade.status != 'PAGO':
 

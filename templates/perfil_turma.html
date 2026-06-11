@@ -11,12 +11,22 @@
         </h2>
 
         <p class="text-muted mb-0">
-            Perfil da turma e alunos vinculados
+
+            {% if session.tipo == 'admin' %}
+
+                Perfil da turma e alunos vinculados
+
+            {% else %}
+
+                Perfil da sua turma e alunos vinculados
+
+            {% endif %}
+
         </p>
 
     </div>
 
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap">
 
         <a
             href="/chamada_turma/{{ turma.id }}"
@@ -69,6 +79,18 @@
     </div>
 
 </div>
+
+{% if session.tipo == 'professor' %}
+
+    <div class="alert alert-info mb-4">
+
+        <i class="bi bi-info-circle-fill"></i>
+
+        Você está visualizando uma turma vinculada ao seu usuário de professor.
+
+    </div>
+
+{% endif %}
 
 <div class="row g-4 mb-4">
 
@@ -353,15 +375,15 @@
                                     <i class="bi bi-person-vcard-fill"></i>
                                 </a>
 
-                                {% if session.tipo == 'admin' %}
+                                <a
+                                    href="/editar_aluno/{{ aluno.id }}"
+                                    class="btn btn-primary btn-sm rounded-3"
+                                    title="Editar aluno"
+                                >
+                                    <i class="bi bi-pencil-fill"></i>
+                                </a>
 
-                                    <a
-                                        href="/editar_aluno/{{ aluno.id }}"
-                                        class="btn btn-primary btn-sm rounded-3"
-                                        title="Editar aluno"
-                                    >
-                                        <i class="bi bi-pencil-fill"></i>
-                                    </a>
+                                {% if session.tipo == 'admin' %}
 
                                     <a
                                         href="/turma/{{ turma.id }}/remover_aluno/{{ aluno.id }}"
@@ -399,9 +421,19 @@
                                     Nenhum aluno nesta turma
                                 </h5>
 
-                                <p>
-                                    Adicione alunos usando o campo acima.
-                                </p>
+                                {% if session.tipo == 'admin' %}
+
+                                    <p>
+                                        Adicione alunos usando o campo acima.
+                                    </p>
+
+                                {% else %}
+
+                                    <p>
+                                        Esta turma ainda não possui alunos vinculados.
+                                    </p>
+
+                                {% endif %}
 
                             </div>
 

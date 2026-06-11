@@ -11,7 +11,17 @@
         </h2>
 
         <p class="text-muted mb-0">
-            Gerencie as turmas da academia
+
+            {% if session.tipo == 'admin' %}
+
+                Gerencie as turmas da academia
+
+            {% else %}
+
+                Visualize as turmas vinculadas ao seu usuário
+
+            {% endif %}
+
         </p>
 
     </div>
@@ -30,6 +40,18 @@
 
 </div>
 
+{% if session.tipo == 'professor' %}
+
+    <div class="alert alert-info mb-4">
+
+        <i class="bi bi-info-circle-fill"></i>
+
+        Você está visualizando apenas as turmas vinculadas ao seu professor.
+
+    </div>
+
+{% endif %}
+
 <div class="row g-4 mb-4">
 
     <div class="col-md-4">
@@ -41,7 +63,17 @@
                 <div>
 
                     <small class="text-muted">
-                        Total de Turmas
+
+                        {% if session.tipo == 'admin' %}
+
+                            Total de Turmas
+
+                        {% else %}
+
+                            Minhas Turmas
+
+                        {% endif %}
+
                     </small>
 
                     <h2 class="fw-bold mt-2">
@@ -223,13 +255,27 @@
 
                                 <i class="bi bi-diagram-3 fs-1"></i>
 
-                                <h5 class="mt-3">
-                                    Nenhuma turma cadastrada
-                                </h5>
+                                {% if session.tipo == 'admin' %}
 
-                                <p>
-                                    Cadastre a primeira turma da academia
-                                </p>
+                                    <h5 class="mt-3">
+                                        Nenhuma turma cadastrada
+                                    </h5>
+
+                                    <p>
+                                        Cadastre a primeira turma da academia
+                                    </p>
+
+                                {% else %}
+
+                                    <h5 class="mt-3">
+                                        Nenhuma turma vinculada
+                                    </h5>
+
+                                    <p>
+                                        Seu usuário ainda não possui turmas vinculadas. Procure o administrador.
+                                    </p>
+
+                                {% endif %}
 
                             </div>
 

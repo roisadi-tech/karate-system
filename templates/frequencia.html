@@ -13,12 +13,34 @@
         </h2>
 
         <p class="text-muted mb-0">
-            Acompanhe o desempenho e presença dos alunos
+
+            {% if session.tipo == 'admin' %}
+
+                Acompanhe o desempenho e presença de todos os alunos
+
+            {% else %}
+
+                Acompanhe o desempenho e presença dos alunos das suas turmas
+
+            {% endif %}
+
         </p>
 
     </div>
 
 </div>
+
+{% if session.tipo == 'professor' %}
+
+    <div class="alert alert-info mb-4">
+
+        <i class="bi bi-info-circle-fill"></i>
+
+        Você está visualizando apenas a frequência dos alunos vinculados às suas turmas.
+
+    </div>
+
+{% endif %}
 
 <!-- CARDS -->
 
@@ -35,7 +57,17 @@
                 <div>
 
                     <small class="text-muted">
-                        Total de Alunos
+
+                        {% if session.tipo == 'admin' %}
+
+                            Total de Alunos
+
+                        {% else %}
+
+                            Meus Alunos
+
+                        {% endif %}
+
                     </small>
 
                     <h2 class="fw-bold mt-2">
@@ -188,7 +220,15 @@
 
             <small class="text-muted">
 
-                Desempenho geral dos alunos
+                {% if session.tipo == 'admin' %}
+
+                    Desempenho geral dos alunos
+
+                {% else %}
+
+                    Desempenho dos alunos das suas turmas
+
+                {% endif %}
 
             </small>
 
@@ -426,11 +466,23 @@
 
                             </h5>
 
-                            <p>
+                            {% if session.tipo == 'admin' %}
 
-                                Cadastre alunos e registre presenças para gerar o relatório.
+                                <p>
 
-                            </p>
+                                    Cadastre alunos e registre presenças para gerar o relatório.
+
+                                </p>
+
+                            {% else %}
+
+                                <p>
+
+                                    Nenhum aluno foi encontrado nas suas turmas.
+
+                                </p>
+
+                            {% endif %}
 
                         </div>
 
