@@ -20,7 +20,23 @@
 
     </div>
 
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap">
+
+        <a
+            href="/presencas"
+            class="btn btn-primary"
+        >
+            <i class="bi bi-check2-square"></i>
+            Presenças
+        </a>
+
+        <a
+            href="/frequencia_turma/{{ turma.id }}"
+            class="btn btn-success"
+        >
+            <i class="bi bi-bar-chart-line-fill"></i>
+            Frequência
+        </a>
 
         <a
             href="/turma/{{ turma.id }}"
@@ -33,6 +49,18 @@
     </div>
 
 </div>
+
+{% if session.tipo == 'professor' %}
+
+<div class="alert alert-info mb-4">
+
+    <i class="bi bi-info-circle-fill"></i>
+
+    Você está registrando chamada de uma turma vinculada ao seu usuário de professor.
+
+</div>
+
+{% endif %}
 
 <div class="card border-0 shadow-sm p-4 rounded-4 mb-4">
 
@@ -84,7 +112,17 @@
             </h4>
 
             <small class="text-muted">
-                Marque a presença ou falta de cada aluno
+
+                {% if session.tipo == 'admin' %}
+
+                    Marque a presença ou falta de cada aluno da turma
+
+                {% else %}
+
+                    Marque a presença ou falta dos alunos da sua turma
+
+                {% endif %}
+
             </small>
 
         </div>
@@ -103,36 +141,40 @@
             value="{{ data_chamada }}"
         >
 
+        {% if alunos|length > 0 %}
+
         <div class="d-flex gap-2 flex-wrap mb-4">
 
-    <button
-        type="button"
-        class="btn btn-success"
-        onclick="marcarTodos('PRESENTE')"
-    >
-        <i class="bi bi-check-circle-fill"></i>
-        Marcar todos como PRESENTE
-    </button>
+            <button
+                type="button"
+                class="btn btn-success"
+                onclick="marcarTodos('PRESENTE')"
+            >
+                <i class="bi bi-check-circle-fill"></i>
+                Marcar todos como PRESENTE
+            </button>
 
-    <button
-        type="button"
-        class="btn btn-danger"
-        onclick="marcarTodos('FALTA')"
-    >
-        <i class="bi bi-x-circle-fill"></i>
-        Marcar todos como FALTA
-    </button>
+            <button
+                type="button"
+                class="btn btn-danger"
+                onclick="marcarTodos('FALTA')"
+            >
+                <i class="bi bi-x-circle-fill"></i>
+                Marcar todos como FALTA
+            </button>
 
-    <button
-        type="button"
-        class="btn btn-outline-secondary"
-        onclick="limparMarcacoes()"
-    >
-        <i class="bi bi-eraser-fill"></i>
-        Limpar marcações
-    </button>
+            <button
+                type="button"
+                class="btn btn-outline-secondary"
+                onclick="limparMarcacoes()"
+            >
+                <i class="bi bi-eraser-fill"></i>
+                Limpar marcações
+            </button>
 
-</div>
+        </div>
+
+        {% endif %}
 
         <div class="table-responsive">
 
@@ -281,9 +323,19 @@
                                         Nenhum aluno nesta turma
                                     </h5>
 
-                                    <p>
-                                        Adicione alunos à turma antes de fazer a chamada.
-                                    </p>
+                                    {% if session.tipo == 'admin' %}
+
+                                        <p>
+                                            Adicione alunos à turma antes de fazer a chamada.
+                                        </p>
+
+                                    {% else %}
+
+                                        <p>
+                                            Esta turma ainda não possui alunos vinculados.
+                                        </p>
+
+                                    {% endif %}
 
                                 </div>
 
@@ -320,29 +372,29 @@
 
 <script>
 
-    function marcarTodos(status) {
+function marcarTodos(status) {
 
-        const radios = document.querySelectorAll(
-            'input[type="radio"][value="' + status + '"]'
-        );
+    const radios = document.querySelectorAll(
+        'input[type="radio"][value="' + status + '"]'
+    );
 
-        radios.forEach(function(radio) {
-            radio.checked = true;
-        });
+    radios.forEach(function(radio) {
+        radio.checked = true;
+    });
 
-    }
+}
 
-    function limparMarcacoes() {
+function limparMarcacoes() {
 
-        const radios = document.querySelectorAll(
-            'input[type="radio"]'
-        );
+    const radios = document.querySelectorAll(
+        'input[type="radio"]'
+    );
 
-        radios.forEach(function(radio) {
-            radio.checked = false;
-        });
+    radios.forEach(function(radio) {
+        radio.checked = false;
+    });
 
-    }
+}
 
 </script>
 

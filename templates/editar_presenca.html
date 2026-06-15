@@ -13,7 +13,17 @@
         </h2>
 
         <p class="text-muted mb-0">
-            Atualize o aluno, a data ou o status da presença
+
+            {% if session.tipo == 'admin' %}
+
+                Atualize o aluno, a data ou o status da presença
+
+            {% else %}
+
+                Atualize a presença de um aluno vinculado às suas turmas
+
+            {% endif %}
+
         </p>
 
     </div>
@@ -30,6 +40,18 @@
     </a>
 
 </div>
+
+{% if session.tipo == 'professor' %}
+
+    <div class="alert alert-info mb-4">
+
+        <i class="bi bi-info-circle-fill"></i>
+
+        Você pode editar apenas presenças de alunos vinculados às suas turmas.
+
+    </div>
+
+{% endif %}
 
 <!-- CARD -->
 
@@ -83,20 +105,60 @@
 
                     {% for aluno in alunos %}
 
-                    <option
-                        value="{{ aluno.id }}"
-                        {% if presenca.aluno_id == aluno.id %}
-                            selected
-                        {% endif %}
-                    >
+                        <option
+                            value="{{ aluno.id }}"
+                            {% if presenca.aluno_id == aluno.id %}
+                                selected
+                            {% endif %}
+                        >
 
-                        {{ aluno.nome }}
+                            {{ aluno.nome }}
 
-                    </option>
+                            {% if aluno.turma_relacao %}
+                                — {{ aluno.turma_relacao.nome }}
+                            {% else %}
+                                — Sem turma
+                            {% endif %}
+
+                        </option>
 
                     {% endfor %}
 
                 </select>
+
+                {% if alunos|length == 0 %}
+
+                    <small class="text-danger">
+
+                        {% if session.tipo == 'admin' %}
+
+                            Nenhum aluno encontrado.
+
+                        {% else %}
+
+                            Nenhum aluno das suas turmas foi encontrado.
+
+                        {% endif %}
+
+                    </small>
+
+                {% else %}
+
+                    <small class="text-muted">
+
+                        {% if session.tipo == 'admin' %}
+
+                            Selecione o aluno relacionado a esta presença.
+
+                        {% else %}
+
+                            A lista mostra apenas alunos das suas turmas.
+
+                        {% endif %}
+
+                    </small>
+
+                {% endif %}
 
             </div>
 
@@ -183,9 +245,27 @@
 
             </a>
 
+            {% if presenca.aluno %}
+
+                <a
+                    href="/aluno/{{ presenca.aluno.id }}"
+                    class="btn btn-dark btn-lg"
+                >
+
+                    <i class="bi bi-person-vcard-fill"></i>
+
+                    Perfil do Aluno
+
+                </a>
+
+            {% endif %}
+
             <button
                 type="submit"
                 class="btn btn-success btn-lg"
+                {% if alunos|length == 0 %}
+                    disabled
+                {% endif %}
             >
 
                 <i class="bi bi-check-circle-fill"></i>

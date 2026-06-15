@@ -13,7 +13,17 @@
         </h2>
 
         <p class="text-muted mb-0">
-            Atualize os dados da mensalidade
+
+            {% if session.tipo == 'admin' %}
+
+                Atualize os dados da mensalidade
+
+            {% else %}
+
+                Atualize os dados da mensalidade de um aluno das suas turmas
+
+            {% endif %}
+
         </p>
 
     </div>
@@ -41,6 +51,18 @@
     {% endif %}
 
 </div>
+
+{% if session.tipo == 'professor' %}
+
+    <div class="alert alert-info mb-4">
+
+        <i class="bi bi-info-circle-fill"></i>
+
+        Você pode editar apenas mensalidades de alunos vinculados às suas turmas.
+
+    </div>
+
+{% endif %}
 
 <!-- AVISO -->
 
@@ -110,7 +132,33 @@
                 {% if alunos|length == 0 %}
 
                     <small class="text-danger">
-                        Nenhum aluno encontrado para o filtro selecionado.
+
+                        {% if session.tipo == 'admin' %}
+
+                            Nenhum aluno encontrado para o filtro selecionado.
+
+                        {% else %}
+
+                            Nenhum aluno das suas turmas foi encontrado para este filtro.
+
+                        {% endif %}
+
+                    </small>
+
+                {% else %}
+
+                    <small class="text-muted">
+
+                        {% if session.tipo == 'admin' %}
+
+                            Selecione o aluno vinculado a esta mensalidade.
+
+                        {% else %}
+
+                            A lista mostra apenas alunos das suas turmas.
+
+                        {% endif %}
+
                     </small>
 
                 {% endif %}
@@ -196,6 +244,9 @@
 
             <button
                 class="btn btn-warning btn-lg text-white"
+                {% if alunos|length == 0 %}
+                    disabled
+                {% endif %}
             >
 
                 <i class="bi bi-save-fill"></i>
@@ -203,6 +254,21 @@
                 Salvar Alterações
 
             </button>
+
+            {% if mensalidade.aluno %}
+
+                <a
+                    href="/aluno/{{ mensalidade.aluno.id }}"
+                    class="btn btn-dark btn-lg"
+                >
+
+                    <i class="bi bi-person-vcard-fill"></i>
+
+                    Perfil do Aluno
+
+                </a>
+
+            {% endif %}
 
             {% if mes and ano %}
 

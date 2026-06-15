@@ -11,14 +11,34 @@
         </h2>
 
         <p class="text-muted mb-0">
-            Adicione novos alunos à academia
+
+            {% if session.tipo == 'admin' %}
+
+                Adicione novos alunos à academia
+
+            {% else %}
+
+                Adicione novos alunos às suas turmas
+
+            {% endif %}
+
         </p>
 
     </div>
 
 </div>
 
-<!-- FORM -->
+{% if session.tipo == 'professor' %}
+
+    <div class="alert alert-info mb-4">
+
+        <i class="bi bi-info-circle-fill"></i>
+
+        Você pode cadastrar alunos apenas nas turmas vinculadas ao seu usuário de professor.
+
+    </div>
+
+{% endif %}
 
 <div class="card border-0 shadow-sm p-4 rounded-4">
 
@@ -28,8 +48,6 @@
     >
 
         <div class="row g-4">
-
-            <!-- FOTO -->
 
             <div class="col-lg-4">
 
@@ -63,13 +81,9 @@
 
             </div>
 
-            <!-- DADOS -->
-
             <div class="col-lg-8">
 
                 <div class="row g-3">
-
-                    <!-- NOME -->
 
                     <div class="col-md-12">
 
@@ -86,8 +100,6 @@
 
                     </div>
 
-                    <!-- NASCIMENTO -->
-
                     <div class="col-md-6">
 
                         <label class="form-label fw-semibold">
@@ -102,8 +114,6 @@
                         >
 
                     </div>
-
-                    <!-- SEXO -->
 
                     <div class="col-md-6">
 
@@ -133,8 +143,6 @@
 
                     </div>
 
-                    <!-- RESPONSÁVEL -->
-
                     <div class="col-md-12">
 
                         <label class="form-label fw-semibold">
@@ -149,8 +157,6 @@
                         >
 
                     </div>
-
-                    <!-- WHATSAPP -->
 
                     <div class="col-md-6">
 
@@ -168,8 +174,6 @@
 
                     </div>
 
-                    <!-- TURMA CADASTRADA -->
-
                     <div class="col-md-6">
 
                         <label class="form-label fw-semibold">
@@ -179,11 +183,24 @@
                         <select
                             name="turma_id"
                             class="form-select form-select-lg"
+                            {% if session.tipo == 'professor' %}
+                                required
+                            {% endif %}
                         >
 
-                            <option value="">
-                                Sem turma definida
-                            </option>
+                            {% if session.tipo == 'admin' %}
+
+                                <option value="">
+                                    Sem turma definida
+                                </option>
+
+                            {% else %}
+
+                                <option value="">
+                                    Selecione uma das suas turmas
+                                </option>
+
+                            {% endif %}
 
                             {% for turma in turmas %}
 
@@ -204,20 +221,38 @@
                         {% if turmas|length == 0 %}
 
                             <small class="text-danger">
-                                Nenhuma turma cadastrada. Cadastre uma turma antes, se desejar vincular o aluno.
+
+                                {% if session.tipo == 'admin' %}
+
+                                    Nenhuma turma cadastrada. Cadastre uma turma antes, se desejar vincular o aluno.
+
+                                {% else %}
+
+                                    Nenhuma turma vinculada ao seu usuário de professor. Procure o administrador.
+
+                                {% endif %}
+
                             </small>
 
                         {% else %}
 
                             <small class="text-muted">
-                                O professor será definido automaticamente pela turma escolhida.
+
+                                {% if session.tipo == 'admin' %}
+
+                                    O professor será definido automaticamente pela turma escolhida.
+
+                                {% else %}
+
+                                    O aluno será vinculado a uma das suas turmas.
+
+                                {% endif %}
+
                             </small>
 
                         {% endif %}
 
                     </div>
-
-                    <!-- FAIXA -->
 
                     <div class="col-md-6">
 
@@ -245,8 +280,6 @@
 
                     </div>
 
-                    <!-- MENSALIDADE -->
-
                     <div class="col-md-6">
 
                         <label class="form-label fw-semibold">
@@ -270,9 +303,7 @@
 
         </div>
 
-        <!-- BOTÕES -->
-
-        <div class="mt-5 d-flex gap-3">
+        <div class="mt-5 d-flex gap-3 flex-wrap">
 
             <button
                 class="btn btn-danger btn-lg px-4"
@@ -298,8 +329,6 @@
     </form>
 
 </div>
-
-<!-- PREVIEW FOTO -->
 
 <script>
 
